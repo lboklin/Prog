@@ -1,0 +1,11 @@
+# Blender v2.72 (sub 0) OBJ File: ''
+# www.blender.org
+mtllib shadowplane.mtl
+o Plane_Plane.001
+v -2.000000 0.000000 2.000000
+v 2.000000 0.000000 2.000000
+v -2.000000 0.000000 -2.000000
+v 2.000000 0.000000 -2.000000
+usemtl Material.003
+s off
+f 1 2 4 3
