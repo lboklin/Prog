@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=1]
+
+[ext_resource path="res://tilesets/individualtiles/novatile.png" type="Texture" id=1]
+
+[node name="BaseTiles" type="Node2D"]
+
+__meta__ = { "__editor_plugin_screen__":"2D" }
+
+[node name="NovaTileGreen" type="Sprite" parent="."]
+
+transform/pos = Vector2( 0, 64 )
+texture = ExtResource( 1 )
+offset = Vector2( 0, -128 )
+
+
