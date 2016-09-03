@@ -1,5 +1,5 @@
 game/.fscache
-Lore.odt
-bin/
-meta/
+assets
+bin
+meta
 .directory
