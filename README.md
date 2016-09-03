@@ -1,4 +1,4 @@
-# Progeny
+# Prog
 Prototype stage, minimalistic sci-fi game built with Godot Engine.
 
 The goal of this project is to try and fill the void of isometric combat
