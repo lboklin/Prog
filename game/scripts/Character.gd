@@ -151,7 +151,7 @@ func face_dir(focus):
 	
 	var face_dir = dir_vscaled(get_pos(), focus) * -1
 	# Need to compensate with offset of the face_dir because the viewport only includes quadrant IV so sprite had to be moved into it 
-	var insignia = get_node("PlayerModel/InsigniaViewport/Insignia")
+	var insignia = get_node("PlayerSprite/InsigniaViewport/Insignia")
 	var dir_compensated = face_dir + insignia.get_pos()
 	var angle = insignia.get_angle_to(dir_compensated)
 	var s = sign(angle)
