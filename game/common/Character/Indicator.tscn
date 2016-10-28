@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=1]
+
+[ext_resource path="res://common/Character/CharacterSprite.tscn" type="PackedScene" id=1]
+
+[node name="Indicator" type="Node2D"]
+
+visibility/opacity = 0.5
+visibility/behind_parent = true
+
+[node name="CharacterSprite" parent="." instance=ExtResource( 1 )]
+
+modulate = Color( 0.410156, 0.410156, 0.410156, 1 )
+
+[node name="Shadow" parent="CharacterSprite"]
+
+visibility/visible = false
+
+
+[editable path="CharacterSprite"]

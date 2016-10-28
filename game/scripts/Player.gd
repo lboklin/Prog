@@ -106,6 +106,5 @@ func _ready():
 	get_node("CharacterSprite/InsigniaViewport/Insignia").set_texture(insignia)
 	
 	set_process_input(true)
-#	set_process(true)
 	set_fixed_process(true)
 	pass

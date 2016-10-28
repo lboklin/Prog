@@ -38,6 +38,9 @@ var rolling = false
 var jumping = false			# Shared with fixed process
 var moving = false
 
+var indicator
+
+## Movement vectors
 var start_pos = Vector2()	# Shared between input process and movement functions
 var destination = Vector2()
 var ground_motion = Vector2()
@@ -85,16 +88,13 @@ func draw_empty_circle(circle_center, circle_radius, color, resolution):
 	line_end = circle_radius.rotated(deg2rad(360)) + circle_center
 	draw_line(line_origin, line_end, color)
 	update()
-	
+
+
 # Create a transparent, ghost-like character sprite to represent it as if 
 # it had already arrived at its destination
-func indicate_dest():
-	var indicator = preload("res://common/Character/CharacterSprite.tscn").instance()
+func indicate_dest(): 
+	indicator = preload("res://common/Character/Indicator.tscn").instance()
 	indicator.set_pos(destination)
-	var color = indicator.get_modulate()
-	color.gray()
-	color.a = 50
-	indicator.set_modulate(color)
 	get_parent().add_child(indicator)
 
 
@@ -176,7 +176,7 @@ func face_dir(focus):
 
 func attack():
 	
-	stop_moving()
+#	stop_moving()
 #	abort_actions_except("attack")
 	
 	attk_cd = ATTK_CD
@@ -223,6 +223,7 @@ func stop_moving():
 	if jumping:
 		jumping = false
 		stunned_timer = JUMP_CD
+		indicator.queue_free()
 	elif rolling:
 		rolling = false
 

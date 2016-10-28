@@ -89,7 +89,7 @@ func _fixed_process(delta):
 
 func _ready():
 	var insignia = ImageTexture.new()
-	insignia.create_from_image("res://npc/insignia.png")
+	insignia.load("res://npc/insignia.png")
 	get_node("CharacterSprite/InsigniaViewport/Insignia").set_texture(insignia)
 	
 	set_fixed_process(true)

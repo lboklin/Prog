@@ -20,7 +20,7 @@ step = 0.1
 input/pickable = false
 shapes/0/shape = SubResource( 1 )
 shapes/0/transform = Matrix32( 0.804975, -2.58426e-05, 1.30708e-05, 0.407145, -0.19542, -0.226121 )
-shapes/0/trigger = true
+shapes/0/trigger = false
 collision/layers = 1
 collision/mask = 1
 collision/margin = 0.08
@@ -42,13 +42,12 @@ autoplay = ""
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 
-visibility/visible = false
 visibility/behind_parent = true
 transform/pos = Vector2( -0.19542, -0.226121 )
 transform/rot = 0.0018394
 transform/scale = Vector2( 0.804975, 0.407145 )
 shape = SubResource( 1 )
-trigger = true
+trigger = false
 _update_shape_index = 0
 
 
