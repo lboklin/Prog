@@ -22,11 +22,15 @@ step = 0.1
 tracks/0/type = "value"
 tracks/0/path = NodePath("PlayerModel:transform/pos")
 tracks/0/interp = 2
-tracks/0/keys = { "cont":true, "times":FloatArray( 0, 0.5, 1 ), "transitions":FloatArray( 1, 1, 1 ), "values":[ Vector2( 0, 0 ), Vector2( 0, -40 ), Vector2( 0, 0 ) ] }
+tracks/0/imported = false
+tracks/0/keys = { "times":FloatArray( 0, 0.5, 1 ), "transitions":FloatArray( 1, 1, 1 ), "update":0, "values":[ Vector2( 0, 0 ), Vector2( 0, -40 ), Vector2( 0, 0 ) ] }
 
 [node name="Bot" type="KinematicBody2D"]
 
 input/pickable = false
+shapes/0/shape = SubResource( 1 )
+shapes/0/transform = Matrix32( 0.144, -4.62292e-06, 2.31146e-06, 0.072, 0.048157, -6.1979 )
+shapes/0/trigger = false
 collision/layers = 1
 collision/mask = 1
 collision/margin = 0.08
@@ -80,6 +84,16 @@ config/samples = ExtResource( 4 )
 config/pitch_random = 0.0
 __meta__ = { "_edit_lock_":true }
 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+visibility/behind_parent = true
+transform/pos = Vector2( 0.048157, -6.1979 )
+transform/rot = 0.0018394
+transform/scale = Vector2( 0.144, 0.072 )
+shape = SubResource( 1 )
+trigger = false
+_update_shape_index = 0
+
 [node name="PlayerModel" type="Sprite" parent="."]
 
 visibility/behind_parent = true
@@ -87,16 +101,6 @@ transform/scale = Vector2( 0.2, 0.2 )
 texture = ExtResource( 5 )
 offset = Vector2( 0, -128 )
 modulate = Color( 0.410156, 0.410156, 0.410156, 1 )
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerModel"]
-
-visibility/behind_parent = true
-transform/pos = Vector2( 0.240785, -30.9895 )
-transform/rot = 0.0018394
-transform/scale = Vector2( 0.72, 0.36 )
-shape = SubResource( 1 )
-trigger = false
-_update_shape_index = 0
 
 [node name="InsigniaViewport" type="Viewport" parent="PlayerModel"]
 
