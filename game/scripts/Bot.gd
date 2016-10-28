@@ -75,7 +75,11 @@ func _fixed_process(delta):
 	# If idle
 	elif not busy:
 		face_dir(mouse_pos)
-	
+
+	if is_colliding():
+		print(get_collider())
+		print(get_parent().get_child(1))
+		queue_free()
 
 
 #####################################################################
@@ -84,5 +88,9 @@ func _fixed_process(delta):
 
 
 func _ready():
+	var insignia = ImageTexture.new()
+	insignia.create_from_image("res://npc/insignia.png")
+	get_node("CharacterSprite/InsigniaViewport/Insignia").set_texture(insignia)
+	
 	set_fixed_process(true)
 	pass

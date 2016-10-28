@@ -18,6 +18,11 @@ func _fixed_process(delta):
 	
 	update_states(delta)
 	
+#	if is_colliding():
+#		print(get_collider())
+#		print(get_parent().get_child(1))
+#		queue_free()
+	
 	# Command queue limit
 	if command_queue.size() > 3:
 		command_queue.resize(3)
@@ -96,6 +101,10 @@ func _input(ev):
 
 
 func _ready():
+	var insignia = ImageTexture.new()
+	insignia.load("res://player/insignia.png")
+	get_node("CharacterSprite/InsigniaViewport/Insignia").set_texture(insignia)
+	
 	set_process_input(true)
 #	set_process(true)
 	set_fixed_process(true)

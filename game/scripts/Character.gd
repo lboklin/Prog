@@ -89,7 +89,7 @@ func draw_empty_circle(circle_center, circle_radius, color, resolution):
 # Create a transparent, ghost-like character sprite to represent it as if 
 # it had already arrived at its destination
 func indicate_dest():
-	var indicator = preload("res://player/PlayerSprite.tscn").instance()
+	var indicator = preload("res://common/Character/CharacterSprite.tscn").instance()
 	indicator.set_pos(destination)
 	var color = indicator.get_modulate()
 	color.gray()
@@ -163,7 +163,7 @@ func face_dir(focus):
 	var face_dir = dir_vscaled(get_pos(), focus) * -1
 	# Need to compensate with offset of the face_dir because the viewport only includes quadrant IV so sprite had to be moved into it 
 	# Don't waste any more time looking at this. Just leave it. This is how it is.
-	var insignia = get_node("PlayerSprite/InsigniaViewport/Insignia")
+	var insignia = get_node("CharacterSprite/InsigniaViewport/Insignia")
 	var dir_compensated = face_dir + insignia.get_pos()
 	var angle = insignia.get_angle_to(dir_compensated)
 	var s = sign(angle)
@@ -234,11 +234,6 @@ func stop_moving():
 
 
 func supposed_to_be_moving():
-	
-	if is_colliding():
-		print(self.get_collider())
-		print(get_parent().get_child(1))
-		return false
 	
 	# For use in knowing if nearing destination
 	# d2go = distance left to go
