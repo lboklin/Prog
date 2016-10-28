@@ -275,29 +275,3 @@ func execute_command():
 #####################################################################
 #####################################################################
 #####################################################################
-
-
-func randloc():
-
-	randomize()
-
-	var screenrect = get_viewport().get_visible_rect()
-	var loc = Vector2()
-
-	loc.x = round(rand_range(screenrect.pos.x, screenrect.end.x))
-	loc.y = round(rand_range(screenrect.pos.y, screenrect.end.y))
-
-	return loc
-
-
-func success(chance):
-
-	randomize()
-
-	if chance > 100:
-		return false
-
-	var luck_result = randi() % convert((100 / get_fixed_process_delta_time()),2)
-
-	if luck_result <= chance:
-		return true
