@@ -1,6 +1,7 @@
 extends "res://scripts/Character.gd"
 
 
+# Return a random location somewhere within the visible area
 func randloc():
 
 	randomize()
@@ -14,6 +15,7 @@ func randloc():
 	return loc
 
 
+# Take a probability percentage and return true or false after diceroll
 func success(chance):
 
 	randomize()
