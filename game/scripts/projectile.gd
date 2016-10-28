@@ -13,6 +13,7 @@ var hit=false
 func _fixed_process(delta):
 	
 	if (hit):
+		queue_free()
 		return
 	var motion = advance_dir*delta*ADVANCE_SPEED
 	motion.y *= GLOBALS.VSCALE

@@ -85,6 +85,17 @@ func draw_empty_circle(circle_center, circle_radius, color, resolution):
 	line_end = circle_radius.rotated(deg2rad(360)) + circle_center
 	draw_line(line_origin, line_end, color)
 	update()
+	
+# Create a transparent, ghost-like character sprite to represent it as if 
+# it had already arrived at its destination
+func indicate_dest():
+	var indicator = preload("res://player/PlayerSprite.tscn").instance()
+	indicator.set_pos(destination)
+	var color = indicator.get_modulate()
+	color.gray()
+	color.a = 50
+	indicator.set_modulate(color)
+	get_parent().add_child(indicator)
 
 
 func update_states(delta):
@@ -151,6 +162,7 @@ func face_dir(focus):
 	
 	var face_dir = dir_vscaled(get_pos(), focus) * -1
 	# Need to compensate with offset of the face_dir because the viewport only includes quadrant IV so sprite had to be moved into it 
+	# Don't waste any more time looking at this. Just leave it. This is how it is.
 	var insignia = get_node("PlayerSprite/InsigniaViewport/Insignia")
 	var dir_compensated = face_dir + insignia.get_pos()
 	var angle = insignia.get_angle_to(dir_compensated)
@@ -175,6 +187,7 @@ func attack():
 		var projectile = preload("res://common/Projectile/projectile.tscn").instance()
 		var attack_dir = dir_vscaled(get_pos(), attack.target_coords)
 		projectile.advance_dir = attack_dir
+		# Initial position
 		projectile.set_pos( get_pos() + attack_dir * Vector2(128,64) )
 		get_parent().add_child(projectile)
 	
@@ -198,6 +211,7 @@ func jump():
 	
 	if not jumping:
 		jumping = true
+		indicate_dest()
 	
 	ground_motion = dir * MAX_SPEED * delta
 	var motion = ground_motion #I have my reasons
@@ -239,21 +253,21 @@ func supposed_to_be_moving():
 
 
 func go_to_destination():
-		
-	# Move if able, else do nothing
-	if not (stunned or rooted or busy):
-		if command_queue[0] == "jump":
-			# Set destination only once per jump
-			if not jumping:
-				destination = jump.target_coords[0]
-				jump.target_coords.pop_front()
-			jump()
-		elif command_queue[0] == "roll":
-			destination = roll.target_coords
-			roll()
-		
+	
 	if moving and not supposed_to_be_moving():
 		stop_moving()
+	else:
+		# Move if able, else do nothing
+		if not (stunned or rooted or busy):
+			if command_queue[0] == "jump":
+				# Set destination only once per jump
+				if not jumping:
+					destination = jump.target_coords[0]
+					jump.target_coords.pop_front()
+				jump()
+			elif command_queue[0] == "roll":
+				destination = roll.target_coords
+				roll()
 
 
 func execute_command():
