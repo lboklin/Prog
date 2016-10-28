@@ -174,6 +174,12 @@ func face_dir(focus):
 #	jump.clear()
 # To do: Figure out a good way to do this
 
+func die():
+	# Dramatic animation goes here
+	print(get_collider().get_name() + " killed " + get_name())
+	indicator.queue_free()
+	queue_free()
+
 func attack():
 	
 #	stop_moving()

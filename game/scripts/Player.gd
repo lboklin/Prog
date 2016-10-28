@@ -19,9 +19,8 @@ func _fixed_process(delta):
 	update_states(delta)
 	
 #	if is_colliding():
-#		print(get_collider())
-#		print(get_parent().get_child(1))
-#		queue_free()
+#		die()
+#		return
 	
 	# Command queue limit
 	if command_queue.size() > 3:
@@ -39,7 +38,7 @@ func _fixed_process(delta):
 		face_dir(mouse_pos)
 	
 	# Refresh custom draw calls
-	update()
+#	update()
 
 
 #####################################################################

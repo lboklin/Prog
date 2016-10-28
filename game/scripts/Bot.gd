@@ -72,14 +72,11 @@ func _fixed_process(delta):
 	# Do stuff if commanded to
 	if command_queue.size() > 0:
 		execute_command()
-	# If idle
 	elif not busy:
 		face_dir(mouse_pos)
 
 	if is_colliding():
-		print(get_collider())
-		print(get_parent().get_child(1))
-		queue_free()
+		die()
 
 
 #####################################################################
