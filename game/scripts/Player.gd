@@ -62,21 +62,14 @@ func _input(ev):
 		
 		# Move to
 		if Input.is_action_pressed("move_to"):
-			if no_roll:
-				jump.target_coords.append(mouse_pos)
-				command_queue.append("jump")
-			else:
-				roll.target_coords = mouse_pos
-				command_queue.append("roll")
+			jump.target_coords.append(mouse_pos)
+			command_queue.append("jump")
 				
 		# RMB = Attack target location
 		if ev.button_index == 2:
 			if command_queue.find("attack") == -1:
 				attack.target_coords = mouse_pos
 				command_queue.append("attack")
-	
-	if Input.is_action_pressed("rolltoggle"):
-		no_roll = !no_roll
 		
 	# Key is pressed
 	if ev.type == InputEvent.KEY and ev.is_pressed():

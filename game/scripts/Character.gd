@@ -6,13 +6,11 @@ extends KinematicBody2D
 # ATTK_CD = attack cooldown
 # DEST_R = radius for destination approximation 
 # MAX_SPEED =  max movement ground_speed (magnitude)
-# ROLL_ACCEL = acceleration while rolling
 # JUMP_CD = cooldown for jump
 # ROT_SPEED = (visual) turning ground_speed for character
 const ATTK_CD = 0.5
 const DEST_R = 5.0
 const MAX_SPEED = 1000
-const ROLL_ACCEL = 5.0
 const JUMP_CD = 0.1
 const ROT_SPEED = 20
 
@@ -33,8 +31,6 @@ var impeded = false			# Shared with functions here and there
 var busy = false
 
 ## Movement booleans
-var no_roll = true			# Shared between input process and movement functions
-var rolling = false
 var jumping = false			# Shared with fixed process
 var moving = false
 
@@ -50,10 +46,6 @@ var command_queue = []
 var mouse_pos = Vector2()	# Shared all over
 
 ## action dicts
-var roll = {
-	"start_pos"			:	Vector2(),
-	"target_coords"		:	Vector2()
-}
 var jump = {
 	"start_pos"			:	Vector2(),
 	"target_coords"		:	[]
@@ -101,7 +93,7 @@ func indicate_dest():
 func update_states(delta):
 	
 	# Movement status
-	if jumping  or rolling:
+	if jumping:
 		moving = true
 	else:
 		moving = false
@@ -196,18 +188,6 @@ func attack():
 		# Initial position
 		projectile.set_pos( get_pos() + attack_dir * Vector2(128,64) )
 		get_parent().add_child(projectile)
-	
-
-func roll():
-	
-	if not rolling:
-		rolling = true
-	
-	var dir = dir_vscaled(get_pos(), roll.target_coords)
-	ground_motion = ground_motion.linear_interpolate(MAX_SPEED*dir,get_fixed_process_delta_time()*ROLL_ACCEL)
-	ground_motion.y *= GLOBALS.VSCALE
-	
-	move(ground_motion)
 
 
 func jump():
@@ -226,12 +206,9 @@ func jump():
 
 func stop_moving():
 	
-	if jumping:
-		jumping = false
-		stunned_timer = JUMP_CD
-		indicator.queue_free()
-	elif rolling:
-		rolling = false
+	jumping = false
+	stunned_timer = JUMP_CD
+	indicator.queue_free()
 
 	set_pos(destination)
 	ground_motion = Vector2()
@@ -258,18 +235,14 @@ func go_to_destination():
 	
 	if moving and not supposed_to_be_moving():
 		stop_moving()
-	else:
+	elif command_queue[0] == "jump":
 		# Move if able, else do nothing
 		if not (stunned or rooted or busy):
-			if command_queue[0] == "jump":
-				# Set destination only once per jump
-				if not jumping:
-					destination = jump.target_coords[0]
-					jump.target_coords.pop_front()
-				jump()
-			elif command_queue[0] == "roll":
-				destination = roll.target_coords
-				roll()
+			# Set destination only once per jump
+			if not jumping:
+				destination = jump.target_coords[0]
+				jump.target_coords.pop_front()
+			jump()
 
 
 func execute_command():
