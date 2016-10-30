@@ -15,31 +15,13 @@ func spawn_enemy(loc):
 
 
 func _fixed_process(delta):
+				
+	mouse_pos = get_global_mouse_pos()
 	
-	update_states(delta)
+	# Request to attack target location
+	if Input.is_action_pressed("attack"):
+		attack.target_coords = mouse_pos
 	
-#	if is_colliding():
-#		die()
-#		return
-	
-	# Command queue limit
-	if command_queue.size() > 3:
-		command_queue.resize(3)
-	
-	# Don't bother with anything if stunned
-	if stunned:
-		return
-	
-	# Do stuff if commanded to
-	if command_queue.size() > 0:
-		execute_command()
-	# If idle
-	elif not busy:
-		face_dir(mouse_pos)
-	
-	# Refresh custom draw calls
-#	update()
-
 
 #####################################################################
 #####################################################################
@@ -48,48 +30,26 @@ func _fixed_process(delta):
 
 func _input(ev):
 	
-	# Pointer is moved
-	if ev.type == InputEvent.MOUSE_MOTION:
-		mouse_pos = get_viewport_transform().affine_inverse().xform(ev.pos)
+#	# Pointer is moved
+#	if ev.type == (InputEvent.MOUSE_MOTION or InputEvent.MOUSE_BUTTON):
+#		mouse_pos = get_global_mouse_pos()
+	
+	# Request to jump
+	if ev.is_action_pressed("move_to"):
+		jump.target_coords.append(mouse_pos)
 
-	if Input.is_action_pressed("spawn_enemy"):
+	if ev.is_action_pressed("spawn_enemy"):
 		spawn_enemy(mouse_pos)
 		
-	# Mouse is clicked
-	if ev.type == InputEvent.MOUSE_BUTTON and ev.is_pressed():
-		randomize()
-		rand_color = randi() % 55
-		
-		# Move to
-		if Input.is_action_pressed("move_to"):
-			jump.target_coords.append(mouse_pos)
-			command_queue.append("jump")
-				
-		# RMB = Attack target location
-		if ev.button_index == 2:
-			if command_queue.find("attack") == -1:
-				attack.target_coords = mouse_pos
-				command_queue.append("attack")
-		
-	# Key is pressed
-	if ev.type == InputEvent.KEY and ev.is_pressed():
-		
-		# To reset position in case of buggery
-		if Input.is_action_pressed("reset"):
-			rooted = true
-			set_pos(Vector2(0,0))
-		
-		var delta = get_fixed_process_delta_time()
-			
-	get_tree().set_input_as_handled()
+	# To reset position in case of buggery
+	if ev.is_action_pressed("reset"):
+		rooted = true
+		set_pos(Vector2(0,0))
 			
 
 ######################
 ######################
 ######################
-
-# func _draw():
-# 	draw_empty_circle(get_global_transform().affine_inverse().xform(destination),Vector2(50,50),Color(rand_color,rand_color,rand_color),1)
 
 
 func _ready():

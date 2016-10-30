@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=1]
+[gd_scene load_steps=6 format=1]
 
 [ext_resource path="res://scripts/Bot.gd" type="Script" id=1]
 [ext_resource path="res://common/Character/CharacterSprite.tscn" type="PackedScene" id=2]
+[ext_resource path="res://common/Character/Indicator.tscn" type="PackedScene" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
 
@@ -17,6 +18,7 @@ step = 0.1
 
 [node name="Bot" type="KinematicBody2D"]
 
+z/z = 1
 input/pickable = false
 shapes/0/shape = SubResource( 1 )
 shapes/0/transform = Matrix32( 3.02169, -9.70072e-05, 5.42578e-05, 1.69008, 0.0692518, -1.69086 )
@@ -49,5 +51,7 @@ transform/scale = Vector2( 3.02169, 1.69008 )
 shape = SubResource( 1 )
 trigger = false
 _update_shape_index = 0
+
+[node name="Indicator" parent="." instance=ExtResource( 3 )]
 
 

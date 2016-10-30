@@ -5,7 +5,7 @@
 [node name="Indicator" type="Node2D"]
 
 visibility/opacity = 0.5
-visibility/behind_parent = true
+z/z = -1
 
 [node name="CharacterSprite" type="Sprite" parent="."]
 

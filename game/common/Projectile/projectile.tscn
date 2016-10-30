@@ -4,16 +4,16 @@
 [ext_resource path="res://common/Projectile/energy.tex" type="Texture" id=2]
 [ext_resource path="res://common/Projectile/shoot_halo.tex" type="Texture" id=3]
 
-[sub_resource type="CircleShape2D" id=6]
+[sub_resource type="CircleShape2D" id=1]
 
 custom_solver_bias = 0.0
 radius = 10.0
 
-[sub_resource type="CanvasItemMaterial" id=7]
+[sub_resource type="CanvasItemMaterial" id=2]
 
 shader/shading_mode = 0
 
-[sub_resource type="Animation" id=8]
+[sub_resource type="Animation" id=3]
 
 length = 1.0
 loop = false
@@ -44,7 +44,7 @@ tracks/4/interp = 1
 tracks/4/imported = false
 tracks/4/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Color( 1, 3, 2, 1 ), Color( 0, 0, 0, 0 ) ] }
 
-[sub_resource type="Animation" id=9]
+[sub_resource type="Animation" id=4]
 
 length = 1.0
 loop = true
@@ -80,15 +80,15 @@ tracks/4/keys = { "times":FloatArray( 0 ), "transitions":FloatArray( 1 ), "updat
 offsets = FloatArray( 0, 0.0170213, 1 )
 colors = ColorArray( 1, 1, 1, 1, 1, 0.93808, 0.952265, 0.848861, 1, 0.617074, 0.704795, 0.0653235 )
 
-[sub_resource type="ColorRamp" id=10]
+[sub_resource type="ColorRamp" id=6]
 
 offsets = FloatArray( 0, 1 )
 colors = ColorArray( 1, 1, 1, 1, 1, 0.617074, 0.704795, 0.0653235 )
 
-[node name="Projectile" type="KinematicBody2D"]
+[node name="Projectile" type="KinematicBody2D" groups=[ "Lethal" ]]
 
 input/pickable = false
-shapes/0/shape = SubResource( 6 )
+shapes/0/shape = SubResource( 1 )
 shapes/0/transform = Matrix32( 1, 0, 0, 1, 0, 0 )
 shapes/0/trigger = false
 collision/layers = 1
@@ -100,13 +100,13 @@ __meta__ = { "__editor_plugin_screen__":"2D" }
 [node name="Sprite" type="Sprite" parent="."]
 
 visibility/opacity = 0.2
-material/material = SubResource( 7 )
+material/material = SubResource( 2 )
 texture = ExtResource( 2 )
 
 [node name="Sprite1" type="Sprite" parent="."]
 
 visibility/opacity = 0.2
-material/material = SubResource( 7 )
+material/material = SubResource( 2 )
 texture = ExtResource( 2 )
 
 [node name="anim" type="AnimationPlayer" parent="."]
@@ -114,8 +114,8 @@ texture = ExtResource( 2 )
 playback/process_mode = 1
 playback/default_blend_time = 0.0
 root/root = NodePath("..")
-anims/explode = SubResource( 8 )
-anims/spin = SubResource( 9 )
+anims/explode = SubResource( 3 )
+anims/spin = SubResource( 4 )
 playback/active = true
 playback/speed = 1.0
 blend_times = [  ]
@@ -144,7 +144,7 @@ shadow/item_mask = 1
 
 [node name="shape" type="CollisionShape2D" parent="."]
 
-shape = SubResource( 6 )
+shape = SubResource( 1 )
 trigger = false
 _update_shape_index = -1
 
@@ -203,6 +203,6 @@ params/final_size = 0.1
 params/hue_variation = 0.0
 params/anim_speed_scale = 1.0
 params/anim_initial_pos = 0.0
-color/color_ramp = SubResource( 10 )
+color/color_ramp = SubResource( 6 )
 
 

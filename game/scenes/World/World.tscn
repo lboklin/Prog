@@ -52,23 +52,7 @@ sort/enabled = true
 
 [node name="Player" parent="CollisionSprites/YSort" instance=ExtResource( 2 )]
 
-[node name="Camera2D" type="Camera2D" parent="CollisionSprites/YSort/Player"]
-
-anchor_mode = 1
-rotating = false
-current = true
-zoom = Vector2( 1, 1 )
-limit/left = -10000000
-limit/top = -10000000
-limit/right = 10000000
-limit/bottom = 10000000
-drag_margin/h_enabled = true
-drag_margin/v_enabled = true
-smoothing/enable = true
-smoothing/speed = 10.0
-drag_margin/left = 0.0
-drag_margin/top = 0.0
-drag_margin/right = 0.0
-drag_margin/bottom = 0.0
+editor/display_folded = true
 
 
+[editable path="CollisionSprites/YSort/Player"]
