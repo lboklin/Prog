@@ -3,7 +3,7 @@ extends KinematicBody2D
 
 var travel_time = 0
 var advance_dir=Vector2(1,0)
-const ADVANCE_SPEED = 1500.0
+const ADVANCE_SPEED = 2000.0
 
 var hit=false
 
