@@ -1,19 +1,18 @@
 extends Node2D
 
+const LIVES = 3
+
 var character
+var lives = LIVES
 
 
 # Take a probability percentage and return true or false after diceroll
-func success(chance):
+func success(delta, chance):
 
-	if chance > 100:
-		return true
-
-	chance = chance * get_fixed_process_delta_time()
-	var luck_result = randi() % 100
-	randomize() # New seed
-
-	if luck_result <= chance:
+	var diceroll = rand_range(0, 100)
+	randomize()
+	
+	if diceroll <= (chance * delta):
 		return true
 
 
@@ -25,17 +24,22 @@ func _fixed_process(delta):
 	# so that it appears more human in it's ability to predict and deduce
 	# the intentions and actions of others).
 
-	if not self.has_node("CharacterModel"):
+	if not self.has_node("CharacterModel") and lives > 0:
 		character = preload("res://common/Character/CharacterModel.tscn").instance()
+		self.set_global_pos(character.randloc(get_viewport().get_visible_rect()))
 		self.add_child(character)
 		character = get_node("CharacterModel")
 	
 		var insignia = ImageTexture.new()
 		insignia.load("res://npc/insignia.png")
 		get_node("CharacterModel/InsigniaViewport/Insignia").set_texture(insignia)
+	elif lives == 0:
+		return
 
-	# Probability of attacking inside a second
-	if success(50):
+	# Probabilities are a percentage of likelyhood within the timespan of a second 
+
+	# Attacking
+	if success(delta, 35):
 		if get_parent().get_node("Player/CharacterModel").moving: # Attack target's dest
 			character.attack_coords = get_parent().get_node("Player/CharacterModel").jump_target_coords[0]
 		else: # Attack target's current pos
@@ -43,10 +47,10 @@ func _fixed_process(delta):
 	
 	# Probability of jumping
 	if not character.moving:
-		if success(80):
+		if success(delta, 80):
 			character.jump_target_coords.append(character.randloc(get_viewport().get_visible_rect()))
 	else:
-		if success(70):
+		if success(delta, 70):
 			character.jump_target_coords.append(character.randloc(get_viewport().get_visible_rect()))
 		
 	character.act(delta)

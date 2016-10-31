@@ -8,7 +8,7 @@ extends KinematicBody2D
 # MAX_SPEED =  max movement ground_speed (magnitude)
 # JUMP_CD = cooldown for jump
 # ROT_SPEED = (visual) turning ground_speed for character
-const ATTK_CD = 0.0
+const ATTK_CD = 1.0
 const DEST_R = 5.0
 const MAX_SPEED = 1000
 const JUMP_CD = 0.0
@@ -155,7 +155,7 @@ func die():
 
 func attack():
 	
-	if not attacking:
+	if not attacking and attk_cd <= 0:
 		# Spawn projectile
 		var projectile = preload("res://common/Projectile/projectile.tscn").instance()
 		var attack_dir = dir_vscaled(character_pos, attack_coords)
