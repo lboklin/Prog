@@ -34,21 +34,12 @@ var disabled = false
 var moving = false
 
 ## Movement vectors
-var start_pos = Vector2()	# Shared between input process and movement functions
 var motion = Vector2(0,0)
 
-## Misc
-var mouse_pos = Vector2()	# Shared all over
+## Coordinates
+var character_pos = Vector2()
+var jump_target_coords = []
 var attack_coords = null
-
-## action dicts
-var jump = {
-	"start_pos"			:	Vector2(),
-	"target_coords"		:	[]
-}
-#var attack = {
-#	"target_coords"		:	Vector2()
-#}
 
 
 #########################
@@ -114,28 +105,28 @@ func update_predictor():
 	var indicator = get_node("Indicator")
 	
 	# If there's a destination, put there, otherwise, put on char pos
-	if jump.target_coords.size() > 0:
-		indicator.set_global_pos(jump.target_coords[0])
+	if jump_target_coords.size() > 0:
+		indicator.set_global_pos(jump_target_coords[0])
 		indicator.show()
 	else:
-		indicator.set_global_pos(get_pos())
+		indicator.set_global_pos(character_pos)
 		indicator.hide()
 
 
-func face_dir(focus):
+func face_dir(delta,focus):
 	
-	var face_dir = dir_vscaled(get_pos(), focus) * -1
+	var face_dir = dir_vscaled(character_pos, focus) * -1
 	
 	# Need to compensate with offset of the face_dir because the viewport only includes quadrant IV so sprite had to be moved into it 
 	# Don't waste any more time looking at this. Just leave it. This is how it is.
-	var insignia = get_node("CharacterSprite/InsigniaViewport/Insignia")
+	var insignia = get_node("InsigniaViewport/Insignia")
 	var dir_compensated = face_dir + insignia.get_pos()
 	
 	var angle = insignia.get_angle_to(dir_compensated)
 	var s = sign(angle)
 	angle = abs(angle)
 	
-	insignia.rotate(min(angle, (get_fixed_process_delta_time()*ROT_SPEED*angle*angle)+0.1)*s)
+	insignia.rotate(min(angle, (delta*ROT_SPEED*angle*angle)+0.1)*s)
 
 func die():
 	# Dramatic animation goes here
@@ -147,12 +138,12 @@ func attack():
 	if not attacking:
 		# Spawn projectile
 		var projectile = preload("res://common/Projectile/projectile.tscn").instance()
-		var attack_dir = dir_vscaled(get_pos(), attack_coords)
+		var attack_dir = dir_vscaled(character_pos, attack_coords)
 		
 		# Initial position and direction
 		projectile.advance_dir = attack_dir
-		projectile.set_pos( get_pos() + attack_dir * Vector2(64,32) )
-		get_parent().add_child(projectile)
+		projectile.set_global_pos( character_pos + attack_dir * Vector2(80,40) )
+		get_parent().get_parent().add_child(projectile)
 		
 		attk_cd = ATTK_CD
 		attk_dur = 0.2
@@ -161,42 +152,40 @@ func attack():
 func stop_moving():
 	
 	motion = Vector2(0,0)
-	set_pos(jump.target_coords[0])
+	get_parent().set_pos(jump_target_coords[0])
 	moving = false
 	
-	jump.target_coords.pop_front()
+	jump_target_coords.pop_front()
 	stunned_timer = JUMP_CD
 	
 	
 func move_towards_destination(delta):
 	
-	var dir = dir_vscaled(get_pos(), jump.target_coords[0])
+	var dir = dir_vscaled(character_pos, jump_target_coords[0])
 	
 #	if motion == Vector2(0,0):
 	motion = dir * MAX_SPEED * delta
 	motion.y *= GLOBALS.VSCALE
-	move(motion)
+	get_parent().set_pos(character_pos + motion)
 
 
 func supposed_to_be_moving():
 	
-	var current_pos = get_pos()
-	
 	# Check if no jumps are queued
-	if jump.target_coords.size() == 0:
+	if jump_target_coords.size() == 0:
 		return false
 		
 	# Keep number of jumps in queue under a limit
-	if jump.target_coords.size() > 3: 
-		jump.target_coords.resize(3)
+	if jump_target_coords.size() > 3: 
+		jump_target_coords.resize(3)
 	
 	# If not disabled and not at dest
-	if not disabled and current_pos != jump.target_coords[0]:
+	if not disabled and character_pos != jump_target_coords[0]:
 		# If speed is greater than distance to dest
-		if moving and motion.length() > current_pos.distance_to(jump.target_coords[0]):
+		if moving and motion.length() > character_pos.distance_to(jump_target_coords[0]):
 			return false
-#			if motion.length() >= (jump.target_coords[0] - current_pos).length():
-#			if motion.length() > current_pos.distance_to(jump.target_coords[0]).length():
+#			if motion.length() >= (jump_target_coords[0] - character_pos).length():
+#			if motion.length() > character_pos.distance_to(jump_target_coords[0]).length():
 		else:
 			return true
 	else:
@@ -208,7 +197,9 @@ func supposed_to_be_moving():
 #####################################################################
 
 
-func _fixed_process(delta):
+func act(delta):
+	
+	character_pos = get_parent().get_pos()
 	
 	# Update the state the character is in
 	update_states(delta)
@@ -222,7 +213,7 @@ func _fixed_process(delta):
 	
 	if supposed_to_be_moving():
 		move_towards_destination(delta)	
-		face_dir(jump.target_coords[0])
+		face_dir(delta,jump_target_coords[0])
 	elif moving:
 		stop_moving()
 	
@@ -231,9 +222,12 @@ func _fixed_process(delta):
 			attack()
 			
 		if attacking:
-			face_dir(attack_coords)
+			face_dir(delta,attack_coords)
 		elif moving:
-			face_dir(jump.target_coords[0])
+			face_dir(delta,jump_target_coords[0])
 		else:
-			face_dir(mouse_pos)
-	
+			face_dir(delta,get_parent().mouse_pos)
+			
+			
+#func _ready():
+#	_fixed_process(true)

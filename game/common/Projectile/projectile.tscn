@@ -2,7 +2,7 @@
 
 [ext_resource path="res://scripts/projectile.gd" type="Script" id=1]
 [ext_resource path="res://common/Projectile/energy.tex" type="Texture" id=2]
-[ext_resource path="res://common/Projectile/shoot_halo.tex" type="Texture" id=3]
+[ext_resource path="res://common/Projectile/light.tex" type="Texture" id=3]
 
 [sub_resource type="CircleShape2D" id=1]
 
@@ -27,12 +27,12 @@ tracks/1/type = "value"
 tracks/1/path = NodePath("Sprite1:visibility/opacity")
 tracks/1/interp = 1
 tracks/1/imported = false
-tracks/1/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ 1.0, 0.0 ] }
+tracks/1/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ 0.0, 0.0 ] }
 tracks/2/type = "value"
 tracks/2/path = NodePath("Sprite:visibility/opacity")
 tracks/2/interp = 1
 tracks/2/imported = false
-tracks/2/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ 1.0, 0.0 ] }
+tracks/2/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ 0.0, 0.0 ] }
 tracks/3/type = "value"
 tracks/3/path = NodePath("energy1:config/emitting")
 tracks/3/interp = 1
@@ -42,7 +42,7 @@ tracks/4/type = "value"
 tracks/4/path = NodePath("light:color")
 tracks/4/interp = 1
 tracks/4/imported = false
-tracks/4/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Color( 1, 3, 2, 1 ), Color( 0, 0, 0, 0 ) ] }
+tracks/4/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Color( 1, 0.894043, 0.757812, 1 ), Color( 0, 0, 0, 0 ) ] }
 
 [sub_resource type="Animation" id=4]
 
@@ -75,10 +75,10 @@ tracks/4/interp = 1
 tracks/4/imported = false
 tracks/4/keys = { "times":FloatArray( 0 ), "transitions":FloatArray( 1 ), "update":1, "values":[ true ] }
 
-[sub_resource type="ColorRamp" id=5]
+[sub_resource type="ColorRamp" id=7]
 
-offsets = FloatArray( 0, 0.0170213, 1 )
-colors = ColorArray( 1, 1, 1, 1, 1, 0.93808, 0.952265, 0.848861, 1, 0.617074, 0.704795, 0.0653235 )
+offsets = FloatArray( 0, 0.657343, 1 )
+colors = ColorArray( 0.160828, 0.242188, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0.755102 )
 
 [sub_resource type="ColorRamp" id=6]
 
@@ -99,12 +99,14 @@ __meta__ = { "__editor_plugin_screen__":"2D" }
 
 [node name="Sprite" type="Sprite" parent="."]
 
+visibility/visible = false
 visibility/opacity = 0.2
 material/material = SubResource( 2 )
 texture = ExtResource( 2 )
 
 [node name="Sprite1" type="Sprite" parent="."]
 
+visibility/visible = false
 visibility/opacity = 0.2
 material/material = SubResource( 2 )
 texture = ExtResource( 2 )
@@ -123,18 +125,19 @@ autoplay = "spin"
 
 [node name="light" type="Light2D" parent="."]
 
+transform/pos = Vector2( -0.128517, 10.0723 )
 enabled = true
 texture = ExtResource( 3 )
 offset = Vector2( 0, 0 )
-scale = 1.0
-color = Color( 0.294128, 0.953125, 0.814118, 0 )
-energy = 0.1
+scale = 2.2
+color = Color( 1, 1, 1, 1 )
+energy = 0.2
 mode = 0
 range/height = 80.0
 range/z_min = -1024
 range/z_max = 1024
 range/layer_min = 0
-range/layer_max = 1
+range/layer_max = 2
 range/item_mask = 1
 shadow/enabled = false
 shadow/color = Color( 0.212494, 0.824219, 0.695183, 0 )
@@ -144,6 +147,7 @@ shadow/item_mask = 1
 
 [node name="shape" type="CollisionShape2D" parent="."]
 
+visibility/visible = false
 shape = SubResource( 1 )
 trigger = false
 _update_shape_index = -1
@@ -152,57 +156,65 @@ _update_shape_index = -1
 
 visibility/blend_mode = 1
 z/z = 1
-config/amount = 100
-config/lifetime = 0.3
-config/preprocess = 50.0
-config/local_space = false
+config/amount = 1024
+config/lifetime = 0.03
+config/time_scale = 0.1
 config/texture = ExtResource( 2 )
 params/direction = 0.0
 params/spread = 180.0
-params/linear_velocity = 60.0
+params/linear_velocity = 1000.0
 params/spin_velocity = 0.0
 params/orbit_velocity = 0.0
 params/gravity_direction = 0.0
 params/gravity_strength = 0.0
 params/radial_accel = 0.0
 params/tangential_accel = 0.0
-params/damping = 200.0
+params/damping = 1024.0
 params/initial_angle = 0.0
-params/initial_size = 0.52
+params/initial_size = 0.1
 params/final_size = 0.0
-params/hue_variation = 1.0
+params/hue_variation = 0.7
 params/anim_speed_scale = 0.0
 params/anim_initial_pos = 0.0
-randomness/radial_accel = 1.0
-randomness/hue_variation = 1.0
-randomness/anim_initial_pos = 1.0
-color/color_ramp = SubResource( 5 )
+randomness/direction = 1.0
+randomness/linear_velocity = -1.0
+randomness/initial_size = -1.0
+randomness/final_size = 1.0
+color/color = Color( 1, 1, 1, 0 )
+color/color_ramp = SubResource( 7 )
 
 [node name="explosion" type="Particles2D" parent="."]
 
 visibility/blend_mode = 1
-config/amount = 32
-config/lifetime = 0.6
+transform/scale = Vector2( 1.4, 0.7 )
+config/amount = 1024
+config/lifetime = 2.0
+config/time_scale = 1.5
+config/preprocess = 0.1
 config/emitting = false
 config/local_space = false
 config/explosiveness = 0.1
 config/texture = ExtResource( 2 )
 params/direction = 0.0
 params/spread = 180.0
-params/linear_velocity = 200.0
+params/linear_velocity = 150.0
 params/spin_velocity = 0.0
 params/orbit_velocity = 0.0
 params/gravity_direction = 0.0
-params/gravity_strength = 200.0
+params/gravity_strength = 100.0
 params/radial_accel = 0.0
 params/tangential_accel = 0.0
-params/damping = 0.0
+params/damping = 500.0
 params/initial_angle = 0.0
-params/initial_size = 0.8
-params/final_size = 0.1
-params/hue_variation = 0.0
-params/anim_speed_scale = 1.0
+params/initial_size = 0.1
+params/final_size = 0.0
+params/hue_variation = 0.7
+params/anim_speed_scale = 0.0
 params/anim_initial_pos = 0.0
+randomness/linear_velocity = 1.0
+randomness/damping = 1.0
+randomness/initial_size = -1.0
+randomness/final_size = -1.0
 color/color_ramp = SubResource( 6 )
 
 

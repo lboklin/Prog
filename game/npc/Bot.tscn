@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=1]
+
+[ext_resource path="res://scripts/Bot.gd" type="Script" id=1]
+[ext_resource path="res://common/Character/CharacterModel.tscn" type="PackedScene" id=2]
+
+[node name="Bot" type="KinematicBody2D"]
+
+z/z = 1
+input/pickable = false
+collision/layers = 1
+collision/mask = 1
+collision/margin = 0.08
+script/script = ExtResource( 1 )
+__meta__ = { "__editor_plugin_screen__":"3D" }
+
+[node name="CharacterModel" parent="." instance=ExtResource( 2 )]
+
+

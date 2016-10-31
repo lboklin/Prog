@@ -1,5 +1,6 @@
-extends "res://scripts/Character.gd"
+extends Node2D
 
+var bot
 
 # Return a random location somewhere within the visible area
 func randloc():
@@ -37,22 +38,22 @@ func _fixed_process(delta):
 
 	if is_colliding():
 		if get_collider().is_in_group("Lethal"):
-			die()
+			bot.die()
 
 	# Probability of attacking inside a second
 	if success(50):
-		if get_node("../Player").moving: # Attack target's dest
-			attack_coords = get_node("../Player").jump.target_coords[0]
+		if get_node("../Player/CharacterModel").moving: # Attack target's dest
+			bot.attack_coords = get_node("../Player/CharacterModel").jump_target_coords[0]
 		else: # Attack target's current pos
-			attack_coords = get_node("../Player").get_pos()
+			bot.attack_coords = get_node("../Player").get_pos()
 	
 	# Probability of jumping
-	if not moving:
+	if not bot.moving:
 		if success(80):
-			jump.target_coords.append(randloc())
+			bot.jump_target_coords.append(randloc())
 	else:
 		if success(70):
-			jump.target_coords.append(randloc())
+			bot.jump_target_coords.append(randloc())
 
 
 #####################################################################
@@ -61,9 +62,11 @@ func _fixed_process(delta):
 
 
 func _ready():
+	bot = get_node("CharacterModel")
+	
 	var insignia = ImageTexture.new()
 	insignia.load("res://npc/insignia.png")
-	get_node("CharacterSprite/InsigniaViewport/Insignia").set_texture(insignia)
+	get_node("CharacterModel/InsigniaViewport/Insignia").set_texture(insignia)
 	
 	set_fixed_process(true)
 	pass

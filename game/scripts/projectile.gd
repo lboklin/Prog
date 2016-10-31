@@ -3,7 +3,7 @@ extends KinematicBody2D
 
 var travel_time = 0
 var advance_dir=Vector2(1,0)
-const ADVANCE_SPEED = 2100.0
+const ADVANCE_SPEED = 1500.0
 
 var hit=false
 
@@ -24,6 +24,7 @@ func _fixed_process(delta):
 	motion.y *= GLOBALS.VSCALE
 	move(motion)
 	if is_colliding():
+		get_node("shape").queue_free()
 		get_node("anim").play("explode")
 		hit=true
 

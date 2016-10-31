@@ -52,7 +52,5 @@ sort/enabled = true
 
 [node name="Player" parent="CollisionSprites/YSort" instance=ExtResource( 2 )]
 
-editor/display_folded = true
-
 
 [editable path="CollisionSprites/YSort/Player"]
