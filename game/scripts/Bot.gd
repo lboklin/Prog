@@ -20,7 +20,7 @@ func success(chance):
 	if chance > 100:
 		return true
 
-	var luck_result = randf() % ( 100 / get_fixed_process_delta_time() )
+	var luck_result = randi() % convert(100 / get_fixed_process_delta_time(), 2)
 	randomize() # New seed
 
 	if luck_result <= chance:
@@ -39,21 +39,19 @@ func _fixed_process(delta):
 		if get_collider().is_in_group("Lethal"):
 			die()
 
-	var p # Probability variable
-	p = 50 # 50% probability of attacking inside a second
-	if success(p):
+	# Probability of attacking inside a second
+	if success(50):
 		if get_node("../Player").moving: # Attack target's dest
-			attack.target_coords = get_node("../Player").destination
+			attack_coords = get_node("../Player").jump.target_coords[0]
 		else: # Attack target's current pos
-			attack.target_coords = get_node("../Player").get_pos()
+			attack_coords = get_node("../Player").get_pos()
+	
+	# Probability of jumping
+	if not moving:
+		if success(80):
+			jump.target_coords.append(randloc())
 	else:
-		# Probability of jumping
-		if not moving:
-			p = 80
-		else:
-			p = 70
-
-		if success(p):
+		if success(70):
 			jump.target_coords.append(randloc())
 
 

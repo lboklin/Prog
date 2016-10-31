@@ -24,7 +24,7 @@ z/z = 1
 input/pickable = false
 shapes/0/shape = SubResource( 1 )
 shapes/0/transform = Matrix32( 3.86133, -0.000123963, 6.79106e-05, 2.11536, 0.198378, -1.50031 )
-shapes/0/trigger = false
+shapes/0/trigger = true
 collision/layers = 1
 collision/mask = 1
 collision/margin = 0.08
@@ -75,7 +75,7 @@ transform/pos = Vector2( 0.198378, -1.50031 )
 transform/rot = 0.0018394
 transform/scale = Vector2( 3.86133, 2.11536 )
 shape = SubResource( 1 )
-trigger = false
+trigger = true
 _update_shape_index = 0
 
 [node name="Indicator" parent="." instance=ExtResource( 5 )]

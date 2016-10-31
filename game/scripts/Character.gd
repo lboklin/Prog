@@ -8,10 +8,10 @@ extends KinematicBody2D
 # MAX_SPEED =  max movement ground_speed (magnitude)
 # JUMP_CD = cooldown for jump
 # ROT_SPEED = (visual) turning ground_speed for character
-const ATTK_CD = 0.5
+const ATTK_CD = 0.0
 const DEST_R = 5.0
 const MAX_SPEED = 1000
-const JUMP_CD = 0.1
+const JUMP_CD = 0.0
 const ROT_SPEED = 2
 
 ## Cooldowns
@@ -27,8 +27,8 @@ var attk_dur = 0
 var attacking = false		# Shared with fixed process and set by attack function
 var rooted = false
 var stunned = false
-var impeded = false			# Shared with functions here and there
 var busy = false
+var disabled = false
 
 ## Movement booleans
 var moving = false
@@ -39,15 +39,16 @@ var motion = Vector2(0,0)
 
 ## Misc
 var mouse_pos = Vector2()	# Shared all over
+var attack_coords = null
 
 ## action dicts
 var jump = {
 	"start_pos"			:	Vector2(),
 	"target_coords"		:	[]
 }
-var attack = {
-	"target_coords"		:	Vector2()
-}
+#var attack = {
+#	"target_coords"		:	Vector2()
+#}
 
 
 #########################
@@ -61,24 +62,26 @@ func update_states(delta):
 		moving = true
 	else:
 		moving = false
-
-	if rooted or stunned or busy:
-		impeded = true
+		
+	if rooted or stunned:
+		disabled = true
 	else:
-		impeded = false
+		disabled = false
 	
 	# Various status effects and their cooldowns
 	if rooted_timer > 0:
-		rooted = true
 		rooted_timer -= delta
-	else:
-		rooted = false
+		if rooted_timer <= 0:
+			rooted = false
+		else:
+			rooted = true
 		
 	if stunned_timer > 0:
-		stunned = true
 		stunned_timer -= delta
-	else:
-		stunned = false
+		if stunned_timer <= 0:
+			stunned = false
+		else:
+			stunned = true
 	
 	# attack cooldowns
 	if attk_cd > 0:
@@ -86,16 +89,12 @@ func update_states(delta):
 	
 	# attack duration
 	if attk_dur > 0:
-		attacking = true
 		attk_dur -= delta
-	else:
-		attacking = false
-		
-	# apply busy status if busy doing stuff
-	if attacking:
-		busy = true
-	else:
-		busy = false
+		if attk_dur <= 0:
+			attacking = false
+			attack_coords = null
+		else:
+			attacking = true
 
 
 func dir_vscaled(from, to):
@@ -145,18 +144,18 @@ func die():
 
 func attack():
 	
-	attk_cd = ATTK_CD
-	attk_dur = 0.5
-	
-	# Spawn projectile
 	if not attacking:
+		# Spawn projectile
 		var projectile = preload("res://common/Projectile/projectile.tscn").instance()
-		var attack_dir = dir_vscaled(get_pos(), attack.target_coords)
+		var attack_dir = dir_vscaled(get_pos(), attack_coords)
 		
 		# Initial position and direction
 		projectile.advance_dir = attack_dir
-		projectile.set_pos( get_pos() + attack_dir * Vector2(128,64) )
+		projectile.set_pos( get_pos() + attack_dir * Vector2(64,32) )
 		get_parent().add_child(projectile)
+		
+		attk_cd = ATTK_CD
+		attk_dur = 0.2
 	
 
 func stop_moving():
@@ -191,8 +190,8 @@ func supposed_to_be_moving():
 	if jump.target_coords.size() > 3: 
 		jump.target_coords.resize(3)
 	
-	# If not impeded and not at dest
-	if not impeded and current_pos != jump.target_coords[0]:
+	# If not disabled and not at dest
+	if not disabled and current_pos != jump.target_coords[0]:
 		# If speed is greater than distance to dest
 		if moving and motion.length() > current_pos.distance_to(jump.target_coords[0]):
 			return false
@@ -227,6 +226,14 @@ func _fixed_process(delta):
 	elif moving:
 		stop_moving()
 	
-	if not impeded: # If idling, always stay turned towards pointer location
-		face_dir(mouse_pos)
+	if not disabled: # If idling, always stay turned towards pointer location
+		if attack_coords != null:
+			attack()
+			
+		if attacking:
+			face_dir(attack_coords)
+		elif moving:
+			face_dir(jump.target_coords[0])
+		else:
+			face_dir(mouse_pos)
 	

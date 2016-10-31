@@ -20,7 +20,7 @@ func _fixed_process(delta):
 	
 	# Request to attack target location
 	if Input.is_action_pressed("attack"):
-		attack.target_coords = mouse_pos
+		attack_coords = mouse_pos
 	
 
 #####################################################################
