@@ -225,7 +225,7 @@ func act(delta):
 			face_dir(delta,attack_coords)
 		elif moving:
 			face_dir(delta,jump_target_coords[0])
-		else:
+		elif get_parent().get_name() == "Player":
 			face_dir(delta,get_parent().mouse_pos)
 			
 			

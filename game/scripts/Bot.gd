@@ -21,7 +21,8 @@ func success(chance):
 	if chance > 100:
 		return true
 
-	var luck_result = randi() % convert(100 / get_fixed_process_delta_time(), 2)
+	chance = chance * get_fixed_process_delta_time()
+	var luck_result = randi() % 100
 	randomize() # New seed
 
 	if luck_result <= chance:
@@ -36,16 +37,16 @@ func _fixed_process(delta):
 	# so that it appears more human in it's ability to predict and deduce
 	# the intentions and actions of others).
 
-	if is_colliding():
-		if get_collider().is_in_group("Lethal"):
+	if bot.is_colliding():
+		if bot.get_collider().is_in_group("Lethal"):
 			bot.die()
 
 	# Probability of attacking inside a second
 	if success(50):
-		if get_node("../Player/CharacterModel").moving: # Attack target's dest
-			bot.attack_coords = get_node("../Player/CharacterModel").jump_target_coords[0]
+		if get_parent().get_node("Player/CharacterModel").moving: # Attack target's dest
+			bot.attack_coords = get_parent().get_node("Player/CharacterModel").jump_target_coords[0]
 		else: # Attack target's current pos
-			bot.attack_coords = get_node("../Player").get_pos()
+			bot.attack_coords = get_parent().get_node("Player").get_pos()
 	
 	# Probability of jumping
 	if not bot.moving:
@@ -54,6 +55,8 @@ func _fixed_process(delta):
 	else:
 		if success(70):
 			bot.jump_target_coords.append(randloc())
+		
+	bot.act(delta)
 
 
 #####################################################################
@@ -69,4 +72,3 @@ func _ready():
 	get_node("CharacterModel/InsigniaViewport/Insignia").set_texture(insignia)
 	
 	set_fixed_process(true)
-	pass
