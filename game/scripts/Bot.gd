@@ -1,18 +1,6 @@
 extends Node2D
 
-var bot
-
-# Return a random location somewhere within the visible area
-func randloc():
-
-	var screenrect = get_viewport().get_visible_rect()
-	var loc = Vector2()
-
-	loc.x = round(rand_range(screenrect.pos.x, screenrect.end.x))
-	loc.y = round(rand_range(screenrect.pos.y, screenrect.end.y))
-	randomize() # New seed
-
-	return loc
+var character
 
 
 # Take a probability percentage and return true or false after diceroll
@@ -31,32 +19,37 @@ func success(chance):
 
 func _fixed_process(delta):
 
-	# TODO: Implement awareness of surroundings. Ability to "see" and respond
+	# TODO: Implement awareness of surroundings. Ability to detect and respond
 	# to actions of players and bots around it. Awareness should be limited to
-	# a limited 360 degree radius around it (and not be perfect observations
+	# a 360 degree limited radius around it (and not be perfect observations
 	# so that it appears more human in it's ability to predict and deduce
 	# the intentions and actions of others).
 
-	if bot.is_colliding():
-		if bot.get_collider().is_in_group("Lethal"):
-			bot.die()
+	if not self.has_node("CharacterModel"):
+		character = preload("res://common/Character/CharacterModel.tscn").instance()
+		self.add_child(character)
+		character = get_node("CharacterModel")
+	
+		var insignia = ImageTexture.new()
+		insignia.load("res://npc/insignia.png")
+		get_node("CharacterModel/InsigniaViewport/Insignia").set_texture(insignia)
 
 	# Probability of attacking inside a second
 	if success(50):
 		if get_parent().get_node("Player/CharacterModel").moving: # Attack target's dest
-			bot.attack_coords = get_parent().get_node("Player/CharacterModel").jump_target_coords[0]
+			character.attack_coords = get_parent().get_node("Player/CharacterModel").jump_target_coords[0]
 		else: # Attack target's current pos
-			bot.attack_coords = get_parent().get_node("Player").get_pos()
+			character.attack_coords = get_parent().get_node("Player").get_pos()
 	
 	# Probability of jumping
-	if not bot.moving:
+	if not character.moving:
 		if success(80):
-			bot.jump_target_coords.append(randloc())
+			character.jump_target_coords.append(character.randloc(get_viewport().get_visible_rect()))
 	else:
 		if success(70):
-			bot.jump_target_coords.append(randloc())
+			character.jump_target_coords.append(character.randloc(get_viewport().get_visible_rect()))
 		
-	bot.act(delta)
+	character.act(delta)
 
 
 #####################################################################
@@ -65,10 +58,5 @@ func _fixed_process(delta):
 
 
 func _ready():
-	bot = get_node("CharacterModel")
-	
-	var insignia = ImageTexture.new()
-	insignia.load("res://npc/insignia.png")
-	get_node("CharacterModel/InsigniaViewport/Insignia").set_texture(insignia)
 	
 	set_fixed_process(true)

@@ -85,7 +85,7 @@ colors = ColorArray( 0.160828, 0.242188, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0.755102 )
 offsets = FloatArray( 0, 1 )
 colors = ColorArray( 1, 1, 1, 1, 1, 0.617074, 0.704795, 0.0653235 )
 
-[node name="Projectile" type="KinematicBody2D" groups=[ "Lethal" ]]
+[node name="Projectile" type="KinematicBody2D"]
 
 z/z = 1
 input/pickable = false

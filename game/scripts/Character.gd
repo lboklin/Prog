@@ -41,6 +41,8 @@ var character_pos = Vector2()
 var jump_target_coords = []
 var attack_coords = null
 
+var actor
+
 
 #########################
 #########################
@@ -93,8 +95,22 @@ func dir_vscaled(from, to):
 	var dir_vscaled = to - from
 	dir_vscaled.y /= GLOBALS.VSCALE # Compensate for velocity_magnitude.y*=GLOBALS.VSCALE
 	dir_vscaled = dir_vscaled.normalized()
-	return dir_vscaled
 	
+	return dir_vscaled
+
+
+# Return a random location somewhere within the visible area
+func randloc(area):
+
+	var loc = Vector2()
+
+	loc.x = round(rand_range(area.pos.x, area.end.x))
+	loc.y = round(rand_range(area.pos.y, area.end.y))
+	randomize() # New seed
+
+	return loc
+
+		
 ##################################################
 
 
@@ -128,10 +144,14 @@ func face_dir(delta,focus):
 	
 	insignia.rotate(min(angle, (delta*ROT_SPEED*angle*angle)+0.1)*s)
 
+
 func die():
-	# Dramatic animation goes here
-	print(get_collider().get_name() + " killed " + get_name())
-	queue_free()
+	
+	if not self.is_queued_for_deletion():
+		# Dramatic animation goes here
+		print(self.get_name() + " was killed.")
+		queue_free()
+
 
 func attack():
 	
@@ -143,7 +163,7 @@ func attack():
 		# Initial position and direction
 		projectile.advance_dir = attack_dir
 		projectile.set_global_pos( character_pos + attack_dir * Vector2(80,40) )
-		get_parent().get_parent().add_child(projectile)
+		actor.get_parent().add_child(projectile)
 		
 		attk_cd = ATTK_CD
 		attk_dur = 0.2
@@ -152,7 +172,7 @@ func attack():
 func stop_moving():
 	
 	motion = Vector2(0,0)
-	get_parent().set_pos(jump_target_coords[0])
+	actor.set_pos(jump_target_coords[0])
 	moving = false
 	
 	jump_target_coords.pop_front()
@@ -166,7 +186,7 @@ func move_towards_destination(delta):
 #	if motion == Vector2(0,0):
 	motion = dir * MAX_SPEED * delta
 	motion.y *= GLOBALS.VSCALE
-	get_parent().set_pos(character_pos + motion)
+	actor.set_pos(character_pos + motion)
 
 
 func supposed_to_be_moving():
@@ -199,7 +219,7 @@ func supposed_to_be_moving():
 
 func act(delta):
 	
-	character_pos = get_parent().get_pos()
+	character_pos = actor.get_pos()
 	
 	# Update the state the character is in
 	update_states(delta)
@@ -225,9 +245,11 @@ func act(delta):
 			face_dir(delta,attack_coords)
 		elif moving:
 			face_dir(delta,jump_target_coords[0])
-		elif get_parent().get_name() == "Player":
-			face_dir(delta,get_parent().mouse_pos)
+		elif actor.get_name() == "Player":
+			face_dir(delta,actor.mouse_pos)
 			
 			
-#func _ready():
+func _ready():
+	
+	actor = get_parent()
 #	_fixed_process(true)

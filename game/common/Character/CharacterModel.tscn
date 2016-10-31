@@ -82,7 +82,7 @@ gui/disable_input = false
 
 transform/pos = Vector2( 256, 256 )
 texture = ExtResource( 4 )
-modulate = Color( 0.203125, 0.203125, 0.203125, 1 )
+modulate = Color( 0.332031, 0.332031, 0.332031, 1 )
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="."]
 

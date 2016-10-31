@@ -24,8 +24,13 @@ func _fixed_process(delta):
 	motion.y *= GLOBALS.VSCALE
 	move(motion)
 	if is_colliding():
-		get_node("shape").queue_free()
 		get_node("anim").play("explode")
+		# Stop exploded projectiles from colliding with each other
+		get_node("shape").queue_free() 
+		var collider = get_collider()
+		if collider.get_name() == "CharacterModel":
+			collider.die()
+			print(collider)
 		hit=true
 
 func _ready():
