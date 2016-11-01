@@ -11,7 +11,7 @@ func success(delta, chance):
 
 	var diceroll = rand_range(0, 100)
 	randomize()
-	
+
 	if diceroll <= (chance * delta):
 		return true
 
@@ -29,14 +29,14 @@ func _fixed_process(delta):
 		self.set_global_pos(character.randloc(get_viewport().get_visible_rect()))
 		self.add_child(character)
 		character = get_node("CharacterModel")
-	
+
 		var insignia = ImageTexture.new()
 		insignia.load("res://npc/insignia.png")
 		get_node("CharacterModel/InsigniaViewport/Insignia").set_texture(insignia)
 	elif lives == 0:
 		return
 
-	# Probabilities are a percentage of likelyhood within the timespan of a second 
+	# Probabilities are a percentage of likelyhood within the timespan of a second
 
 	# Attacking
 	if success(delta, 35):
@@ -44,7 +44,7 @@ func _fixed_process(delta):
 			character.attack_coords = get_parent().get_node("Player/CharacterModel").jump_target_coords[0]
 		else: # Attack target's current pos
 			character.attack_coords = get_parent().get_node("Player").get_pos()
-	
+
 	# Probability of jumping
 	if not character.moving:
 		if success(delta, 80):
@@ -52,7 +52,7 @@ func _fixed_process(delta):
 	else:
 		if success(delta, 70):
 			character.jump_target_coords.append(character.randloc(get_viewport().get_visible_rect()))
-		
+
 	character.act(delta)
 
 
@@ -62,5 +62,5 @@ func _fixed_process(delta):
 
 
 func _ready():
-	
+
 	set_fixed_process(true)

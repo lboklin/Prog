@@ -26,7 +26,7 @@ polygon = Vector2Array( -257, 13, -247, 43, -212, 78, -137, 113, -47, 128, 48, 1
 [node name="CharacterModel" type="KinematicBody2D"]
 
 visibility/behind_parent = true
-transform/scale = Vector2( 0.2, 0.2 )
+transform/scale = Vector2( 0.18, 0.18 )
 z/z = 1
 input/pickable = false
 shapes/0/shape = SubResource( 3 )
