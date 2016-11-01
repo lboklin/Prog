@@ -1,5 +1,6 @@
 extends KinematicBody2D
 
+
 ########################
 ### Global variables ###
 ########################
@@ -13,6 +14,12 @@ const DEST_R = 5.0
 const MAX_SPEED = 1000
 const JUMP_CD = 0.0
 const ROT_SPEED = 2
+const LIVES = 3
+
+########################
+
+
+var lives = LIVES
 
 ## Cooldowns
 # Set and updated by status update func
@@ -29,6 +36,7 @@ var rooted = false
 var stunned = false
 var busy = false
 var disabled = false
+var dead = false
 
 ## Movement booleans
 var moving = false
@@ -41,7 +49,7 @@ var character_pos = Vector2()
 var jump_target_coords = []
 var attack_coords = null
 
-var actor
+var mouse_pos = Vector2()
 
 
 #########################
@@ -111,6 +119,16 @@ func randloc(area):
 	return loc
 
 
+# Take a probability percentage and return true or false after diceroll
+func success(delta, chance):
+
+	var diceroll = rand_range(0, 100)
+	randomize()
+
+	if diceroll <= (chance * delta):
+		return true
+
+
 ##################################################
 
 
@@ -135,7 +153,7 @@ func face_dir(delta,focus):
 
 	# Need to compensate with offset of the face_dir because the viewport only includes quadrant IV so sprite had to be moved into it
 	# Don't waste any more time looking at this. Just leave it. This is how it is.
-	var insignia = get_node("InsigniaViewport/Insignia")
+	var insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
 	var dir_compensated = face_dir + insignia.get_pos()
 
 	var angle = insignia.get_angle_to(dir_compensated)
@@ -147,10 +165,18 @@ func face_dir(delta,focus):
 
 func die():
 
-	if not self.is_queued_for_deletion():
+	if not is_queued_for_deletion():
+		dead = true
 		# Dramatic animation goes here
-		print(self.get_name() + " was killed.")
-		queue_free()
+		print(get_name() + " was killed.")
+		lives -= 1
+		get_node("CollisionPolygon2D").set_trigger(true)
+
+
+func respawn():
+	dead = false
+	set_pos(randloc(get_viewport().get_visible_rect()))
+	get_node("CollisionPolygon2D").set_trigger(false)
 
 
 func attack():
@@ -163,7 +189,7 @@ func attack():
 		# Initial position and direction
 		projectile.advance_dir = attack_dir
 		projectile.set_global_pos( character_pos + attack_dir * Vector2(80,40) )
-		actor.get_parent().add_child(projectile)
+		get_parent().add_child(projectile)
 
 		attk_cd = ATTK_CD
 		attk_dur = 0.2
@@ -172,7 +198,7 @@ func attack():
 func stop_moving():
 
 	motion = Vector2(0,0)
-	actor.set_pos(jump_target_coords[0])
+	set_pos(jump_target_coords[0])
 	moving = false
 
 	jump_target_coords.pop_front()
@@ -186,7 +212,8 @@ func move_towards_destination(delta):
 #	if motion == Vector2(0,0):
 	motion = dir * MAX_SPEED * delta
 	motion.y *= GLOBALS.VSCALE
-	actor.set_pos(character_pos + motion)
+#	set_pos(character_pos + motion)
+	move(motion)
 
 
 func supposed_to_be_moving():
@@ -219,7 +246,7 @@ func supposed_to_be_moving():
 
 func act(delta):
 
-	character_pos = actor.get_pos()
+	character_pos = get_pos()
 
 	# Update the state the character is in
 	update_states(delta)
@@ -245,11 +272,5 @@ func act(delta):
 			face_dir(delta,attack_coords)
 		elif moving:
 			face_dir(delta,jump_target_coords[0])
-		elif actor.get_name() == "Player":
-			face_dir(delta,actor.mouse_pos)
-
-
-func _ready():
-
-	actor = get_parent()
-#	_fixed_process(true)
+		elif get_name() == "Player":
+			face_dir(delta,mouse_pos)

@@ -1,19 +1,4 @@
-extends Node2D
-
-const LIVES = 3
-
-var character
-var lives = LIVES
-
-
-# Take a probability percentage and return true or false after diceroll
-func success(delta, chance):
-
-	var diceroll = rand_range(0, 100)
-	randomize()
-
-	if diceroll <= (chance * delta):
-		return true
+extends "res://scripts/Character.gd"
 
 
 func _fixed_process(delta):
@@ -24,36 +9,35 @@ func _fixed_process(delta):
 	# so that it appears more human in it's ability to predict and deduce
 	# the intentions and actions of others).
 
-	if not self.has_node("CharacterModel") and lives > 0:
-		character = preload("res://common/Character/CharacterModel.tscn").instance()
-		self.set_global_pos(character.randloc(get_viewport().get_visible_rect()))
-		self.add_child(character)
-		character = get_node("CharacterModel")
+	if dead:
+		if lives > 0:
+			respawn()
+		elif lives == 0:
+			if not is_queued_for_deletion():
+				queue_free()
+			return
 
-		var insignia = ImageTexture.new()
-		insignia.load("res://npc/insignia.png")
-		get_node("CharacterModel/InsigniaViewport/Insignia").set_texture(insignia)
-	elif lives == 0:
-		return
 
 	# Probabilities are a percentage of likelyhood within the timespan of a second
 
 	# Attacking
 	if success(delta, 35):
-		if get_parent().get_node("Player/CharacterModel").moving: # Attack target's dest
-			character.attack_coords = get_parent().get_node("Player/CharacterModel").jump_target_coords[0]
+		var player = get_parent().get_node("Player")
+		if player.moving: # Attack target's dest
+			attack_coords = player.jump_target_coords[0]
 		else: # Attack target's current pos
-			character.attack_coords = get_parent().get_node("Player").get_pos()
+			attack_coords = player.get_pos()
 
 	# Probability of jumping
-	if not character.moving:
+	if not moving:
 		if success(delta, 80):
-			character.jump_target_coords.append(character.randloc(get_viewport().get_visible_rect()))
+			jump_target_coords.append(randloc(get_viewport().get_visible_rect()))
 	else:
 		if success(delta, 70):
-			character.jump_target_coords.append(character.randloc(get_viewport().get_visible_rect()))
+			jump_target_coords.append(randloc(get_viewport().get_visible_rect()))
 
-	character.act(delta)
+
+	act(delta)
 
 
 #####################################################################

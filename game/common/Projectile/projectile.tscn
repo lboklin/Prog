@@ -75,7 +75,7 @@ tracks/4/interp = 1
 tracks/4/imported = false
 tracks/4/keys = { "times":FloatArray( 0 ), "transitions":FloatArray( 1 ), "update":1, "values":[ true ] }
 
-[sub_resource type="ColorRamp" id=7]
+[sub_resource type="ColorRamp" id=5]
 
 offsets = FloatArray( 0, 0.657343, 1 )
 colors = ColorArray( 0.160828, 0.242188, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0.755102 )
@@ -182,7 +182,7 @@ randomness/linear_velocity = -1.0
 randomness/initial_size = -1.0
 randomness/final_size = 1.0
 color/color = Color( 1, 1, 1, 0 )
-color/color_ramp = SubResource( 7 )
+color/color_ramp = SubResource( 5 )
 
 [node name="explosion" type="Particles2D" parent="."]
 
