@@ -149,7 +149,7 @@ func update_predictor():
 
 func face_dir(delta,focus):
 
-	var face_dir = dir_vscaled(character_pos, focus) * -1
+	var face_dir = dir_vscaled(character_pos, focus)
 
 	# Need to compensate with offset of the face_dir because the viewport only includes quadrant IV so sprite had to be moved into it
 	# Don't waste any more time looking at this. Just leave it. This is how it is.
