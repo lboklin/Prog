@@ -12,7 +12,7 @@ extends KinematicBody2D
 const ATTK_CD = 1.0
 const DEST_R = 5.0
 const MAX_SPEED = 1000
-const JUMP_CD = 0.0
+const JUMP_CD = 0.2
 const ROT_SPEED = 2
 const LIVES = 3
 
@@ -182,6 +182,7 @@ func attack():
 
 		# Initial position and direction
 		projectile.advance_dir = attack_dir
+		projectile.attack_coords = attack_coords
 		projectile.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
 		get_parent().add_child(projectile)
 
@@ -198,6 +199,7 @@ func stop_moving():
 	jump_target_coords.pop_front()
 	character_start_pos = character_pos
 	get_node("CollisionPolygon2D").set_trigger(false)
+	self.set_z(1)
 	stunned_timer = JUMP_CD
 
 
@@ -205,6 +207,7 @@ func move_towards_destination(delta):
 
 	if not moving:
 		get_node("CollisionPolygon2D").set_trigger(true)
+		self.set_z(3)
 
 	var travel_dist = jump_target_coords[0] - character_start_pos
 	travel_dist.y *= 2

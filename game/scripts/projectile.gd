@@ -3,8 +3,9 @@ extends KinematicBody2D
 const ADVANCE_SPEED = 2000.0
 const LIFETIME = 4
 
-var travel_time = 0
-var advance_dir=Vector2(1,0)
+var age = 0
+var advance_dir = Vector2(1,0)
+var attack_coords = Vector2()
 
 var hit=false
 
@@ -26,13 +27,13 @@ func _fixed_process(delta):
 		return
 
 	# Despawn after lifetime has expired
-	travel_time += delta
-	if travel_time > LIFETIME:
+	age += delta
+	if age > LIFETIME:
 		hit = true
 		explode()
 
 	var motion = advance_dir*delta*ADVANCE_SPEED
-	motion.y *= GLOBALS.VSCALE
+	motion.y /= 2
 	move(motion)
 	if is_colliding():
 
@@ -43,9 +44,7 @@ func _fixed_process(delta):
 		hit=true
 
 func _ready():
+
 	get_node("anim").connect("finished", self, "_on_animation_finished")
-	# Initialization here
+
 	set_fixed_process(true)
-	pass
-
-
