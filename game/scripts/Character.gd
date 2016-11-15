@@ -197,13 +197,14 @@ func stop_moving():
 
 	jump_target_coords.pop_front()
 	character_start_pos = character_pos
+	get_node("CollisionPolygon2D").set_trigger(false)
 	stunned_timer = JUMP_CD
 
 
 func move_towards_destination(delta):
 
 	if not moving:
-		character_start_pos = self.get_pos()
+		get_node("CollisionPolygon2D").set_trigger(true)
 
 	var travel_dist = jump_target_coords[0] - character_start_pos
 	travel_dist.y *= 2
