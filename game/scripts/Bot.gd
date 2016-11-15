@@ -1,6 +1,5 @@
 extends "res://scripts/Character.gd"
 
-
 func _fixed_process(delta):
 
 	# TODO: Implement awareness of surroundings. Ability to detect and respond
@@ -46,5 +45,13 @@ func _fixed_process(delta):
 
 
 func _ready():
+
+	if primary_color ==  Color():
+		primary_color = Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1))
+	if secondary_color == Color():
+		secondary_color = Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1))
+
+	get_node("Sprite").set_modulate(primary_color)
+	get_node("Sprite/Insignia").set_modulate(secondary_color)
 
 	set_fixed_process(true)

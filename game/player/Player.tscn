@@ -6,12 +6,12 @@
 [ext_resource path="res://player/insignia.png" type="Texture" id=4]
 [ext_resource path="res://common/Character/Indicator.tscn" type="PackedScene" id=5]
 
-[sub_resource type="ConvexPolygonShape2D" id=4]
+[sub_resource type="ConvexPolygonShape2D" id=1]
 
 custom_solver_bias = 0.0
 points = Vector2Array( -232, -32, -177, -77, -122, -97, -52, -112, 48, -112, 113, -102, 178, -82, 243, -32, 248, 8.00001, 233, 38, 203, 68, 133, 103, 53, 118, -47, 118, -122, 103, -187, 78, -227, 43, -242, 8.00001 )
 
-[sub_resource type="OccluderPolygon2D" id=3]
+[sub_resource type="OccluderPolygon2D" id=2]
 
 resource/name = "CharacterModelOccluder"
 closed = true
@@ -22,7 +22,7 @@ polygon = Vector2Array( -257, 13, -247, 43, -212, 78, -137, 113, -47, 128, 48, 1
 
 z/z = 1
 input/pickable = false
-shapes/0/shape = SubResource( 4 )
+shapes/0/shape = SubResource( 1 )
 shapes/0/transform = Matrix32( 0.18, 0, 0, 0.18, -0.827984, -1.63799 )
 shapes/0/trigger = false
 collision/layers = 1
@@ -100,7 +100,7 @@ modulate = Color( 0.332031, 0.332031, 0.332031, 1 )
 visibility/visible = false
 transform/pos = Vector2( 0.36, -1.44 )
 transform/scale = Vector2( 0.18, 0.18 )
-occluder = SubResource( 3 )
+occluder = SubResource( 2 )
 light_mask = 1
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]

@@ -1,5 +1,8 @@
 extends KinematicBody2D
 
+export var primary_color = Color()
+export var secondary_color = Color()
+
 
 ########################
 ### Global variables ###
@@ -176,7 +179,7 @@ func attack():
 
 	if not attacking and attk_cd <= 0:
 		# Spawn projectile
-		var projectile = preload("res://common/Projectile/projectile.tscn").instance()
+		var projectile = preload("res://common/Projectile/Projectile.tscn").instance()
 		var attack_dir = (attack_coords - character_pos).normalized()
 		attack_dir.y *= 2
 
