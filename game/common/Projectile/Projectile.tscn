@@ -1,19 +1,15 @@
-[gd_scene load_steps=10 format=1]
+[gd_scene load_steps=9 format=1]
 
-[ext_resource path="res://scripts/projectile.gd" type="Script" id=1]
-[ext_resource path="res://common/Projectile/energy.tex" type="Texture" id=2]
-[ext_resource path="res://common/Projectile/light.tex" type="Texture" id=3]
+[ext_resource path="res://scripts/Projectile.gd" type="Script" id=1]
+[ext_resource path="res://common/Projectile/light.tex" type="Texture" id=2]
+[ext_resource path="res://common/Projectile/energy.tex" type="Texture" id=3]
 
 [sub_resource type="CircleShape2D" id=1]
 
 custom_solver_bias = 0.0
 radius = 10.0
 
-[sub_resource type="CanvasItemMaterial" id=2]
-
-shader/shading_mode = 0
-
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id=2]
 
 length = 1.0
 loop = false
@@ -24,63 +20,33 @@ tracks/0/interp = 1
 tracks/0/imported = false
 tracks/0/keys = { "times":FloatArray( 0, 0.3 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
 tracks/1/type = "value"
-tracks/1/path = NodePath("Sprite1:visibility/opacity")
+tracks/1/path = NodePath("energy1:config/emitting")
 tracks/1/interp = 1
 tracks/1/imported = false
-tracks/1/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ 0.0, 0.0 ] }
+tracks/1/keys = { "times":FloatArray( 0 ), "transitions":FloatArray( 1 ), "update":1, "values":[ false ] }
 tracks/2/type = "value"
-tracks/2/path = NodePath("Sprite:visibility/opacity")
+tracks/2/path = NodePath("light:color")
 tracks/2/interp = 1
 tracks/2/imported = false
-tracks/2/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ 0.0, 0.0 ] }
-tracks/3/type = "value"
-tracks/3/path = NodePath("energy1:config/emitting")
-tracks/3/interp = 1
-tracks/3/imported = false
-tracks/3/keys = { "times":FloatArray( 0 ), "transitions":FloatArray( 1 ), "update":1, "values":[ false ] }
-tracks/4/type = "value"
-tracks/4/path = NodePath("light:color")
-tracks/4/interp = 1
-tracks/4/imported = false
-tracks/4/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Color( 1, 0.894043, 0.757812, 1 ), Color( 0, 0, 0, 0 ) ] }
+tracks/2/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Color( 1, 0.894043, 0.757812, 1 ), Color( 0, 0, 0, 0 ) ] }
 
-[sub_resource type="Animation" id=4]
+[sub_resource type="Animation" id=3]
 
 length = 1.0
 loop = true
 step = 0.1
 tracks/0/type = "value"
-tracks/0/path = NodePath("Sprite:transform/rot")
+tracks/0/path = NodePath("energy1:config/emitting")
 tracks/0/interp = 1
 tracks/0/imported = false
-tracks/0/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ 0.0, 360.0 ] }
-tracks/1/type = "value"
-tracks/1/path = NodePath("Sprite1:transform/rot")
-tracks/1/interp = 1
-tracks/1/imported = false
-tracks/1/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ 0.0, -360.0 ] }
-tracks/2/type = "value"
-tracks/2/path = NodePath("Sprite:visibility/opacity")
-tracks/2/interp = 1
-tracks/2/imported = false
-tracks/2/keys = { "times":FloatArray( 0 ), "transitions":FloatArray( 1 ), "update":0, "values":[ 0.2 ] }
-tracks/3/type = "value"
-tracks/3/path = NodePath("Sprite1:visibility/opacity")
-tracks/3/interp = 1
-tracks/3/imported = false
-tracks/3/keys = { "times":FloatArray( 0 ), "transitions":FloatArray( 1 ), "update":0, "values":[ 0.2 ] }
-tracks/4/type = "value"
-tracks/4/path = NodePath("energy1:config/emitting")
-tracks/4/interp = 1
-tracks/4/imported = false
-tracks/4/keys = { "times":FloatArray( 0 ), "transitions":FloatArray( 1 ), "update":1, "values":[ true ] }
+tracks/0/keys = { "times":FloatArray( 0 ), "transitions":FloatArray( 1 ), "update":1, "values":[ true ] }
 
-[sub_resource type="ColorRamp" id=5]
+[sub_resource type="ColorRamp" id=4]
 
 offsets = FloatArray( 0, 0.657343, 1 )
 colors = ColorArray( 0.160828, 0.242188, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0.755102 )
 
-[sub_resource type="ColorRamp" id=6]
+[sub_resource type="ColorRamp" id=5]
 
 offsets = FloatArray( 0, 1 )
 colors = ColorArray( 1, 1, 1, 1, 1, 0.617074, 0.704795, 0.0653235 )
@@ -98,27 +64,13 @@ collision/margin = 0.08
 script/script = ExtResource( 1 )
 __meta__ = { "__editor_plugin_screen__":"2D" }
 
-[node name="Sprite" type="Sprite" parent="."]
-
-visibility/visible = false
-visibility/opacity = 0.2
-material/material = SubResource( 2 )
-texture = ExtResource( 2 )
-
-[node name="Sprite1" type="Sprite" parent="."]
-
-visibility/visible = false
-visibility/opacity = 0.2
-material/material = SubResource( 2 )
-texture = ExtResource( 2 )
-
 [node name="anim" type="AnimationPlayer" parent="."]
 
 playback/process_mode = 1
 playback/default_blend_time = 0.0
 root/root = NodePath("..")
-anims/explode = SubResource( 3 )
-anims/spin = SubResource( 4 )
+anims/explode = SubResource( 2 )
+anims/spin = SubResource( 3 )
 playback/active = true
 playback/speed = 1.0
 blend_times = [  ]
@@ -128,7 +80,7 @@ autoplay = "spin"
 
 transform/pos = Vector2( -0.128517, 10.0723 )
 enabled = true
-texture = ExtResource( 3 )
+texture = ExtResource( 2 )
 offset = Vector2( 0, 0 )
 scale = 2.2
 color = Color( 1, 1, 1, 1 )
@@ -160,7 +112,7 @@ z/z = 1
 config/amount = 1024
 config/lifetime = 0.03
 config/time_scale = 0.1
-config/texture = ExtResource( 2 )
+config/texture = ExtResource( 3 )
 params/direction = 0.0
 params/spread = 180.0
 params/linear_velocity = 1000.0
@@ -182,7 +134,7 @@ randomness/linear_velocity = -1.0
 randomness/initial_size = -1.0
 randomness/final_size = 1.0
 color/color = Color( 1, 1, 1, 0 )
-color/color_ramp = SubResource( 5 )
+color/color_ramp = SubResource( 4 )
 
 [node name="explosion" type="Particles2D" parent="."]
 
@@ -196,7 +148,7 @@ config/preprocess = 0.1
 config/emitting = false
 config/local_space = false
 config/explosiveness = 0.1
-config/texture = ExtResource( 2 )
+config/texture = ExtResource( 3 )
 params/direction = 0.0
 params/spread = 180.0
 params/linear_velocity = 150.0
@@ -217,6 +169,6 @@ randomness/linear_velocity = 1.0
 randomness/damping = 1.0
 randomness/initial_size = -1.0
 randomness/final_size = -1.0
-color/color_ramp = SubResource( 6 )
+color/color_ramp = SubResource( 5 )
 
 
