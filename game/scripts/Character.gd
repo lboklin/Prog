@@ -46,6 +46,7 @@ var motion = Vector2(0,0)
 
 ## Coordinates
 var character_pos = Vector2()
+var character_start_pos = Vector2()
 var jump_target_coords = []
 var attack_coords = null
 
@@ -59,7 +60,7 @@ var mouse_pos = Vector2()
 
 func update_states(delta):
 
-	if motion > Vector2(0,0):
+	if motion.length() > 0:
 		moving = true
 	else:
 		moving = false
@@ -96,15 +97,6 @@ func update_states(delta):
 			attack_coords = null
 		else:
 			attacking = true
-
-
-func dir_vscaled(from, to):
-
-	var dir_vscaled = to - from
-	dir_vscaled.y /= GLOBALS.VSCALE # Compensate for velocity_magnitude.y*=GLOBALS.VSCALE
-	dir_vscaled = dir_vscaled.normalized()
-
-	return dir_vscaled
 
 
 # Return a random location somewhere within the visible area
@@ -149,7 +141,8 @@ func update_predictor():
 
 func face_dir(delta,focus):
 
-	var face_dir = dir_vscaled(character_pos, focus)
+	var face_dir = focus - character_pos
+	face_dir.y *= 2
 
 	# Need to compensate with offset of the face_dir because the viewport only includes quadrant IV so sprite had to be moved into it
 	# Don't waste any more time looking at this. Just leave it. This is how it is.
@@ -184,11 +177,12 @@ func attack():
 	if not attacking and attk_cd <= 0:
 		# Spawn projectile
 		var projectile = preload("res://common/Projectile/projectile.tscn").instance()
-		var attack_dir = dir_vscaled(character_pos, attack_coords)
+		var attack_dir = (attack_coords - character_pos).normalized()
+		attack_dir.y *= 2
 
 		# Initial position and direction
 		projectile.advance_dir = attack_dir
-		projectile.set_global_pos( character_pos + attack_dir * Vector2(80,40) )
+		projectile.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
 		get_parent().add_child(projectile)
 
 		attk_cd = ATTK_CD
@@ -202,16 +196,28 @@ func stop_moving():
 	moving = false
 
 	jump_target_coords.pop_front()
+	character_start_pos = character_pos
 	stunned_timer = JUMP_CD
 
 
 func move_towards_destination(delta):
 
-	var dir = dir_vscaled(character_pos, jump_target_coords[0])
+	if not moving:
+		character_start_pos = self.get_pos()
+
+	var travel_dist = jump_target_coords[0] - character_start_pos
+	travel_dist.y *= 2
+	travel_dist = (travel_dist).length()
+
+	var dir = jump_target_coords[0] - character_pos
+	dir.y *= 2
+	dir = dir.normalized()
 
 #	if motion == Vector2(0,0):
-	motion = dir * MAX_SPEED * delta
-	motion.y *= GLOBALS.VSCALE
+	var speed = max(min(travel_dist*2, 1000), 500)
+
+	motion = dir * speed * delta
+	motion.y /= 2
 #	set_pos(character_pos + motion)
 	move(motion)
 
