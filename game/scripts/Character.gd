@@ -177,11 +177,12 @@ func respawn():
 
 func attack():
 
-	if not attacking and attk_cd <= 0:
+	if not moving and not attacking and attk_cd <= 0:
 		# Spawn projectile
 		var projectile = preload("res://common/Projectile/Projectile.tscn").instance()
-		var attack_dir = (attack_coords - character_pos).normalized()
+		var attack_dir = (attack_coords - character_pos)
 		attack_dir.y *= 2
+		attack_dir = attack_dir.normalized()
 
 		# Initial position and direction
 		projectile.advance_dir = attack_dir
