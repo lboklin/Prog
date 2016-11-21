@@ -129,17 +129,12 @@ func success(delta, chance):
 
 # Create a transparent, ghost-like character sprite to represent it as if
 # it had already arrived at its destination
-func update_predictor():
+func indicate(pos, anim):
 
-	var indicator = get_node("Indicator")
-
-	# If there's a destination, put there, otherwise, put on char pos
-	if jump_target_coords.size() > 0:
-		indicator.set_global_pos(jump_target_coords[0])
-		indicator.show()
-	else:
-		indicator.set_global_pos(character_pos)
-		indicator.hide()
+	var indicator = preload("res://gui/Indicator.tscn").instance()
+	indicator.set_pos(pos)
+	self.get_parent().add_child(indicator)
+	indicator.get_node("AnimationPlayer").play(anim)
 
 
 func face_dir(delta,focus):
@@ -185,8 +180,8 @@ func attack():
 		attack_dir = attack_dir.normalized()
 
 		# Initial position and direction
-		projectile.advance_dir = attack_dir
-		projectile.attack_coords = attack_coords
+#		projectile.advance_dir = attack_dir
+		projectile.destination = attack_coords
 		projectile.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
 		get_parent().add_child(projectile)
 
@@ -265,8 +260,6 @@ func act(delta):
 	# Update the state the character is in
 	update_states(delta)
 
-	# Update the location of the destination prediction indicator
-	update_predictor()
 
 	# Do nothing if stunned
 	if stunned:

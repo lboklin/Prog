@@ -30,10 +30,14 @@ func _fixed_process(delta):
 	# Probability of jumping
 	if not moving:
 		if success(delta, 80):
-			jump_target_coords.append(randloc(get_viewport().get_visible_rect()))
+			var jump_dest = randloc(get_viewport().get_visible_rect())
+			jump_target_coords.append(jump_dest)
+			self.indicate(jump_dest, "move_to")
 	else:
 		if success(delta, 70):
+			var jump_dest = randloc(get_viewport().get_visible_rect())
 			jump_target_coords.append(randloc(get_viewport().get_visible_rect()))
+			self.indicate(jump_dest, "move_to")
 
 
 	act(delta)

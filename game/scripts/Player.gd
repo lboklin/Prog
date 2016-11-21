@@ -42,6 +42,7 @@ func _input(ev):
 		# Request to jump
 		if ev.is_action_pressed("move_to"):
 			jump_target_coords.append(mouse_pos)
+			indicate(mouse_pos, "move_to")
 
 		# Request to spawn a clone with a grudge
 		if ev.is_action_pressed("spawn_enemy"):
