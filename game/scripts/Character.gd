@@ -115,8 +115,9 @@ func randloc(area):
 
 
 # Take a probability percentage and return true or false after diceroll
-func success(delta, chance):
+func success(chance):
 
+	var delta = get_fixed_process_delta_time()
 	var diceroll = rand_range(0, 100)
 	randomize()
 
@@ -157,10 +158,13 @@ func face_dir(delta,focus):
 func die():
 
 	if not is_queued_for_deletion():
-		dead = true
 		# Dramatic animation goes here
-		print(get_name() + " was killed.")
+		var death_anim = preload("res://common/DeathEffect.tscn").instance()
+		death_anim.set_pos(self.get_pos())
+		get_parent().add_child(death_anim)
+		dead = true
 		lives -= 1
+		print(get_name() + " was killed.")
 		get_node("CollisionPolygon2D").set_trigger(true)
 
 
@@ -222,7 +226,7 @@ func move_towards_destination(delta):
 	dir = dir.normalized()
 
 #	if motion == Vector2(0,0):
-	var speed = max(min(travel_dist*2, 1000), 500)
+	var speed = max(min(travel_dist*2, MAX_SPEED), 500)
 
 	## GLORIOUS JUMP ANIMATION ##
 	var traveled = traveled_dist / travel_dist

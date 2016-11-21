@@ -20,7 +20,7 @@ func _fixed_process(delta):
 	# Probabilities are a percentage of likelyhood within the timespan of a second
 
 	# Attacking
-	if success(delta, 35):
+	if success(35):
 		var player = get_parent().get_node("Player")
 		if player.moving: # Attack target's dest
 			attack_coords = player.jump_target_coords[0]
@@ -29,12 +29,12 @@ func _fixed_process(delta):
 
 	# Probability of jumping
 	if not moving:
-		if success(delta, 80):
+		if success(80):
 			var jump_dest = randloc(get_viewport().get_visible_rect())
 			jump_target_coords.append(jump_dest)
 			self.indicate(jump_dest, "move_to")
 	else:
-		if success(delta, 70):
+		if success(70):
 			var jump_dest = randloc(get_viewport().get_visible_rect())
 			jump_target_coords.append(randloc(get_viewport().get_visible_rect()))
 			self.indicate(jump_dest, "move_to")
