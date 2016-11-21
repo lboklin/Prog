@@ -226,9 +226,9 @@ func move_towards_destination(delta):
 
 	## GLORIOUS JUMP ANIMATION ##
 	var traveled = traveled_dist / travel_dist
-	var height = sin(2*deg2rad(90*traveled)) * -180
+	var height = sin(deg2rad(180*traveled)) * travel_dist * -0.2
 	self.get_node("Sprite").set_pos(Vector2(0, height))
-	var scale = 0.5 - 0.18 * sin(2*deg2rad(90*traveled))
+	var scale = 0.5 - 0.08 * sin(deg2rad(-1 * height))
 	self.get_node("Shadow").set_scale(Vector2(scale, scale))
 	self.get_node("Shadow").set_opacity(scale)
 
