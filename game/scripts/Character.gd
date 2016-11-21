@@ -14,7 +14,7 @@ export var secondary_color = Color()
 # ROT_SPEED = (visual) turning ground_speed for character
 const ATTK_CD = 1.0
 const DEST_R = 5.0
-const MAX_SPEED = 1000
+const MAX_SPEED = 1500
 const JUMP_CD = 0.2
 const ROT_SPEED = 2
 const LIVES = 3
@@ -199,6 +199,7 @@ func stop_moving():
 	character_start_pos = character_pos
 	get_node("CollisionPolygon2D").set_trigger(false)
 	self.set_z(1)
+	self.get_node("Sprite").set_pos(Vector2(0, 0))
 	stunned_timer = JUMP_CD
 
 
@@ -212,12 +213,24 @@ func move_towards_destination(delta):
 	travel_dist.y *= 2
 	travel_dist = (travel_dist).length()
 
+	var traveled_dist = jump_target_coords[0] - self.get_pos()
+	traveled_dist.y *= 2
+	traveled_dist = traveled_dist.length()
+
 	var dir = jump_target_coords[0] - character_pos
 	dir.y *= 2
 	dir = dir.normalized()
 
 #	if motion == Vector2(0,0):
 	var speed = max(min(travel_dist*2, 1000), 500)
+
+	## GLORIOUS JUMP ANIMATION ##
+	var traveled = traveled_dist / travel_dist
+	var height = sin(2*deg2rad(90*traveled)) * -180
+	self.get_node("Sprite").set_pos(Vector2(0, height))
+	var scale = 0.5 - 0.18 * sin(2*deg2rad(90*traveled))
+	self.get_node("Shadow").set_scale(Vector2(scale, scale))
+	self.get_node("Shadow").set_opacity(scale)
 
 	motion = dir * speed * delta
 	motion.y /= 2
