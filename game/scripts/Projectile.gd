@@ -1,50 +1,94 @@
 extends KinematicBody2D
 
-const ADVANCE_SPEED = 2000.0
-const LIFETIME = 4
 
-var age = 0
-var advance_dir = Vector2(1,0)
-var attack_coords = Vector2()
+const ADVANCE_SPEED = 2200.0
+const MAX_RANGE = 500
+const SAFE_RADIUS = 128
 
-var hit=false
+onready var shape = self.get_node("CollisionShape")
 
-func _on_animation_finished():
+var destination = Vector2()
+var direction = Vector2(1,0)
+var distance = 0
+var dist_traveled = 0
+
+
+func _animation_finished():
 
 	queue_free()
 
+
 func explode():
 
-		# Stop exploded projectiles from colliding with each other
-		var shape = get_node("shape")
-		if not shape.is_queued_for_deletion():
-			shape.queue_free()
-		get_node("anim").play("explode")
+	# Stop exploded projectiles from colliding with each other
+	if not self.shape.is_queued_for_deletion():
+		self.shape.set_trigger(true)
+
+	# Set the explosion orientation based on how it collided
+	var col_norm = self.get_collision_normal()
+	var vel_at_impact = self.ADVANCE_SPEED * self.direction
+	var collision_vector = self.get_collider_velocity() * col_norm
+	var lost_vel = (vel_at_impact - collision_vector).length()
+	var spread_angle_deg_width = lerp(85, 45, lost_vel / self.ADVANCE_SPEED)
+	var spread_dir = vel_at_impact.slide(collision_vector).angle() - deg2rad(180)
+
+	var explosion = self.get_node("Object/ExplosionForwards")
+	explosion.set_param(0, spread_dir)
+	explosion.set_param(1, spread_angle_deg_width)
+
+#	rot_dir = dir.angle() - deg2rad(180)
+#	self.get_node("Object/ExplosionForwards").set_rot(rot_dir)
+	get_node("Animation").play("Explode")
+
 
 func _fixed_process(delta):
 
+	var hit = false
+	var current_pos = self.get_pos()
+
+	var dist_to_target = self.destination - current_pos
+	dist_to_target.y *= 0.5
+	dist_to_target = dist_to_target.length()
+
+	if not hit:
+		var motion = self.direction * delta * self.ADVANCE_SPEED
+		motion.y *= 0.5
+		if motion.length() >= dist_to_target:
+			self.move(self.destination - current_pos)
+			hit = true
+		elif self.is_colliding():
+				hit = true
+				var collider = get_collider()
+				if collider.is_in_group("Mortals"):
+					collider.die()
+		else:
+			self.move(motion)
+#			motion.y *= 2
+#			self.dist_traveled += motion.length()
+
 	if hit:
-		return
-
-	# Despawn after lifetime has expired
-	age += delta
-	if age > LIFETIME:
-		hit = true
 		explode()
+		self.set_fixed_process(false)
 
-	var motion = advance_dir*delta*ADVANCE_SPEED
-	motion.y /= 2
-	move(motion)
-	if is_colliding():
-
-		var collider = get_collider()
-		if collider.is_in_group("Mortals"):
-			collider.die()
-		explode()
-		hit=true
 
 func _ready():
 
-	get_node("anim").connect("finished", self, "_on_animation_finished")
+	get_node("Animation").connect("finished", self, "_animation_finished")
+
+	self.shape.set_trigger(true)
+	var current_pos = self.get_global_pos()
+
+	var dist = self.destination - current_pos
+	dist.y *= 2
+	self.distance = dist.length()
+	var dir = self.destination - current_pos
+	dir.y *= 2
+	self.direction = dir.normalized()
+
+	# I don't know why I can't use the same rotation for all nodes
+	# in Object, but apparently it doesn't work that way
+	var rot_dir = self.direction.angle() - deg2rad(180)
+	self.get_node("Object/EnergyBall").set_rot(rot_dir)
+	self.get_node("Object/ExplosionForwards").set_rot(rot_dir)
 
 	set_fixed_process(true)
