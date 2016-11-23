@@ -4,12 +4,12 @@
 [ext_resource path="res://common/Projectile/energy.tex" type="Texture" id=2]
 [ext_resource path="res://common/Projectile/light.tex" type="Texture" id=3]
 
-[sub_resource type="ColorRamp" id=6]
+[sub_resource type="ColorRamp" id=1]
 
 offsets = FloatArray( 0, 1 )
 colors = ColorArray( 0, 0, 0, 1, 0.152344, 0.0737915, 0.0940433, 1 )
 
-[sub_resource type="Animation" id=5]
+[sub_resource type="Animation" id=2]
 
 resource/name = "Explode"
 length = 2.0
@@ -144,7 +144,7 @@ randomness/initial_angle = 1.0
 randomness/initial_size = 1.0
 randomness/final_size = 1.0
 color/color = Color( 1, 1, 1, 0 )
-color/color_ramp = SubResource( 6 )
+color/color_ramp = SubResource( 1 )
 
 [node name="Slag" type="Particles2D" parent="ExplosionResidue"]
 
@@ -210,7 +210,7 @@ shadow/item_mask = 1
 playback/process_mode = 0
 playback/default_blend_time = 0.0
 root/root = NodePath("..")
-anims/Explode = SubResource( 5 )
+anims/Explode = SubResource( 2 )
 playback/active = true
 playback/speed = 0.5
 blend_times = [  ]

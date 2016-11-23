@@ -50,8 +50,8 @@ var motion = Vector2(0,0)
 ## Coordinates
 var character_pos = Vector2()
 var character_start_pos = Vector2()
-var jump_target_coords = []
-var attack_coords = null
+var jump_destination = []
+var attack_location = null
 
 var mouse_pos = Vector2()
 
@@ -97,7 +97,7 @@ func update_states(delta):
 		attk_dur -= delta
 		if attk_dur <= 0:
 			attacking = false
-			attack_coords = null
+			self.attack_location = null
 		else:
 			attacking = true
 
@@ -112,6 +112,14 @@ func randloc(area):
 	randomize() # New seed
 
 	return loc
+
+
+func rand_loc(location, radius):
+
+	var new_radius = rand_range(0, radius)
+	var angle = deg2rad(rand_range(0, 360))
+	var point_on_circ = Vector2(new_radius, 0).rotated(angle)
+	return location + point_on_circ
 
 
 # Take a probability percentage and return true or false after diceroll
@@ -155,20 +163,21 @@ func face_dir(delta,focus):
 	insignia.rotate(min(angle, (delta*ROT_SPEED*angle*angle)+0.1)*s)
 
 
-func die():
+func hit():
 
-	if not is_queued_for_deletion():
+	if not self.dead:
+		self.dead = true
+		self.lives -= 1
 		# Dramatic animation goes here
 		var death_anim = preload("res://common/DeathEffect.tscn").instance()
 		death_anim.set_pos(self.get_pos())
 		get_parent().add_child(death_anim)
-		dead = true
-		lives -= 1
 		print(get_name() + " was killed.")
 		get_node("CollisionPolygon2D").set_trigger(true)
 
 
 func respawn():
+
 	dead = false
 	set_pos(randloc(get_viewport().get_visible_rect()))
 	get_node("CollisionPolygon2D").set_trigger(false)
@@ -179,13 +188,13 @@ func attack():
 	if not moving and not attacking and attk_cd <= 0:
 		# Spawn projectile
 		var projectile = preload("res://common/Projectile/Projectile.tscn").instance()
-		var attack_dir = (attack_coords - character_pos)
+		var attack_dir = (self.attack_location - character_pos)
 		attack_dir.y *= 2
 		attack_dir = attack_dir.normalized()
 
 		# Initial position and direction
 #		projectile.advance_dir = attack_dir
-		projectile.destination = attack_coords
+		projectile.destination = self.attack_location
 		projectile.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
 		get_parent().add_child(projectile)
 
@@ -196,10 +205,10 @@ func attack():
 func stop_moving():
 
 	motion = Vector2(0,0)
-	set_pos(jump_target_coords[0])
+	set_pos(jump_destination[0])
 	moving = false
 
-	jump_target_coords.pop_front()
+	jump_destination.pop_front()
 	character_start_pos = character_pos
 	get_node("CollisionPolygon2D").set_trigger(false)
 	self.set_z(1)
@@ -213,15 +222,15 @@ func move_towards_destination(delta):
 		get_node("CollisionPolygon2D").set_trigger(true)
 		self.set_z(3)
 
-	var travel_dist = jump_target_coords[0] - character_start_pos
+	var travel_dist = jump_destination[0] - character_start_pos
 	travel_dist.y *= 2
 	travel_dist = (travel_dist).length()
 
-	var traveled_dist = jump_target_coords[0] - self.get_pos()
+	var traveled_dist = jump_destination[0] - self.get_pos()
 	traveled_dist.y *= 2
 	traveled_dist = traveled_dist.length()
 
-	var dir = jump_target_coords[0] - character_pos
+	var dir = jump_destination[0] - character_pos
 	dir.y *= 2
 	dir = dir.normalized()
 
@@ -245,20 +254,20 @@ func move_towards_destination(delta):
 func supposed_to_be_moving():
 
 	# Check if no jumps are queued
-	if jump_target_coords.size() == 0:
+	if jump_destination.size() == 0:
 		return false
 
 	# Keep number of jumps in queue under a limit
-	if jump_target_coords.size() > 3:
-		jump_target_coords.resize(3)
+	if jump_destination.size() > 3:
+		jump_destination.resize(3)
 
 	# If not disabled and not at dest
-	if not disabled and character_pos != jump_target_coords[0]:
+	if not disabled and character_pos != jump_destination[0]:
 		# If speed is greater than distance to dest
-		if moving and motion.length() > character_pos.distance_to(jump_target_coords[0]):
+		if moving and motion.length() > character_pos.distance_to(jump_destination[0]):
 			return false
-#			if motion.length() >= (jump_target_coords[0] - character_pos).length():
-#			if motion.length() > character_pos.distance_to(jump_target_coords[0]).length():
+#			if motion.length() >= (jump_destination[0] - character_pos).length():
+#			if motion.length() > character_pos.distance_to(jump_destination[0]).length():
 		else:
 			return true
 	else:
@@ -284,17 +293,17 @@ func act(delta):
 
 	if supposed_to_be_moving():
 		move_towards_destination(delta)
-		face_dir(delta,jump_target_coords[0])
+		face_dir(delta,jump_destination[0])
 	elif moving:
 		stop_moving()
 
 	if not disabled: # If idling, always stay turned towards pointer location
-		if attack_coords != null:
+		if self.attack_location != null:
 			attack()
 
 		if attacking:
-			face_dir(delta,attack_coords)
+			face_dir(delta,self.attack_location)
 		elif moving:
-			face_dir(delta,jump_target_coords[0])
+			face_dir(delta,jump_destination[0])
 		elif get_name() == "Player":
 			face_dir(delta,mouse_pos)

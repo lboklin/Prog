@@ -1,5 +1,9 @@
 extends "res://scripts/Character.gd"
 
+
+export var accuracy_percentage = 70
+
+
 func _fixed_process(delta):
 
 	# TODO: Implement awareness of surroundings. Ability to detect and respond
@@ -11,9 +15,8 @@ func _fixed_process(delta):
 	if dead:
 		if lives > 0:
 			respawn()
-		elif lives == 0:
-			if not is_queued_for_deletion():
-				queue_free()
+		elif lives == 0 and not self.is_queued_for_deletion():
+			queue_free()
 			return
 
 
@@ -21,22 +24,31 @@ func _fixed_process(delta):
 
 	# Attacking
 	if success(35):
-		var player = get_parent().get_node("Player")
-		if player.moving: # Attack target's dest
-			attack_coords = player.jump_target_coords[0]
-		else: # Attack target's current pos
-			attack_coords = player.get_pos()
+
+		if get_parent().has_node("Player"):
+			var player = get_parent().get_node("Player")
+			var player_sprite = player.get_node("Sprite")
+			var player_size = player_sprite.get_texture().get_width() * player_sprite.get_scale().x
+			var radius = player_size * 100 / accuracy_percentage
+			var target_loc = Vector2()
+
+			if player.moving: # Attack target's dest
+				target_loc = player.jump_destination[0]
+			else: # Attack target's current pos
+				target_loc = player.get_pos()
+
+			self.attack_location = rand_loc(target_loc, radius)
 
 	# Probability of jumping
 	if not moving:
 		if success(80):
 			var jump_dest = randloc(get_viewport().get_visible_rect())
-			jump_target_coords.append(jump_dest)
+			jump_destination.append(jump_dest)
 			self.indicate(jump_dest, "move_to")
 	else:
 		if success(70):
 			var jump_dest = randloc(get_viewport().get_visible_rect())
-			jump_target_coords.append(randloc(get_viewport().get_visible_rect()))
+			jump_destination.append(randloc(get_viewport().get_visible_rect()))
 			self.indicate(jump_dest, "move_to")
 
 

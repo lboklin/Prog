@@ -31,6 +31,7 @@ script/script = ExtResource( 1 )
 __meta__ = { "__editor_plugin_screen__":"3D" }
 primary_color = Color( 0, 0, 0, 1 )
 secondary_color = Color( 0, 0, 0, 1 )
+accuracy_percentage = 70
 
 [node name="Shadow" type="Sprite" parent="."]
 

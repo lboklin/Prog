@@ -15,17 +15,19 @@ func spawn_enemy(loc):
 
 func _fixed_process(delta):
 
+	if dead:
+		respawn() # I'm undead >:)
+#		if lives > 0:
+#			respawn()
+#		elif lives == 0 and not self.is_queued_for_deletion():
+#			queue_free()
+#			return
+
 	mouse_pos = get_global_mouse_pos()
-
-
-	if dead and lives > 0:
-		respawn()
-	elif lives == 0:
-		return
 
 	# If a request to attack
 	if Input.is_action_pressed("attack"):
-		attack_coords = mouse_pos
+		self.attack_location = mouse_pos
 
 	act(delta)
 
@@ -41,7 +43,7 @@ func _input(ev):
 
 		# Request to jump
 		if ev.is_action_pressed("move_to"):
-			jump_target_coords.append(mouse_pos)
+			self.jump_destination.append(mouse_pos)
 			indicate(mouse_pos, "move_to")
 
 		# Request to spawn a clone with a grudge
