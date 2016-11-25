@@ -2,6 +2,7 @@ extends Node
 
 
 var round_timer = 0
+var points = 0
 
 
 func _process(delta):

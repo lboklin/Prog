@@ -21,6 +21,7 @@ const MAX_JUMP_RANGE = 1000
 
 ########################
 
+var points = 0
 
 ## Timers
 var attk_cd = 0.0
@@ -217,6 +218,9 @@ func respawn():
 func attack():
 
 	if not moving and not attacking and attk_cd <= 0:
+		## PLACEHOLDER ##
+		GameRound.points += 1
+		#################
 		# Spawn projectile
 		var projectile = preload("res://common/Projectile/Projectile.tscn").instance()
 		var attack_dir = (self.attack_location - character_pos)
