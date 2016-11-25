@@ -48,7 +48,7 @@ func _input(ev):
 
 		# Request to spawn a clone with a grudge
 		if ev.is_action_pressed("spawn_enemy"):
-			spawn_enemy(randloc(get_viewport().get_visible_rect()))
+			spawn_enemy(rand_loc(mouse_pos, 200, 600))
 
 		# To reset position in case of buggery
 		if ev.is_action_pressed("reset"):

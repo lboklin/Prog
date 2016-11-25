@@ -24,25 +24,25 @@ const LIVES = 3
 
 var lives = LIVES
 
-## Cooldowns
-# Set and updated by status update func
+## Timers
 var attk_cd = 0
 var rooted_timer = 0
 var stunned_timer = 0
 var busy_cd = 0
 var attk_dur = 0
+var shielded_timer = 2 # Spawn in with 2 sec protective shield
 
-## Impediments
-# Set and updated by status update func
-var attacking = false		# Shared with fixed process and set by attack function
+
+## Statuses
+var moving = false
+var shielded = true # Default when spawning
+var attacking = false
 var rooted = false
 var stunned = false
 var busy = false
 var disabled = false
 var dead = false
 
-## Movement booleans
-var moving = false
 
 ## Movement vectors
 var motion = Vector2(0,0)
@@ -63,60 +63,56 @@ var mouse_pos = Vector2()
 
 func update_states(delta):
 
-	if motion.length() > 0:
-		moving = true
+	if self.motion.length() > 0:
+		self.moving = true
 	else:
-		moving = false
+		self.moving = false
 
-	if rooted or stunned:
-		disabled = true
+	if self.rooted or self.stunned:
+		self.disabled = true
 	else:
-		disabled = false
+		self.disabled = false
 
-	# Various status effects and their cooldowns
-	if rooted_timer > 0:
-		rooted_timer -= delta
-		if rooted_timer <= 0:
-			rooted = false
+	## Various status effects and their cooldowns ##
+
+	if self.shielded or self.shielded_timer > 0:
+		self.shielded_timer -= delta
+		if self.shielded_timer <= 0:
+			self.shielded = false
 		else:
-			rooted = true
+			self.shielded = true
 
-	if stunned_timer > 0:
-		stunned_timer -= delta
-		if stunned_timer <= 0:
-			stunned = false
+	if self.rooted or self.rooted_timer > 0:
+		self.rooted_timer -= delta
+		if self.rooted_timer <= 0:
+			self.rooted = false
 		else:
-			stunned = true
+			self.rooted = true
 
-	# attack cooldowns
-	if attk_cd > 0:
-		attk_cd -= delta
+	if self.stunned or self.stunned_timer > 0:
+		self.stunned_timer -= delta
+		if self.stunned_timer <= 0:
+			self.stunned = false
+		else:
+			self.stunned = true
 
-	# attack duration
-	if attk_dur > 0:
-		attk_dur -= delta
-		if attk_dur <= 0:
-			attacking = false
+	# self.attack cooldowns
+	if self.attk_cd > 0:
+		self.attk_cd -= delta
+
+	# self.attack duration
+	if self.attk_dur > 0:
+		self.attk_dur -= delta
+		if self.attk_dur <= 0:
+			self.attacking = false
 			self.attack_location = null
 		else:
-			attacking = true
+			self.attacking = true
 
 
-# Return a random location somewhere within the visible area
-func randloc(area):
+func rand_loc(location, radius_min, radius_max):
 
-	var loc = Vector2()
-
-	loc.x = round(rand_range(area.pos.x, area.end.x))
-	loc.y = round(rand_range(area.pos.y, area.end.y))
-	randomize() # New seed
-
-	return loc
-
-
-func rand_loc(location, radius):
-
-	var new_radius = rand_range(0, radius)
+	var new_radius = rand_range(radius_min, radius_max)
 	var angle = deg2rad(rand_range(0, 360))
 	var point_on_circ = Vector2(new_radius, 0).rotated(angle)
 	return location + point_on_circ

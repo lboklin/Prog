@@ -37,7 +37,7 @@ func _fixed_process(delta):
 			else: # Attack target's current pos
 				target_loc = player.get_pos()
 
-			self.attack_location = rand_loc(target_loc, radius)
+			self.attack_location = rand_loc(target_loc, 0, radius)
 
 	# Probability of jumping
 	if not moving:
