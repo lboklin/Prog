@@ -1,4 +1,4 @@
-extends KinematicBody2D
+extends Area2D
 
 export var primary_color = Color()
 export var secondary_color = Color()
@@ -248,7 +248,8 @@ func move_towards_destination(delta):
 	motion = dir * speed * delta
 	motion.y /= 2
 #	set_pos(character_pos + motion)
-	move(motion)
+#	move(motion)
+	set_pos(self.get_pos() + motion)
 
 
 func supposed_to_be_moving():

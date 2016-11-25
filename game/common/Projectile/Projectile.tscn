@@ -90,7 +90,7 @@ tracks/1/keys = { "times":FloatArray( 0 ), "transitions":FloatArray( 1 ), "updat
 offsets = FloatArray( 0, 1 )
 colors = ColorArray( 0, 0, 0, 1, 0.152344, 0.0737915, 0.0940433, 1 )
 
-[node name="Projectile" type="KinematicBody2D" groups=[ "Damaging" ]]
+[node name="Projectile" type="Area2D" groups=[ "Damaging" ]]
 
 z/z = 2
 input/pickable = false
@@ -100,9 +100,10 @@ shapes/0/trigger = false
 shapes/1/shape = SubResource( 1 )
 shapes/1/transform = Matrix32( 6, 0, 0, 3, 0, 0 )
 shapes/1/trigger = true
-collision/layers = 1
-collision/mask = 1
-collision/margin = 0.08
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
 script/script = ExtResource( 1 )
 __meta__ = { "__editor_plugin_screen__":"2D" }
 

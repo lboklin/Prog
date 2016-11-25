@@ -1,4 +1,4 @@
-extends KinematicBody2D
+extends Area2D
 
 
 const ADVANCE_SPEED = 2600.0
@@ -39,20 +39,23 @@ func _fixed_process(delta):
 		var motion = self.direction * delta * self.ADVANCE_SPEED
 		motion.y *= 0.5
 		if motion.length() >= dist_to_target:
-			self.move(self.destination - current_pos)
+			motion = self.destination - current_pos
+			self.set_pos(current_pos + motion)
 			self.explode()
 		else:
-			self.move(motion)
+#			self.move(motion)
+			self.set_pos(current_pos + motion)
 			motion.y *= 2
 			self.dist_traveled += motion.length()
 
-	if not hit and self.is_colliding() and self.dist_traveled > SAFE_RADIUS :
-		var collider = get_collider()
-		if collider != null and collider.has_method("hit"):
-			collider.hit()
-			self.hit = true
-		if not self.exploded:
-			self.explode()
+	var colliders = self.get_overlapping_areas()
+	if not hit and colliders.size() > 0 and self.dist_traveled > SAFE_RADIUS :
+		for collider in colliders:
+			if collider != null and collider.has_method("hit"):
+				collider.hit()
+				self.hit = true
+			if not self.exploded:
+				self.explode()
 
 
 

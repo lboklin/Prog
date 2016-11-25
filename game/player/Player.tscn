@@ -17,16 +17,17 @@ closed = true
 cull_mode = 0
 polygon = Vector2Array( -257, 13, -247, 43, -212, 78, -137, 113, -47, 128, 48, 128, 148, 108, 208, 78, 243, 43, 253, 8, 243, -42, 203, -77, 133, -107, 45, -125, -55, -125, -137, -107, -202, -77, -242, -42 )
 
-[node name="Player" type="KinematicBody2D"]
+[node name="Player" type="Area2D"]
 
 z/z = 1
 input/pickable = false
 shapes/0/shape = SubResource( 1 )
 shapes/0/transform = Matrix32( 0.18, 0, 0, 0.18, -0.827984, -1.63799 )
 shapes/0/trigger = false
-collision/layers = 1
-collision/mask = 1
-collision/margin = 0.08
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
 script/script = ExtResource( 1 )
 __meta__ = { "__editor_plugin_screen__":"3D" }
 primary_color = Color( 0, 0, 0, 1 )
