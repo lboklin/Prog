@@ -17,7 +17,7 @@ closed = true
 cull_mode = 0
 polygon = Vector2Array( -257, 13, -247, 43, -212, 78, -137, 113, -47, 128, 48, 128, 148, 108, 208, 78, 243, 43, 253, 8, 243, -42, 203, -77, 133, -107, 45, -125, -55, -125, -137, -107, -202, -77, -242, -42 )
 
-[node name="Player" type="Area2D"]
+[node name="Player" type="Area2D" groups=[ "Prog" ]]
 
 z/z = 1
 input/pickable = false
