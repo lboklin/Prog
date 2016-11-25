@@ -15,14 +15,6 @@ func spawn_enemy(loc):
 
 func _fixed_process(delta):
 
-	if dead:
-		respawn() # I'm undead >:)
-#		if lives > 0:
-#			respawn()
-#		elif lives == 0 and not self.is_queued_for_deletion():
-#			queue_free()
-#			return
-
 	mouse_pos = get_global_mouse_pos()
 
 	# If a request to attack
@@ -49,11 +41,6 @@ func _input(ev):
 		# Request to spawn a clone with a grudge
 		if ev.is_action_pressed("spawn_enemy"):
 			spawn_enemy(rand_loc(mouse_pos, 200, 600))
-
-		# To reset position in case of buggery
-		if ev.is_action_pressed("reset"):
-			rooted_timer = 1
-			self.set_global_pos(Vector2(0,0))
 
 
 ######################

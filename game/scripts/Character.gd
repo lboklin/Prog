@@ -17,20 +17,21 @@ const DEST_R = 5.0
 const MAX_SPEED = 1500
 const JUMP_CD = 0.2
 const ROT_SPEED = 2
-const LIVES = 3
+const MAX_JUMP_RANGE = 1000
 
 ########################
 
 
-var lives = LIVES
-
 ## Timers
-var attk_cd = 0
-var rooted_timer = 0
-var stunned_timer = 0
-var busy_cd = 0
-var attk_dur = 0
-var shielded_timer = 2 # Spawn in with 2 sec protective shield
+var attk_cd = 0.0
+var rooted_timer = 0.0
+var stunned_timer = 0.0
+var busy_cd = 0.0
+var attk_dur = 0.0
+var shielded_timer = 2.0 # Spawn in with 2 sec protective shield
+var respawn_timer = 0.0
+
+var time_of_death = 0.0
 
 
 ## Statuses
@@ -61,7 +62,9 @@ var mouse_pos = Vector2()
 #########################
 
 
-func update_states(delta):
+func update_states():
+
+	var delta = get_fixed_process_delta_time()
 
 	if self.motion.length() > 0:
 		self.moving = true
@@ -73,7 +76,7 @@ func update_states(delta):
 	else:
 		self.disabled = false
 
-	## Various status effects and their cooldowns ##
+	## Various status effects and their timers ##
 
 	if self.shielded or self.shielded_timer > 0:
 		self.shielded_timer -= delta
@@ -96,12 +99,19 @@ func update_states(delta):
 		else:
 			self.stunned = true
 
-	# self.attack cooldowns
+	if self.stunned or self.stunned_timer > 0:
+		self.stunned_timer -= delta
+		if self.stunned_timer <= 0:
+			self.stunned = false
+		else:
+			self.stunned = true
+
+	# attack cooldowns
 	if self.attk_cd > 0:
 		self.attk_cd -= delta
 
-	# self.attack duration
-	if self.attk_dur > 0:
+	# attack duration
+	if self.attacking or self.attk_dur > 0:
 		self.attk_dur -= delta
 		if self.attk_dur <= 0:
 			self.attacking = false
@@ -142,7 +152,7 @@ func indicate(pos, anim):
 	indicator.get_node("AnimationPlayer").play(anim)
 
 
-func face_dir(delta,focus):
+func face_dir(delta, focus):
 
 	var face_dir = focus - character_pos
 	face_dir.y *= 2
@@ -162,21 +172,46 @@ func face_dir(delta,focus):
 func hit():
 
 	if not self.dead:
+
 		self.dead = true
-		self.lives -= 1
-		# Dramatic animation goes here
+		self.set_monitorable(false)
+		self.set_hidden(true)
+
+		## Reset all active timers and states ##
+		self.attk_cd = 0
+		self.rooted_timer = 0
+		self.stunned_timer = 0
+		self.busy_cd = 0
+		self.attk_dur = 0
+
+		self.attack_location = null
+		self.character_start_pos = self.get_pos()
+
+		update_states()
+		#########################################
+
+		# Set respawn timer based on elapsed game round time
+		self.time_of_death = GameRound.round_timer
+		self.respawn_timer = self.time_of_death / 10
+		print(self.respawn_timer)
+
 		var death_anim = preload("res://common/DeathEffect.tscn").instance()
 		death_anim.set_pos(self.get_pos())
 		get_parent().add_child(death_anim)
-		print(get_name() + " was killed.")
-		get_node("CollisionPolygon2D").set_trigger(true)
+
+		print(get_name() + " was killed and will be back in ", self.respawn_timer)
 
 
 func respawn():
 
-	dead = false
-	set_pos(randloc(get_viewport().get_visible_rect()))
-	get_node("CollisionPolygon2D").set_trigger(false)
+	self.dead = false
+	self.set_monitorable(true)
+
+	self.shielded_timer = 2
+	self.set_pos(rand_loc(Vector2(0,0), 0, 1000))
+	self.jump_destination = [self.get_pos()]
+
+	self.set_hidden(false)
 
 
 func attack():
@@ -206,7 +241,7 @@ func stop_moving():
 
 	jump_destination.pop_front()
 	character_start_pos = character_pos
-	get_node("CollisionPolygon2D").set_trigger(false)
+	self.set_monitorable(true)
 	self.set_z(1)
 	self.get_node("Sprite").set_pos(Vector2(0, 0))
 	stunned_timer = JUMP_CD
@@ -214,9 +249,8 @@ func stop_moving():
 
 func move_towards_destination(delta):
 
-	if not moving:
-		get_node("CollisionPolygon2D").set_trigger(true)
-		self.set_z(3)
+	self.set_z(3)
+	self.set_monitorable(false)
 
 	var travel_dist = jump_destination[0] - character_start_pos
 	travel_dist.y *= 2
@@ -281,8 +315,16 @@ func act(delta):
 	character_pos = get_pos()
 
 	# Update the state the character is in
-	update_states(delta)
+	update_states()
 
+	if self.dead:
+		if self.respawn_timer <= 0:
+			respawn()
+		else:
+			self.respawn_timer -= delta
+			return
+
+	## Below are actions taken ##
 
 	# Do nothing if stunned
 	if stunned:
@@ -290,7 +332,7 @@ func act(delta):
 
 	if supposed_to_be_moving():
 		move_towards_destination(delta)
-		face_dir(delta,jump_destination[0])
+		face_dir(delta, jump_destination[0])
 	elif moving:
 		stop_moving()
 
@@ -299,7 +341,7 @@ func act(delta):
 			attack()
 
 		if attacking:
-			face_dir(delta,self.attack_location)
+			face_dir(delta, self.attack_location)
 		elif moving:
 			face_dir(delta,jump_destination[0])
 		elif get_name() == "Player":

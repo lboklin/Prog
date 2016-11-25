@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=1]
+[gd_scene load_steps=8 format=1]
 
 [ext_resource path="res://scripts/Bot.gd" type="Script" id=1]
 [ext_resource path="res://common/Character/character-shadow-lighter.png" type="Texture" id=2]
@@ -16,6 +16,11 @@ resource/name = "CharacterModelOccluder"
 closed = true
 cull_mode = 0
 polygon = Vector2Array( -257, 13, -247, 43, -212, 78, -137, 113, -47, 128, 48, 128, 148, 108, 208, 78, 243, 43, 253, 8, 243, -42, 203, -77, 133, -107, 45, -125, -55, -125, -137, -107, -202, -77, -242, -42 )
+
+[sub_resource type="RectangleShape2D" id=3]
+
+custom_solver_bias = 0.0
+extents = Vector2( 1920, 1080 )
 
 [node name="Bot" type="Area2D" groups=[ "Mortals" ]]
 
@@ -95,5 +100,24 @@ build_mode = 0
 polygon = Vector2Array( -242, 8.00001, -227, 43, -187, 78, -122, 103, -47, 118, 53, 118, 133, 103, 203, 68, 233, 38, 248, 8.00001, 243, -32, 178, -82, 113, -102, 48, -112, -52, -112, -122, -97, -177, -77, -232, -32 )
 shape_range = Vector2( 0, 0 )
 trigger = false
+
+[node name="AwarenessArea" type="Area2D" parent="."]
+
+visibility/visible = false
+input/pickable = true
+shapes/0/shape = SubResource( 3 )
+shapes/0/transform = Matrix32( 1, 0, 0, 1, 0, 0 )
+shapes/0/trigger = true
+gravity_vec = Vector2( 0, 1 )
+gravity = 0.0
+linear_damp = 0.0
+angular_damp = 0.0
+monitorable = false
+
+[node name="AwarenessShape" type="CollisionShape2D" parent="AwarenessArea"]
+
+shape = SubResource( 3 )
+trigger = true
+_update_shape_index = 0
 
 

@@ -6,20 +6,6 @@ export var accuracy_percentage = 70
 
 func _fixed_process(delta):
 
-	# TODO: Implement awareness of surroundings. Ability to detect and respond
-	# to actions of players and bots around it. Awareness should be limited to
-	# a 360 degree limited radius around it (and not be perfect observations
-	# so that it appears more human in it's ability to predict and deduce
-	# the intentions and actions of others).
-
-	if dead:
-		if lives > 0:
-			respawn()
-		elif lives == 0 and not self.is_queued_for_deletion():
-			queue_free()
-			return
-
-
 	# Probabilities are a percentage of likelyhood within the timespan of a second
 
 	# Attacking
@@ -39,17 +25,33 @@ func _fixed_process(delta):
 
 			self.attack_location = rand_loc(target_loc, 0, radius)
 
-	# Probability of jumping
-	if not moving:
-		if success(80):
-			var jump_dest = randloc(get_viewport().get_visible_rect())
-			jump_destination.append(jump_dest)
-			self.indicate(jump_dest, "move_to")
+#	# Probability of jumping
+#	if not moving:
+#		if success(80):
+#			var jump_dest = randloc(get_viewport().get_visible_rect())
+#			jump_destination.append(jump_dest)
+#			self.indicate(jump_dest, "move_to")
+#	else:
+#		if success(70):
+#			var jump_dest = randloc(get_viewport().get_visible_rect())
+#			jump_destination.append(randloc(get_viewport().get_visible_rect()))
+#			self.indicate(jump_dest, "move_to")
+
+	# Maybe jump - More likely to queue jumps while already doing it
+	var want_to_jump = false
+	if not self.moving:
+		want_to_jump = success(85)
 	else:
-		if success(70):
-			var jump_dest = randloc(get_viewport().get_visible_rect())
-			jump_destination.append(randloc(get_viewport().get_visible_rect()))
-			self.indicate(jump_dest, "move_to")
+		want_to_jump = success(70)
+
+	if want_to_jump:
+		var jump_dest
+		if self.moving:
+			jump_dest = rand_loc(self.jump_destination[0], 50, MAX_JUMP_RANGE)
+		else:
+			jump_dest = rand_loc(self.get_pos(), 50, MAX_JUMP_RANGE)
+		self.jump_destination.append(jump_dest)
+
 
 
 	act(delta)
