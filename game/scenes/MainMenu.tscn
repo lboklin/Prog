@@ -109,7 +109,6 @@ flat = false
 
 [node name="JoinContainer" type="Container" parent="."]
 
-editor/display_folded = true
 visibility/visible = false
 anchor/right = 1
 anchor/bottom = 1
@@ -316,7 +315,6 @@ flat = false
 
 [node name="HostContainer" type="Container" parent="."]
 
-editor/display_folded = true
 visibility/visible = false
 anchor/right = 1
 anchor/bottom = 1
@@ -477,7 +475,6 @@ flat = false
 
 [node name="LobbyContainer" type="Container" parent="."]
 
-editor/display_folded = true
 visibility/visible = false
 anchor/right = 1
 anchor/bottom = 1

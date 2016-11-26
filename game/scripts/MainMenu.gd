@@ -49,7 +49,7 @@ func _on_connect_button_pressed():
 	join_container.find_node("LabelError").set_text("")
 
 	# Connect to server
-	gamestate.join_game(player_name, ip_address)
+	GameState.join_game(player_name, ip_address)
 
 	# While we are attempting to connect, disable button for 'continue'
 	join_container.find_node("ConnectButton").set_disabled(true)
@@ -68,7 +68,7 @@ func _on_continue_button_pressed():
 	host_container.find_node("LabelError").set_text("")
 
 	# Establish network
-	gamestate.host_game(player_name)
+	GameState.host_game(player_name)
 
 	# Refresh Player List (with your own name)
 	refresh_lobby()
@@ -81,7 +81,7 @@ func _on_continue_button_pressed():
 
 # LOBBY CONTAINER - Starts the Game
 func _on_start_game_button_pressed():
-	gamestate.start_game()
+	GameState.start_game()
 
 
 # LOBBY CONTAINER - Cancel Lobby
@@ -92,7 +92,7 @@ func _on_cancel_lobby_button_pressed():
 	menu_container.show()
 
 	# Disconnect networking
-	gamestate.quit_game()
+	GameState.quit_game()
 
 	# Enable buttons
 	join_container.find_node("ConnectButton").set_disabled(false)
@@ -113,23 +113,23 @@ func _ready():
 	host_container.find_node("LineEditNickname").set_text(SERVER_NAME_DEFAULT)
 
 	# Setup Network Signaling between Gamestate and Game UI
-	gamestate.connect("refresh_lobby", self, "refresh_lobby")
-	gamestate.connect("server_ended", self, "_on_server_ended")
-	gamestate.connect("server_error", self, "_on_server_error")
-	gamestate.connect("connection_success", self, "_on_connection_success")
-	gamestate.connect("connection_fail", self, "_on_connection_fail")
+	GameState.connect("refresh_lobby", self, "refresh_lobby")
+	GameState.connect("server_ended", self, "_on_server_ended")
+	GameState.connect("server_error", self, "_on_server_error")
+	GameState.connect("connection_success", self, "_on_connection_success")
+	GameState.connect("connection_fail", self, "_on_connection_fail")
 
 # Refresh Lobby's player list
 # This is run after we have gotten updates from the server regarding new players
 func refresh_lobby():
 	# Get the latest list of players from gamestate
-	var player_list = gamestate.get_player_list()
+	var player_list = GameState.get_player_list()
 	player_list.sort()
 
 	# Add the updated player_list to the itemlist
 	var itemlist = lobby_container.find_node("ItemListPlayers")
 	itemlist.clear()
-	itemlist.add_item(gamestate.get_player_name() + " (YOU)") # Add yourself to the top
+	itemlist.add_item(GameState.get_player_name() + " (YOU)") # Add yourself to the top
 
 	# Add every other player to the list
 	for player in player_list:
