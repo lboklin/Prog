@@ -3,7 +3,7 @@ extends Node
 # NETWORK DATA
 # Port Tip: Check the web for available ports that is not preoccupied by other important services
 # Port Tip #2: If you are the server; you may want to open it (NAT, Firewall)
-const SERVER_PORT = 31416
+const SERVER_PORT = 31041
 
 # GAMEDATA
 var players = {} # Dictionary containing player names and their ID
@@ -178,28 +178,37 @@ func quit_game():
 
 
 func start_game():
+
 	# Set spawn pos for each player
 	var spawn_points = {}
 
 	# Generate spawn points associated with each player
 	spawn_points[1] = 1 # Set first spawn point to server
 
-	# Add spawn point with each player in spawn_points dictionary
-	var count = 2
+	# Add spawn point in spawn_points dictionary for each player
 	for p in players:
-		print(str(p) + ", spawn at " + str(count))
-		spawn_points[p] = count
-		count += 1
+		var spawn_loc = rand_loc(Vector2(0,0), 0, 2000)
+		print(str(p) + ", spawn at " + str(spawn_loc))
+		spawn_points[p] = spawn_loc
 
 	# Tell each player 'p' with id 'spawn_points' to spawn at specified 'spawn_points[id]'
 	for p in players:
 		rpc_id(p, "spawn_player", spawn_points)
 
-	spawn_player(spawn_points)
+	spawn_players(spawn_points)
+#	spawn_players()
 	pass
 
 
-remote func spawn_player(spawn_points):
+func rand_loc(location, radius_min, radius_max):
+
+	var new_radius = rand_range(radius_min, radius_max)
+	var angle = deg2rad(rand_range(0, 360))
+	var point_on_circ = Vector2(new_radius, 0).rotated(angle)
+	return location + point_on_circ
+
+
+remote func spawn_players(spawn_points):
 	# A world without identity.
 	# To be, or not to be.
 	var world
@@ -215,8 +224,8 @@ remote func spawn_player(spawn_points):
 		world.get_node("HUD/Name").set_text(player_name)
 
 	# Create Scenes to instance (further down)
-	var player_scene = load("res://Player/Player.tscn")
-#	var camera_scene = load("res://data/entities/player/camera.tscn")
+	var player_scene = load("res://player/Player.tscn")
+	var camera_scene = load("res://player/PlayerCam.tscn")
 
 	# Spawn! Spawn ALL the players!
 	# There are only multiple players when we wait for players in lobby before starting.
@@ -228,8 +237,8 @@ remote func spawn_player(spawn_points):
 		# Set Player ID as node name - Unique for each player!
 		player.set_name(str(p))
 
-		# Set spawn position for the player (on a spawn point from the map)
-		var spawn_pos = world.find_node(str(spawn_points[p])).get_pos()
+		# Set random spawn position for the player
+		var spawn_pos = player.rand_loc(Vector2(0,0), 0, 2000)
 		player.set_pos(spawn_pos)
 
 
@@ -237,7 +246,7 @@ remote func spawn_player(spawn_points):
 		if (p == get_tree().get_network_unique_id()):
 			# Set as master on yourself
 			player.set_network_mode( NETWORK_MODE_MASTER )
-#			player.add_child(camera_scene.instance()) # Add camera to your player
+			player.add_child(camera_scene.instance()) # Add camera to your player
 
 
 		else:
@@ -248,4 +257,4 @@ remote func spawn_player(spawn_points):
 			player.get_node("hud/player_name").set_text(str(players[p]))
 
 		# Add the player (or you) to the world!
-		world.get_node("players").add_child(player)
+		world.add_child(player)

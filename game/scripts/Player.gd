@@ -50,5 +50,6 @@ func _input(ev):
 
 func _ready():
 
+#	get_node("Camera2D").make_current()
 	set_process_input(true)
 	set_fixed_process(true)

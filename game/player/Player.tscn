@@ -33,26 +33,6 @@ __meta__ = { "__editor_plugin_screen__":"3D" }
 primary_color = Color( 0, 0, 0, 1 )
 secondary_color = Color( 0, 0, 0, 1 )
 
-[node name="Camera2D" type="Camera2D" parent="."]
-
-anchor_mode = 1
-rotating = false
-current = true
-zoom = Vector2( 1.2, 1.2 )
-limit/left = -10000000
-limit/top = -10000000
-limit/right = 10000000
-limit/bottom = 10000000
-limit/smoothed = false
-drag_margin/h_enabled = false
-drag_margin/v_enabled = false
-smoothing/enable = true
-smoothing/speed = 2.0
-drag_margin/left = 0.2
-drag_margin/top = 0.2
-drag_margin/right = 0.2
-drag_margin/bottom = 0.2
-
 [node name="Shadow" type="Sprite" parent="."]
 
 visibility/behind_parent = true
