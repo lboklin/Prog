@@ -32,15 +32,16 @@ func _fixed_process(delta):
 func _input(ev):
 
 	if is_visible():
-
 		# Request to jump
 		if ev.is_action_pressed("move_to"):
 			self.jump_destination.append(mouse_pos)
 			indicate(mouse_pos, "move_to")
-
 		# Request to spawn a clone with a grudge
 		if ev.is_action_pressed("spawn_enemy"):
 			spawn_enemy(rand_loc(mouse_pos, 200, 600))
+
+	if ev.is_action_pressed("quit_game"):
+		get_tree().quit()
 
 
 ######################

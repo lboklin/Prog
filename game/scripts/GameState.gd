@@ -127,7 +127,7 @@ remote func register_new_player(id, name):
 
 	# Spawn player with id 'id' and at position 'spawn_pos[id]'
 	print("Spawning " + str(name))
-	spawn_player(spawn_pos)
+	spawn_players(spawn_pos)
 
 
 # Register player the ol' fashioned way and refresh lobby
@@ -152,8 +152,8 @@ remote func unregister_player(id):
 	# If the game is running
 	if(has_node("/root/World")):
 		# Remove player from game
-		if(has_node("/root/world/players/" + str(id))):
-			get_node("/root/world/players/" + str(id)).queue_free()
+		if(has_node("/root/World/Players/" + str(id))):
+			get_node("/root/World/Players/" + str(id)).queue_free()
 		players.erase(id)
 	else:
 		# Remove from lobby
@@ -221,7 +221,7 @@ remote func spawn_players(spawn_points):
 		world = load("res://scenes/World.tscn").instance()
 		get_tree().get_root().add_child(world)
 		get_tree().get_root().get_node("MainMenu").hide()
-		world.get_node("HUD/Name").set_text(player_name)
+#		world.get_node("HUD/Name").set_text(player_name)
 
 	# Create Scenes to instance (further down)
 	var player_scene = load("res://player/Player.tscn")
@@ -254,7 +254,7 @@ remote func spawn_players(spawn_points):
 			# No camera for you, slave! None!
 			player.set_network_mode( NETWORK_MODE_SLAVE )
 			# Add player name
-			player.get_node("hud/player_name").set_text(str(players[p]))
+			player.get_node("HUD/Name").set_text(str(players[p]))
 
 		# Add the player (or you) to the world!
-		world.add_child(player)
+		world.get_node("Players").add_child(player)
