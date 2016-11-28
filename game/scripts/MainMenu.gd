@@ -6,9 +6,16 @@ onready var join_container = get_node("JoinContainer")
 onready var host_container = get_node("HostContainer")
 onready var lobby_container = get_node("LobbyContainer")
 
+onready var blue_light = get_node("MenuContainer/Background/BlueLight")
+onready var red_light = get_node("MenuContainer/Background/RedLight")
+
+onready var window_size = get_viewport().get_visible_rect().size
 # Player Name
 const PLAYER_NAME_DEFAULT = "Player"
 const SERVER_NAME_DEFAULT = "Server"
+
+var light_pos = Vector2(0,0)
+var light_speed = 200
 
 # MAIN MENU - Join Game
 # Opens up the 'Connect to Server' window
@@ -106,19 +113,6 @@ func _on_cancel_button_pressed():
 	host_container.hide()
 	host_container.find_node("LabelError").set_text("")
 
-
-func _ready():
-	# Set default nicknames on host/join
-	join_container.find_node("LineEditNickname").set_text(PLAYER_NAME_DEFAULT)
-	host_container.find_node("LineEditNickname").set_text(SERVER_NAME_DEFAULT)
-
-	# Setup Network Signaling between Gamestate and Game UI
-	GameState.connect("refresh_lobby", self, "refresh_lobby")
-	GameState.connect("server_ended", self, "_on_server_ended")
-	GameState.connect("server_error", self, "_on_server_error")
-	GameState.connect("connection_success", self, "_on_connection_success")
-	GameState.connect("connection_fail", self, "_on_connection_fail")
-
 # Refresh Lobby's player list
 # This is run after we have gotten updates from the server regarding new players
 func refresh_lobby():
@@ -168,3 +162,39 @@ func _on_connection_fail():
 
 	# Enable continue button again
 	join_container.find_node("ConnectButton").set_disabled(false)
+
+
+func _on_viewport_size_changed():
+
+	window_size = get_viewport().get_visible_rect().size
+	menu_container.set_size(window_size)
+
+
+func _process(delta):
+
+	var margin = 200
+	light_pos += Vector2(light_speed,-10) * delta
+	if light_pos.x > window_size.x + margin:
+		light_pos.x = -margin
+	blue_light.set_pos(light_pos)
+
+	var red_light_pos = Vector2()
+	red_light_pos.x = -light_pos.x + window_size.x
+	red_light_pos.y = window_size.y + 20
+	red_light.set_pos(red_light_pos)
+
+
+func _ready():
+	get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
+	# Set default nicknames on host/join
+	join_container.find_node("LineEditNickname").set_text(PLAYER_NAME_DEFAULT)
+	host_container.find_node("LineEditNickname").set_text(SERVER_NAME_DEFAULT)
+
+	# Setup Network Signaling between Gamestate and Game UI
+	GameState.connect("refresh_lobby", self, "refresh_lobby")
+	GameState.connect("server_ended", self, "_on_server_ended")
+	GameState.connect("server_error", self, "_on_server_error")
+	GameState.connect("connection_success", self, "_on_connection_success")
+	GameState.connect("connection_fail", self, "_on_connection_fail")
+
+	set_process(true)
