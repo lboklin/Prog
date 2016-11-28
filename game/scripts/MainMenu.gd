@@ -106,19 +106,6 @@ func _on_cancel_button_pressed():
 	host_container.hide()
 	host_container.find_node("LabelError").set_text("")
 
-
-func _ready():
-	# Set default nicknames on host/join
-	join_container.find_node("LineEditNickname").set_text(PLAYER_NAME_DEFAULT)
-	host_container.find_node("LineEditNickname").set_text(SERVER_NAME_DEFAULT)
-
-	# Setup Network Signaling between Gamestate and Game UI
-	GameState.connect("refresh_lobby", self, "refresh_lobby")
-	GameState.connect("server_ended", self, "_on_server_ended")
-	GameState.connect("server_error", self, "_on_server_error")
-	GameState.connect("connection_success", self, "_on_connection_success")
-	GameState.connect("connection_fail", self, "_on_connection_fail")
-
 # Refresh Lobby's player list
 # This is run after we have gotten updates from the server regarding new players
 func refresh_lobby():
@@ -168,3 +155,22 @@ func _on_connection_fail():
 
 	# Enable continue button again
 	join_container.find_node("ConnectButton").set_disabled(false)
+
+
+func _on_viewport_size_changed():
+
+	menu_container.set_size(get_viewport().get_visible_rect().size)
+
+
+func _ready():
+	get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
+	# Set default nicknames on host/join
+	join_container.find_node("LineEditNickname").set_text(PLAYER_NAME_DEFAULT)
+	host_container.find_node("LineEditNickname").set_text(SERVER_NAME_DEFAULT)
+
+	# Setup Network Signaling between Gamestate and Game UI
+	GameState.connect("refresh_lobby", self, "refresh_lobby")
+	GameState.connect("server_ended", self, "_on_server_ended")
+	GameState.connect("server_error", self, "_on_server_error")
+	GameState.connect("connection_success", self, "_on_connection_success")
+	GameState.connect("connection_fail", self, "_on_connection_fail")
