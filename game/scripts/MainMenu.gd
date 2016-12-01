@@ -6,9 +6,16 @@ onready var join_container = get_node("JoinContainer")
 onready var host_container = get_node("HostContainer")
 onready var lobby_container = get_node("LobbyContainer")
 
+onready var blue_light = get_node("MenuContainer/Background/BlueLight")
+onready var red_light = get_node("MenuContainer/Background/RedLight")
+
+onready var window_size = get_viewport().get_visible_rect().size
 # Player Name
 const PLAYER_NAME_DEFAULT = "Player"
 const SERVER_NAME_DEFAULT = "Server"
+
+var light_pos = Vector2(0,0)
+var light_speed = 200
 
 # MAIN MENU - Join Game
 # Opens up the 'Connect to Server' window
@@ -159,7 +166,24 @@ func _on_connection_fail():
 
 func _on_viewport_size_changed():
 
-	menu_container.set_size(get_viewport().get_visible_rect().size)
+	window_size = get_viewport().get_visible_rect().size
+	menu_container.set_size(window_size)
+
+
+func _process(delta):
+
+	var margin = 200
+
+	light_pos.x += delta * light_speed
+	light_pos.y = -10
+	if light_pos.x > window_size.x + margin:
+		light_pos.x = -margin
+	blue_light.set_pos(light_pos)
+
+	var red_light_pos = Vector2()
+	red_light_pos.x = -light_pos.x + window_size.x
+	red_light_pos.y = window_size.y + 20
+	red_light.set_pos(red_light_pos)
 
 
 func _ready():
@@ -174,3 +198,5 @@ func _ready():
 	GameState.connect("server_error", self, "_on_server_error")
 	GameState.connect("connection_success", self, "_on_connection_success")
 	GameState.connect("connection_fail", self, "_on_connection_fail")
+
+	set_process(true)
