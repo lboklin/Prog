@@ -173,7 +173,9 @@ func _on_viewport_size_changed():
 func _process(delta):
 
 	var margin = 200
-	light_pos += Vector2(light_speed,-10) * delta
+
+	light_pos.x += delta * light_speed
+	light_pos.y = -10
 	if light_pos.x > window_size.x + margin:
 		light_pos.x = -margin
 	blue_light.set_pos(light_pos)
