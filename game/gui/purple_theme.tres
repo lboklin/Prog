@@ -1,0 +1,45 @@
+[gd_resource type="Theme" load_steps=11 format=1]
+
+[ext_resource path="res://gui/theme/button_disabled.tres" type="StyleBox" id=1]
+[ext_resource path="res://gui/theme/button_focus.tres" type="StyleBox" id=2]
+[ext_resource path="res://gui/theme/button_hover.tres" type="StyleBox" id=3]
+[ext_resource path="res://gui/theme/button.tres" type="StyleBox" id=4]
+[ext_resource path="res://gui/theme/button_pressed.tres" type="StyleBox" id=5]
+[ext_resource path="res://gui/theme/line_edit_focus.tres" type="StyleBox" id=6]
+[ext_resource path="res://gui/theme/line_edit.tres" type="StyleBox" id=7]
+[ext_resource path="res://gui/theme/line_edit_readonly.tres" type="StyleBox" id=8]
+[ext_resource path="res://gui/theme/style_panel_container.tres" type="StyleBox" id=9]
+[ext_resource path="res://gui/fonts/DejaVuSansCondensed.fnt" type="BitmapFont" id=10]
+
+[resource]
+
+default_font = ExtResource( 10 )
+Button/colors/font_color = Color( 0.597656, 0.641663, 1, 1 )
+Button/colors/font_color_disabled = Color( 0.268204, 0.279125, 0.316406, 1 )
+Button/colors/font_color_hover = Color( 0.714844, 0.792816, 1, 1 )
+Button/colors/font_color_pressed = Color( 0.461914, 0.509483, 0.671875, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = null
+Button/styles/disabled = ExtResource( 1 )
+Button/styles/focus = ExtResource( 2 )
+Button/styles/hover = ExtResource( 3 )
+Button/styles/normal = ExtResource( 4 )
+Button/styles/pressed = ExtResource( 5 )
+Label/colors/font_color = Color( 0.699132, 0.674835, 0.914062, 1 )
+Label/colors/font_color_shadow = Color( 0, 0, 0, 0 )
+Label/constants/line_spacing = 3
+Label/constants/shadow_as_outline = 0
+Label/constants/shadow_offset_x = 1
+Label/constants/shadow_offset_y = 1
+Label/fonts/font = null
+LineEdit/colors/cursor_color = Color( 0.941176, 0.941176, 0.941176, 1 )
+LineEdit/colors/font_color = Color( 0.878431, 0.878431, 0.878431, 1 )
+LineEdit/colors/font_color_selected = Color( 0, 0, 0, 1 )
+LineEdit/colors/selection_color = Color( 0.490196, 0.490196, 0.490196, 1 )
+LineEdit/constants/minimum_spaces = 12
+LineEdit/fonts/font = null
+LineEdit/styles/focus = ExtResource( 6 )
+LineEdit/styles/normal = ExtResource( 7 )
+LineEdit/styles/read_only = ExtResource( 8 )
+PanelContainer/styles/panel = ExtResource( 9 )
+

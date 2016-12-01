@@ -6,8 +6,8 @@ onready var join_container = get_node("JoinContainer")
 onready var host_container = get_node("HostContainer")
 onready var lobby_container = get_node("LobbyContainer")
 
-onready var blue_light = get_node("MenuContainer/Background/BlueLight")
-onready var red_light = get_node("MenuContainer/Background/RedLight")
+onready var blue_light = get_node("Background/BlueLight")
+onready var red_light = get_node("Background/RedLight")
 
 onready var window_size = get_viewport().get_visible_rect().size
 # Player Name
@@ -15,7 +15,7 @@ const PLAYER_NAME_DEFAULT = "Player"
 const SERVER_NAME_DEFAULT = "Server"
 
 var light_pos = Vector2(0,0)
-var light_speed = 200
+var light_speed = 300
 
 # MAIN MENU - Join Game
 # Opens up the 'Connect to Server' window
@@ -172,7 +172,7 @@ func _on_viewport_size_changed():
 
 func _process(delta):
 
-	var margin = 200
+	var margin = 600
 
 	light_pos.x += delta * light_speed
 	light_pos.y = -10
