@@ -6,8 +6,8 @@ onready var join_container = get_node("JoinContainer")
 onready var host_container = get_node("HostContainer")
 onready var lobby_container = get_node("LobbyContainer")
 
-onready var blue_light = get_node("Background/BlueLight")
-onready var red_light = get_node("Background/RedLight")
+onready var light_1 = get_node("Background/Light1")
+onready var light_2 = get_node("Background/Light2")
 
 onready var window_size = get_viewport().get_visible_rect().size
 # Player Name
@@ -29,6 +29,10 @@ func _on_join_game_button_pressed():
 func _on_host_game_button_pressed():
 	#menu_container.hide()
 	host_container.show()
+	var lineedit_nickname = host_container.find_node("LineEditNickname")
+	lineedit_nickname.select_all()
+#	lineedit_nickname.
+	lineedit_nickname.grab_focus()
 
 
 # MAIN MENU - Quit Game
@@ -170,22 +174,6 @@ func _on_viewport_size_changed():
 	menu_container.set_size(window_size)
 
 
-func _process(delta):
-
-	var margin = 600
-
-	light_pos.x += delta * light_speed
-	light_pos.y = -10
-	if light_pos.x > window_size.x + margin:
-		light_pos.x = -margin
-	blue_light.set_pos(light_pos)
-
-	var red_light_pos = Vector2()
-	red_light_pos.x = -light_pos.x + window_size.x
-	red_light_pos.y = window_size.y + 20
-	red_light.set_pos(red_light_pos)
-
-
 func _ready():
 	get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
 	# Set default nicknames on host/join
@@ -200,3 +188,24 @@ func _ready():
 	GameState.connect("connection_fail", self, "_on_connection_fail")
 
 	set_process(true)
+
+
+func _process(delta):
+
+	var margin = 600
+
+	light_pos.x += delta * light_speed
+	light_pos.y = -10
+	if light_pos.x > window_size.x + margin:
+		light_pos.x = -margin
+	light_1.set_pos(light_pos)
+
+	var light_2_pos = Vector2()
+	light_2_pos.x = -light_pos.x + window_size.x
+	light_2_pos.y = window_size.y + 20
+	light_2.set_pos(light_2_pos)
+
+
+func _on_lineedit_nickname_text_entered( text ):
+	var continue_button = get_node("HostContainer").find_node("ContinueButton")
+	continue_button.emit_signal("pressed")
