@@ -20,14 +20,14 @@ var light_speed = 300
 # MAIN MENU - Join Game
 # Opens up the 'Connect to Server' window
 func _on_join_game_button_pressed():
-	menu_container.hide()
+#	#menu_container.hide()
 	join_container.show()
 
 
 # MAIN MENU - Host Game
 # Opens up the 'Choose a nickname' window
 func _on_host_game_button_pressed():
-	menu_container.hide()
+	#menu_container.hide()
 	host_container.show()
 
 
@@ -96,7 +96,7 @@ func _on_start_game_button_pressed():
 func _on_cancel_lobby_button_pressed():
 	# Toggle containers
 	lobby_container.hide()
-	menu_container.show()
+	#menu_container.show()
 
 	# Disconnect networking
 	GameState.quit_game()
@@ -107,7 +107,7 @@ func _on_cancel_lobby_button_pressed():
 
 # ALL - Cancel (from any container)
 func _on_cancel_button_pressed():
-	menu_container.show()
+	#menu_container.show()
 	join_container.hide()
 	join_container.find_node("LabelError").set_text("")
 	host_container.hide()
@@ -139,7 +139,7 @@ func _on_server_ended():
 	lobby_container.hide()
 	join_container.hide()
 	join_container.find_node("ConnectButton").set_disabled(false)
-	menu_container.show()
+	#menu_container.show()
 
 	# If we are ingame, remove world from existence!
 	if(has_node("/root/World")):
