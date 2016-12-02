@@ -192,7 +192,6 @@ flat = false
 
 [node name="JoinContainer" type="Container" parent="."]
 
-editor/display_folded = true
 visibility/visible = false
 anchor/right = 1
 anchor/bottom = 1
@@ -687,13 +686,9 @@ flat = false
 
 [connection signal="pressed" from="MenuContainer/PanelContainer/VBoxContainer/QuitGameButton" to="." method="_on_quit_game_button_pressed"]
 
-[connection signal="text_changed" from="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer/LineEditNickname" to="." method="_on_lineedit_nickname_text_changed"]
-
 [connection signal="pressed" from="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer2/CancelButton" to="." method="_on_cancel_button_pressed"]
 
 [connection signal="pressed" from="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer2/ConnectButton" to="." method="_on_connect_button_pressed"]
-
-[connection signal="text_changed" from="HostContainer/PanelContainer/VBoxContainer/HBoxContainer/LineEditNickname" to="." method="_on_lineedit_nickname_text_changed"]
 
 [connection signal="text_entered" from="HostContainer/PanelContainer/VBoxContainer/HBoxContainer/LineEditNickname" to="." method="_on_lineedit_nickname_text_entered"]
 
