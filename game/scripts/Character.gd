@@ -206,6 +206,48 @@ func attack(loc):
 #		self.action_timer = 0.2
 
 
+func move_towards_destination():
+
+	set_z(3) # To appear above the others
+	set_monitorable(false)
+	var pos = get_pos()
+	var dest = self.jump["destinations"][0]
+
+	if not is_state(MOVING): self.jump["initial_pos"] = pos
+
+	var dist_covered = pos - self.jump["initial_pos"]
+	var dist_total = dest - self.jump["initial_pos"]
+	var dir = dest - pos
+
+	dist_covered.y *= 2
+	dist_total.y *= 2
+	dir.y *= 2
+
+	dist_covered = dist_covered.length()
+	dist_total = dist_total.length()
+	dir = dir.normalized()
+
+	var speed = max(min(dist_total*2, self.MAX_SPEED), 500)
+
+	## GLORIOUS JUMP ANIMATION ##
+	var completion = dist_covered / dist_total
+	var height = sin(deg2rad(180*completion)) * dist_total * -0.2
+	var scale = 0.5 - 0.08 * sin(deg2rad(-1 * height))
+
+	self.get_node("Sprite").set_pos(Vector2(0, height))
+	self.get_node("Shadow").set_scale(Vector2(scale, scale))
+	self.get_node("Shadow").set_opacity(scale)
+
+	var dist = pos.distance_to(dest)
+	# Whether about to reach destination
+	var coming_in_hot = is_state(MOVING) && self.motion.length() >= dist
+
+	var delta = get_fixed_process_delta_time()
+	motion = dir * speed * delta
+	motion.y /= 2
+	var new_pos = pos + motion
+	set_pos(new_pos if not coming_in_hot else dest)
+
 
 func stop_moving():
 
@@ -221,53 +263,14 @@ func stop_moving():
 	self.stunned_timer = JUMP_CD
 
 
-func move_towards_destination():
-
-	self.set_z(3) # To appear above the others
-	self.set_monitorable(false)
-
-	var dist_covered = self.get_pos() - self.jump["initial_pos"]
-	var dist_total = self.jump["destinations"][0] - self.jump["initial_pos"]
-	var dir = self.jump["destinations"][0] - self.get_pos()
-
-	dist_covered.y *= 2
-	dist_total.y *= 2
-	dir.y *= 2
-
-	dist_covered = dist_covered.length()
-	dist_total = dist_total.length()
-	dir = dir.normalized()
-
-	var speed = max(min(dist_total*2, self.MAX_SPEED), 500)
-
-
-	## GLORIOUS JUMP ANIMATION ##
-	var completion = dist_covered / dist_total
-	var height = sin(deg2rad(180*completion)) * dist_total * -0.2
-	var scale = 0.5 - 0.08 * sin(deg2rad(-1 * height))
-
-	self.get_node("Sprite").set_pos(Vector2(0, height))
-	self.get_node("Shadow").set_scale(Vector2(scale, scale))
-	self.get_node("Shadow").set_opacity(scale)
-
-	var delta = get_fixed_process_delta_time()
-	motion = dir * speed * delta
-	motion.y /= 2
-	set_pos(self.get_pos() + motion)
-
-
 func should_be_moving():
-
 	var pos = self.get_pos()
-	var should = false
 	var limit = 2 # Jump queue limit
 	var dests = self.jump["destinations"]
-
 	if dests.size() < 1: return false
-	elif dests.size() > limit: dests.resize(limit)
-
-	var dist = pos.distance_to(dests[0])
-	return true if is_state(MOVING) and self.motion.length() > dist else false
+	if dests.size() > limit: self.jump["destinations"].resize(limit)
+	var dest = dests[0]
+	return true if dest != pos else false
 
 
 #####################################################################
