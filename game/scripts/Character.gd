@@ -192,15 +192,14 @@ func hit():
 # Well, this one makes you respawn
 func respawn():
 
-	self.dead = false
-	set_monitorable(true)
-
-	self.shielded_timer = 2
+	set_monitorable(true) # Enable detection by other bodies and areas
 	set_pos(rand_loc(Vector2(0,0), 0, 1000))
+
+	self.shield["duration_timer"] = 2
 	self.jump["destinations"] = [get_pos()]
 
 
-# Attack given location in non-relative coords
+# Attack given location (not relative to prog)
 master func attack(loc):
 
 	return
@@ -230,7 +229,7 @@ master func attack(loc):
 master func move_towards_destination():
 
 	set_z(3) # To appear above the others
-	set_monitorable(false)
+	set_monitorable(false) # Disable detection by other bodies and areas
 	var pos = get_pos()
 	var dest = self.jump["destinations"][0]
 
