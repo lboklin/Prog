@@ -32,25 +32,26 @@ func _fixed_process(delta):
 
 	if self.is_network_master():
 		mouse_pos = get_global_mouse_pos()
-		rset_unreliable("slave_mouse_position", mouse_pos)
+		rset_unreliable("slave_mouse_pos", mouse_pos)
 		if Input.is_action_just_pressed("move_to"):
 			jump["destinations"].append(mouse_pos)
 			spawn_click_indicator(mouse_pos, "move_to")
 		if Input.is_action_just_pressed("attack"):
 			atk_loc = mouse_pos
+			rset("slave_atk_loc", mouse_pos)
 
-	var focus = atk_loc if is_state(BUSY) else jump["destinations"][0] if is_state(MOVING) else mouse_pos
-	rpc("look_towards", focus)
-
-	if self.is_network_master():
-
-		if atk_loc != null:
-			attack(atk_loc)
-
+		if atk_loc != null:	attack(atk_loc)
 		if should_be_moving():
 			move_towards_destination()
 		elif is_state(MOVING):
 			stop_moving()
+
+		var focus = atk_loc if is_state(BUSY) else jump["destinations"][0] if is_state(MOVING) else mouse_pos
+		rset_unreliable("slave_focus", focus)
+		look_towards(focus)
+	else:
+		look_towards(slave_focus)
+		rpc("set_pos", slave_pos)
 
 
 #####################################################################

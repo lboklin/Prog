@@ -4,16 +4,22 @@ extends Area2D
 export(Color) var primary_color
 export(Color) var secondary_color
 
-const WEP_CD = 1.0 					# Weapon cooldown
-const JUMP_CD = 0.2 				# Jump cooldown after landing
-const MAX_SPEED = 1500				# Max horizontal (ground) speed
-const MAX_JUMP_RANGE = 1000			# How far you can jump from any given starting pos
+const WEP_CD				= 1.0 	# Weapon cooldown
+const JUMP_CD				= 0.2 	# Jump cooldown after landing
+const MAX_SPEED				= 1500	# Max horizontal (ground) speed
+const MAX_JUMP_RANGE		= 1000	# How far you can jump from any given starting pos
 
 # State enums
 enum {IDLE, DEAD, RESPAWNING, MOVING, ATTACKING, STUNNED, BUSY}
 enum Power {ON, OFF}
 
 var state = IDLE setget set_state, get_state
+
+slave var slave_pos 		= Vector2()
+slave var slave_atk_loc 	= Vector2()
+slave var slave_mouse_pos 	= Vector2()
+slave var slave_motion 		= Vector2()
+slave var slave_focus		= Vector2()
 
 # Counters
 var points				= 0
@@ -122,23 +128,27 @@ func success(chance):
 ##################################################
 
 
-sync func look_towards(point):
+master func look_towards(point):
 
 	var delta = get_fixed_process_delta_time()
-	var look_towards = point - self.get_pos()
-	look_towards.y *= 2
+	var dir = point - get_pos()
+	dir.y *= 2
+	dir = dir.normalized()
 
-	# Need to compensate with offset of the look_towards because the viewport only includes quadrant IV so sprite had to be moved into it
+	# Need to compensate with offset of the dir because the
+	# viewport only includes quadrant IV so sprite had to be moved into it
 	# Don't waste any more time looking at this. Just leave it. This is how it is.
-	var insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
-	var dir_compensated = look_towards + insignia.get_pos()
-
+	var insignia = find_node("InsigniaSprite")
+	var dir_compensated = dir + insignia.get_pos()
+#	var offset = Vector2(256, 256) # The pos of the insignia sprite
+#	var dir_compensated = dir + offset
 	var angle = insignia.get_angle_to(dir_compensated)
 	var s = sign(angle)
 	angle = abs(angle)
-
 	var rot_speed = 2
-	insignia.rotate(min(angle, (delta*rot_speed*angle*angle)+0.1)*s)
+	var rot = min(angle, (delta*rot_speed*angle*angle)+0.1)*s
+	insignia.rotate(rot)
+	insignia.rpc("rotate", rot)
 
 
 func hit():
@@ -181,7 +191,7 @@ func respawn():
 	self.jump["destinations"] = [self.get_pos()]
 
 
-func attack(loc):
+master func attack(loc):
 
 	return
 #	var not_the_time_to_use_that = moving || busy
@@ -206,7 +216,7 @@ func attack(loc):
 #		self.action_timer = 0.2
 
 
-func move_towards_destination():
+master func move_towards_destination():
 
 	set_z(3) # To appear above the others
 	set_monitorable(false)
@@ -234,9 +244,9 @@ func move_towards_destination():
 	var height = sin(deg2rad(180*completion)) * dist_total * -0.2
 	var scale = 0.5 - 0.08 * sin(deg2rad(-1 * height))
 
-	self.get_node("Sprite").set_pos(Vector2(0, height))
-	self.get_node("Shadow").set_scale(Vector2(scale, scale))
-	self.get_node("Shadow").set_opacity(scale)
+	get_node("Sprite").set_pos(Vector2(0, height))
+	get_node("Shadow").set_scale(Vector2(scale, scale))
+	get_node("Shadow").set_opacity(scale)
 
 	var dist = pos.distance_to(dest)
 	# Whether about to reach destination
@@ -247,9 +257,10 @@ func move_towards_destination():
 	motion.y /= 2
 	var new_pos = pos + motion
 	set_pos(new_pos if not coming_in_hot else dest)
+	rset_unreliable("slave_pos", get_pos())
 
 
-func stop_moving():
+master func stop_moving():
 
 	self.motion = Vector2(0,0)
 	set_pos(self.jump["destinations"][0])
@@ -263,7 +274,7 @@ func stop_moving():
 	self.stunned_timer = JUMP_CD
 
 
-func should_be_moving():
+master func should_be_moving():
 	var pos = self.get_pos()
 	var limit = 2 # Jump queue limit
 	var dests = self.jump["destinations"]
