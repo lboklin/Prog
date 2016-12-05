@@ -279,7 +279,7 @@ master func stop_moving():
 	self.state = IDLE
 
 	self.jump["destinations"].pop_front()
-	self.jump["initial_pos"] = null
+	self.jump["initial_pos"] = self.get_pos()
 	self.set_monitorable(true)
 	self.set_z(1) # Back to ground level
 	self.get_node("Sprite").set_pos(Vector2(0, 0))
@@ -291,10 +291,11 @@ master func should_be_moving():
 	var pos = self.get_pos()
 	var limit = 2 # Jump queue limit
 	var dests = self.jump["destinations"]
+	# Check if any jumps are queued
 	if dests.size() < 1: return false
-	if dests.size() > limit: self.jump["destinations"].resize(limit)
-	var dest = dests[0]
-	return true if dest != pos else false
+	# Limit amount of queued jumps allowed, add one because active dest is not cleared until landing
+	if dests.size() > limit: self.jump["destinations"].resize(limit + 1)
+	return true if dests[0] != pos else false
 
 
 #####################################################################
