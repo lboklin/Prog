@@ -163,8 +163,8 @@ func hit():
 
 	if self.state != DEAD:
 		self.state = DEAD
-		self.set_monitorable(false)
-		self.set_hidden(true)
+		set_monitorable(false)
+		set_hidden(true)
 
 		## Reset all active timers and states ##
 		self.weapon["cooldown_timer"] = 0
@@ -183,7 +183,7 @@ func hit():
 		print(self.respawn_timer)
 
 		var death_anim = preload("res://common/DeathEffect.tscn").instance()
-		death_anim.set_pos(self.get_pos())
+		death_anim.set_pos(get_pos())
 		get_parent().add_child(death_anim)
 
 		print(get_name() + " was killed and will be back in ", self.respawn_timer)
@@ -193,11 +193,11 @@ func hit():
 func respawn():
 
 	self.dead = false
-	self.set_monitorable(true)
+	set_monitorable(true)
 
 	self.shielded_timer = 2
-	self.set_pos(rand_loc(Vector2(0,0), 0, 1000))
-	self.jump["destinations"] = [self.get_pos()]
+	set_pos(rand_loc(Vector2(0,0), 0, 1000))
+	self.jump["destinations"] = [get_pos()]
 
 
 # Attack given location in non-relative coords
@@ -212,7 +212,7 @@ master func attack(loc):
 #		#################
 #
 #		# Spawn projectile
-#		var character_pos = self.get_pos()
+#		var character_pos = get_pos()
 #		var projectile = preload("res://common/Projectile/Projectile.tscn").instance()
 #		var attack_dir = (self.weapon["target_loc"] - character_pos)
 #		attack_dir.y *= 2
@@ -279,23 +279,22 @@ master func stop_moving():
 	self.state = IDLE
 
 	self.jump["destinations"].pop_front()
-	self.jump["initial_pos"] = self.get_pos()
-	self.set_monitorable(true)
-	self.set_z(1) # Back to ground level
-	self.get_node("Sprite").set_pos(Vector2(0, 0))
+	self.jump["initial_pos"] = get_pos()
+	set_monitorable(true)
+	set_z(1) # Back to ground level
+	get_node("Sprite").set_pos(Vector2(0, 0))
 	self.stunned_timer = JUMP_CD
 
 
 # This chec... ugh just read the name
 master func should_be_moving():
-	var pos = self.get_pos()
 	var limit = 2 # Jump queue limit
 	var dests = self.jump["destinations"]
 	# Check if any jumps are queued
 	if dests.size() < 1: return false
 	# Limit amount of queued jumps allowed, add one because active dest is not cleared until landing
 	if dests.size() > limit: self.jump["destinations"].resize(limit + 1)
-	return true if dests[0] != pos else false
+	return true if dests[0] != get_pos() else false
 
 
 #####################################################################
