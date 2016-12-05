@@ -75,37 +75,44 @@ func is_state(st):
 ##########################
 
 
-# This method mutates the state of this instance
+# This method modifies the member vars
 func update_states():
 
 	var delta = get_fixed_process_delta_time()
 
+	# Check if moving
 	if motion.length() > 0:
 		if not is_state(MOVING): return set_state(MOVING)
 	elif is_state(MOVING): return set_state(IDLE)
 
+	# Check if stunned
 	if stunned_timer > 0:
 		stunned_timer -= delta
 		if not is_state(STUNNED): return set_state(STUNNED)
 	elif is_state(STUNNED): return set_state(IDLE)
 
+	# Check if performing an action
 	if action_timer > 0:
 		action_timer -= delta
 		if not is_state(BUSY): return set_state(BUSY)
 	elif is_state(BUSY): return set_state(IDLE)
 
+	# Check if supposed to respawn (and if dead)
 	if respawn["respawn_timer"] > 0:
 		respawn["respawn_timer"] -= delta
 		if not is_state(DEAD): return set_state(DEAD)
 	elif is_state(DEAD): return set_state(RESPAWNING)
 
+	# Check the state of the shield as necessary
 	shield["state"] = ON if shield["duration_timer"] > 0 else OFF
 	if shield["state"] == ON: shield["duration_timer"] -= delta
 
+	# Check the state of the weapon and update if necessary
 	weapon["state"] = OFF if weapon["cooldown_timer"] > 0 else ON
 	if weapon["state"] == OFF: weapon["cooldown_timer"] -= delta
 
 
+# Produce a random point inside a circle of a given radius
 func rand_loc(location, radius_min, radius_max):
 
 	var new_radius = rand_range(radius_min, radius_max)
@@ -127,7 +134,7 @@ func success(chance):
 
 ##################################################
 
-
+# Rotates the insignia sprite towards the given point (point is not relative to prog)
 master func look_towards(point):
 
 	var delta = get_fixed_process_delta_time()
@@ -151,6 +158,7 @@ master func look_towards(point):
 	insignia.rpc("rotate", rot)
 
 
+# Get hit (and die - at least until better implementation is implemented)
 func hit():
 
 	if self.state != DEAD:
@@ -181,6 +189,7 @@ func hit():
 		print(get_name() + " was killed and will be back in ", self.respawn_timer)
 
 
+# Well, this one makes you respawn
 func respawn():
 
 	self.dead = false
@@ -191,6 +200,7 @@ func respawn():
 	self.jump["destinations"] = [self.get_pos()]
 
 
+# Attack given location in non-relative coords
 master func attack(loc):
 
 	return
@@ -216,6 +226,7 @@ master func attack(loc):
 #		self.action_timer = 0.2
 
 
+# Go to place next in jump dest dict
 master func move_towards_destination():
 
 	set_z(3) # To appear above the others
@@ -260,6 +271,7 @@ master func move_towards_destination():
 	rset_unreliable("slave_pos", get_pos())
 
 
+# This one stops your movement..
 master func stop_moving():
 
 	self.motion = Vector2(0,0)
@@ -274,6 +286,7 @@ master func stop_moving():
 	self.stunned_timer = JUMP_CD
 
 
+# This chec... ugh just read the name
 master func should_be_moving():
 	var pos = self.get_pos()
 	var limit = 2 # Jump queue limit

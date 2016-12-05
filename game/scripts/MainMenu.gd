@@ -10,6 +10,7 @@ onready var light_1 = get_node("Background/Light1")
 onready var light_2 = get_node("Background/Light2")
 
 onready var window_size = get_viewport().get_visible_rect().size
+
 # Player Name
 const PLAYER_NAME_DEFAULT = "Player"
 const SERVER_NAME_DEFAULT = "Server"
