@@ -1,9 +1,6 @@
 extends "res://scripts/Character.gd"
 
 
-var mouse_pos
-
-
 # Spawn an NPC to play with
 func spawn_enemy(loc):
 	var enemy = preload("res://npc/Bot.tscn").instance()
@@ -26,32 +23,39 @@ func spawn_click_indicator(pos, anim):
 
 func _fixed_process(delta):
 
-	if update_states() == STUNNED: return # Update all status conditions
-
-	var atk_loc
+	# Update all states, timers and other statuses and end processing here if stunned
+	if update_states(delta) == STUNNED: return
 
 	if self.is_network_master():
-		mouse_pos = get_global_mouse_pos()
-		rset_unreliable("slave_mouse_pos", mouse_pos)
-		if Input.is_action_just_pressed("move_to"):
-			jump["destinations"].append(mouse_pos)
-			spawn_click_indicator(mouse_pos, "move_to")
-		if Input.is_action_just_pressed("attack"):
-			atk_loc = mouse_pos
-			rset("slave_atk_loc", mouse_pos)
 
-		if atk_loc != null:	attack(atk_loc)
-		if should_be_moving():
-			move_towards_destination()
-		elif is_state(MOVING):
-			stop_moving()
+		var jump = get_jump_state()
+		var weapon = get_weapon_state()
+		var pos = get_pos()
+		rset_unreliable("slave_pos", pos)
 
-		var focus = atk_loc if is_state(BUSY) else jump["destinations"][0] if is_state(MOVING) else mouse_pos
+		if jump["destinations"] != [] && pos == jump["destinations"][0]:
+			rpc("stop_moving")
+			jump = get_jump_state()
+
+		if jump["initial_pos"] == null:
+			jump["initial_pos"] = pos
+		if jump["destinations"].size() > 0:
+			if jump["destinations"].size() > JUMP_Q_LIM:	jump["destinations"].resize(JUMP_Q_LIM + 1)
+
+			var new_motion_state = get_new_motion_state(delta, jump["initial_pos"], pos, jump["destinations"][0])
+
+			apply_new_motion_state(new_motion_state)
+			rset("slave_motion_state", new_motion_state)
+
+
+		if weapon["target_loc"] != null:
+			attack(weapon["target_loc"])
+
+		var focus = weapon["target_loc"] if is_state(BUSY) else ( jump["destinations"][0] if is_state(MOVING) else get_global_mouse_pos() )
 		rset_unreliable("slave_focus", focus)
 		look_towards(focus)
 	else:
 		look_towards(slave_focus)
-		rpc("set_pos", slave_pos)
 
 
 #####################################################################
@@ -60,9 +64,17 @@ func _fixed_process(delta):
 
 
 func _unhandled_input(ev):
-#	if ev.is_action_pressed("move_to"):
-#		self.jump["destinations"].append(mouse_pos)
-#		spawn_click_indicator(mouse_pos, "move_to")
+	var mouse_pos = get_global_mouse_pos()
+	if Input.is_action_just_pressed("move_to"):
+		var jump = get_jump_state()
+		jump["destinations"].append(mouse_pos)
+		set_jump_state(jump)
+		spawn_click_indicator(mouse_pos, "move_to")
+	if Input.is_action_just_pressed("attack"):
+		var weapon = get_weapon_state()
+		weapon["target_loc"] = mouse_pos
+		set_weapon_state(weapon)
+		rset("slave_atk_loc", weapon["target_loc"])
 	if ev.is_action_pressed("spawn_enemy"): # Spawn aggressive bot
 		spawn_enemy(rand_loc(mouse_pos, 200, 600))
 	if ev.is_action_pressed("quit_game"):

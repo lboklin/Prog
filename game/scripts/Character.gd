@@ -8,6 +8,7 @@ const WEP_CD				= 1.0 	# Weapon cooldown
 const JUMP_CD				= 0.2 	# Jump cooldown after landing
 const MAX_SPEED				= 1500	# Max horizontal (ground) speed
 const MAX_JUMP_RANGE		= 1000	# How far you can jump from any given starting pos
+const JUMP_Q_LIM			= 2		# Jump queue limit
 
 # State enums
 enum {IDLE, DEAD, RESPAWNING, MOVING, ATTACKING, STUNNED, BUSY}
@@ -17,7 +18,6 @@ var state = IDLE setget set_state, get_state
 
 slave var slave_pos 		= Vector2()
 slave var slave_atk_loc 	= Vector2()
-slave var slave_mouse_pos 	= Vector2()
 slave var slave_motion 		= Vector2()
 slave var slave_focus		= Vector2()
 
@@ -28,30 +28,28 @@ var points				= 0
 var stunned_timer 		= 0.0
 var action_timer 		= 0.0
 
-var motion 				= Vector2()
-
 ## Dicts ##
 
-var jump = {
+var jump_state = {
 	"initial_pos" 		: null,
 	"destinations"		: []
-}
+} setget set_jump_state, get_jump_state
 
-var weapon = {
+var weapon_state = {
 	"state" 			: Power.ON,
 	"target_loc"		: null,
 	"cooldown_timer"	: 0.0
-}
+} setget set_weapon_state, get_weapon_state
 
-var shield = {
+var shield_state = {
 	"state"				: Power.ON,
 	"duration_timer"	: 2.0		# Spawn in with 2 sec protective shield
-}
+} setget set_shield_state, get_shield_state
 
-var respawn = {
+var respawn_state = {
 	"time_of_death" 	: null,
 	"respawn_timer" 	: 0.0
-}
+} setget set_respawn_state, get_respawn_state
 
 
 ##########################
@@ -60,6 +58,9 @@ var respawn = {
 
 
 func set_state(new_st):
+#	if not is_state(new_st):
+#		if is_state(MOVING):
+#			stop_moving()
 	state = new_st
 	return new_st
 
@@ -72,18 +73,55 @@ func is_state(st):
 	return true if st == get_state() else false
 
 
+func set_jump_state(new_st):
+	if new_st["destinations"] == []:	set_state(IDLE)
+	jump_state = new_st
+
+
+func get_jump_state():
+	return jump_state
+
+
+func add_jump(dest):
+	if jump_state["destinations"] != [] and dest != jump_state["destinations"].back():
+		jump_state["destinations"].append(dest)
+	return jump_state
+
+
+func clear_jump():
+	jump_state["initial_pos"] = null
+	jump_state["destinations"].pop_front()
+
+
+func set_weapon_state(new_st):
+	weapon_state = new_st
+
+
+func get_weapon_state():
+	return weapon_state
+
+
+func set_shield_state(new_st):
+	shield_state = new_st
+
+
+func get_shield_state():
+	return shield_state
+
+
+func set_respawn_state(new_st):
+	respawn_state = new_st
+
+
+func get_respawn_state():
+	return respawn_state
+
+
 ##########################
 
 
 # This method modifies the member vars
-func update_states():
-
-	var delta = get_fixed_process_delta_time()
-
-	# Check if moving
-	if motion.length() > 0:
-		if not is_state(MOVING): return set_state(MOVING)
-	elif is_state(MOVING): return set_state(IDLE)
+func update_states(delta):
 
 	# Check if stunned
 	if stunned_timer > 0:
@@ -98,18 +136,24 @@ func update_states():
 	elif is_state(BUSY): return set_state(IDLE)
 
 	# Check if supposed to respawn (and if dead)
+	var respawn = get_respawn_state()
 	if respawn["respawn_timer"] > 0:
 		respawn["respawn_timer"] -= delta
+		set_respawn_state(respawn)
 		if not is_state(DEAD): return set_state(DEAD)
 	elif is_state(DEAD): return set_state(RESPAWNING)
 
 	# Check the state of the shield as necessary
-	shield["state"] = ON if shield["duration_timer"] > 0 else OFF
-	if shield["state"] == ON: shield["duration_timer"] -= delta
+	var shield = get_shield_state()
+	shield["state"] = Power.ON if shield["duration_timer"] > 0 else Power.OFF
+	if shield["state"] == Power.ON: shield["duration_timer"] -= delta
+	set_shield_state(shield)
 
 	# Check the state of the weapon and update if necessary
-	weapon["state"] = OFF if weapon["cooldown_timer"] > 0 else ON
-	if weapon["state"] == OFF: weapon["cooldown_timer"] -= delta
+	var weapon = get_weapon_state()
+	weapon["state"] = Power.OFF if weapon["cooldown_timer"] > 0 else Power.ON
+	if weapon["state"] == Power.OFF: weapon["cooldown_timer"] -= delta
+	set_weapon_state(weapon)
 
 
 # Produce a random point inside a circle of a given radius
@@ -155,7 +199,7 @@ master func look_towards(point):
 	var rot_speed = 2
 	var rot = min(angle, (delta*rot_speed*angle*angle)+0.1)*s
 	insignia.rotate(rot)
-	insignia.rpc("rotate", rot)
+#	insignia.rpc("rotate", rot)
 
 
 # Get hit (and die - at least until better implementation is implemented)
@@ -202,9 +246,8 @@ func respawn():
 # Attack given location (not relative to prog)
 master func attack(loc):
 
-	return
 #	var not_the_time_to_use_that = moving || busy
-#	if self.state == IDLE and self.weapon_state == Power.ON:
+	return set_state(BUSY if is_state(IDLE) && self.weapon["state"] == ON else get_state())
 #
 #		## PLACEHOLDER ##
 #		GameRound.points += 1
@@ -225,75 +268,91 @@ master func attack(loc):
 #		self.action_timer = 0.2
 
 
-# Go to place next in jump dest dict
-master func move_towards_destination():
+# This one stops your movement..  -- very impure function
+sync func stop_moving():
+	set_monitorable(true) # Can be detected by other bodies and areas
+	set_z(1) # Back onto ground
+	get_node("Sprite").set_pos(Vector2(0, 0)) # y is jump height
 
-	set_z(3) # To appear above the others
-	set_monitorable(false) # Disable detection by other bodies and areas
-	var pos = get_pos()
-	var dest = self.jump["destinations"][0]
-
-	if not is_state(MOVING): self.jump["initial_pos"] = pos
-
-	var dist_covered = pos - self.jump["initial_pos"]
-	var dist_total = dest - self.jump["initial_pos"]
-	var dir = dest - pos
-
-	dist_covered.y *= 2
-	dist_total.y *= 2
-	dir.y *= 2
-
-	dist_covered = dist_covered.length()
-	dist_total = dist_total.length()
-	dir = dir.normalized()
-
-	var speed = max(min(dist_total*2, self.MAX_SPEED), 500)
-
-	## GLORIOUS JUMP ANIMATION ##
-	var completion = dist_covered / dist_total
-	var height = sin(deg2rad(180*completion)) * dist_total * -0.2
-	var scale = 0.5 - 0.08 * sin(deg2rad(-1 * height))
-
-	get_node("Sprite").set_pos(Vector2(0, height))
-	get_node("Shadow").set_scale(Vector2(scale, scale))
-	get_node("Shadow").set_opacity(scale)
-
-	var dist = pos.distance_to(dest)
-	# Whether about to reach destination
-	var coming_in_hot = is_state(MOVING) && self.motion.length() >= dist
-
-	var delta = get_fixed_process_delta_time()
-	motion = dir * speed * delta
-	motion.y /= 2
-	var new_pos = pos + motion
-	set_pos(new_pos if not coming_in_hot else dest)
-	rset_unreliable("slave_pos", get_pos())
-
-
-# This one stops your movement..
-master func stop_moving():
-
-	self.motion = Vector2(0,0)
-	set_pos(self.jump["destinations"][0])
-	self.state = IDLE
-
-	self.jump["destinations"].pop_front()
-	self.jump["initial_pos"] = get_pos()
-	set_monitorable(true)
-	set_z(1) # Back to ground level
-	get_node("Sprite").set_pos(Vector2(0, 0))
+	var jump = get_jump_state()
+	while jump["destinations"] != [] and jump["destinations"][0] == get_pos():
+		jump["destinations"].pop_front()
+	jump["initial_pos"] = null
+	set_jump_state(jump)
 	self.stunned_timer = JUMP_CD
+	return
+
+
+sync func apply_new_motion_state(motion_state):
+
+	# Check if moving
+	var motion = motion_state["new_pos"] - motion_state["old_pos"]
+	if motion.length() > 0:
+		if not is_state(MOVING): set_state(MOVING)
+
+		set_z(motion_state["jump_height"]) # To appear above the others
+		set_monitorable(false) # Disable detection by other bodies and areas
+
+		set_pos(motion_state["new_pos"])
+	#	if not is_state(MOVING): set_state(MOVING)
+
+		# Jump animation
+		var shadow_scale 	= 1 - 0.08 * sin(deg2rad(-1 * motion_state["jump_height"]))
+		var shadow_opacity 	= shadow_scale
+
+		get_node("Sprite").set_pos(Vector2(0, motion_state["jump_height"]))
+		get_node("Shadow").set_scale(Vector2(1, 1) * shadow_scale)
+		get_node("Shadow").set_opacity(shadow_opacity)
+	elif is_state(MOVING): return set_state(IDLE)
+
+
+# Go to place next in jump dest dict
+master func get_new_motion_state(delta, init_pos, pos, dest):
+
+	var dist_covered 	= 	pos - init_pos
+	dist_covered.y 		*= 	2
+	dist_covered 		= 	dist_covered.length()
+
+	var dist_total 		= 	dest - init_pos
+	dist_total.y 		*= 	2
+	dist_total 			= 	dist_total.length()
+
+	var dir 			= 	dest - pos
+	dir.y 				*= 	2
+	dir 				=	dir.normalized()
+
+
+	# Where to put ourselves next
+	var speed 			= 	min(dist_total*2, MAX_SPEED)
+	var motion 			= 	dir * speed * delta
+	motion.y 			/= 	2
+	var projected_pos 	= 	pos + motion
+	var coming_in_hot 	= 	motion.length() > 0 && speed >= pos.distance_to(dest)
+#	if coming_in_hot:	motion = Vector2(0,0)
+	var new_pos 		= 	projected_pos if not coming_in_hot else dest
+
+	var jump_completion = 	dist_covered / dist_total if dist_total > 0 else 1
+	var jump_height 	= 	sin(deg2rad(180*jump_completion)) * dist_total * -0.2
+
+	# Bundle up and return the new state in a nice little dict
+	return {
+#		"motion"		: 	motion,
+#		"init_pos"		:	init_pos,
+		"old_pos"		:	pos,
+		"new_pos"		: 	new_pos,
+		"jump_height" 	: 	jump_height,
+	}
 
 
 # This chec... ugh just read the name
-master func should_be_moving():
-	var limit = 2 # Jump queue limit
-	var dests = self.jump["destinations"]
-	# Check if any jumps are queued
-	if dests.size() < 1: return false
-	# Limit amount of queued jumps allowed, add one because active dest is not cleared until landing
-	if dests.size() > limit: self.jump["destinations"].resize(limit + 1)
-	return true if dests[0] != get_pos() else false
+#master func should_be_moving():
+#	var limit = 2 # Jump queue limit
+#	var dests = self.jump["destinations"]
+#	# Check if any jumps are queued
+#	if dests.size() < 1: return false
+#	# Limit amount of queued jumps allowed, add one because active dest is not cleared until landing
+#	if dests.size() > limit: self.jump["destinations"].resize(limit + 1)
+#	return true if dests[0] != get_pos() else false
 
 
 #####################################################################
