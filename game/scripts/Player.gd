@@ -61,7 +61,7 @@ func _unhandled_input(ev):
 	var mouse_pos = get_global_mouse_pos()
 	if Input.is_action_just_pressed("move_to"):
 		var jumps = get_jumps()
-		if mouse_pos != jumps["destinations"].back():
+		if not ( jumps["destinations"].size() > 0 and mouse_pos == jumps["destinations"].back() ):
 			jumps["destinations"].append(mouse_pos)
 		set_jumps(jumps["active_jump_origin"], jumps["destinations"])
 		spawn_click_indicator(mouse_pos, "move_to")
