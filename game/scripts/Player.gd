@@ -28,30 +28,24 @@ func _fixed_process(delta):
 
 	if self.is_network_master():
 
-		var jump = get_jump_state()
+		var dests = get_jumps()["destinations"]
 		var weapon = get_weapon_state()
 		var pos = get_pos()
 		rset_unreliable("slave_pos", pos)
 
-#		if jump["destinations"] != [] && pos == jump["destinations"][0]:
-#			rpc("stop_moving")
-#			jump = get_jump_state()
-
-		if jump["initial_pos"] == null:
-			jump["initial_pos"] = pos
-		if jump["destinations"].size() > 0:
-			if jump["destinations"].size() > JUMP_Q_LIM:	jump["destinations"].resize(JUMP_Q_LIM + 1)
-
-			var new_motion_state = get_new_motion_state(delta, jump["initial_pos"], pos, jump["destinations"][0])
-
-			rpc("apply_new_motion_state", new_motion_state )
-#			rset("slave_motion_state", new_motion_state)
-
+		if dests.size() > 0:
+			var jump_origin = get_jumps()["active_jump_origin"]
+			if jump_origin == null:	jump_origin = pos
+			rpc("set_motion_state", new_motion_state(delta, jump_origin, pos, dests[0]))
+			if dests.size() > JUMP_Q_LIM:
+				dests.resize(JUMP_Q_LIM + 1)
+		else:
+			rpc("set_motion_state", { "motion" : Vector2(0,0), "jump_height" : 0 })
 
 		if weapon["target_loc"] != null:
 			attack(weapon["target_loc"])
 
-		var focus = weapon["target_loc"] if is_state(BUSY) else ( jump["destinations"][0] if is_state(MOVING) else get_global_mouse_pos() )
+		var focus = weapon["target_loc"] if is_state(BUSY) else ( jumps["destinations"][0] if is_state(MOVING) else get_global_mouse_pos() )
 		rset_unreliable("slave_focus", focus)
 		look_towards(focus)
 	else:
@@ -66,9 +60,10 @@ func _fixed_process(delta):
 func _unhandled_input(ev):
 	var mouse_pos = get_global_mouse_pos()
 	if Input.is_action_just_pressed("move_to"):
-		var jump = get_jump_state()
-		jump["destinations"].append(mouse_pos)
-		set_jump_state(jump)
+		var jumps = get_jumps()
+		if mouse_pos != jumps["destinations"].back():
+			jumps["destinations"].append(mouse_pos)
+		set_jumps(jumps["active_jump_origin"], jumps["destinations"])
 		spawn_click_indicator(mouse_pos, "move_to")
 	if Input.is_action_just_pressed("attack"):
 		var weapon = get_weapon_state()
