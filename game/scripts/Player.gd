@@ -33,9 +33,9 @@ func _fixed_process(delta):
 		var pos = get_pos()
 		rset_unreliable("slave_pos", pos)
 
-		if jump["destinations"] != [] && pos == jump["destinations"][0]:
-			rpc("stop_moving")
-			jump = get_jump_state()
+#		if jump["destinations"] != [] && pos == jump["destinations"][0]:
+#			rpc("stop_moving")
+#			jump = get_jump_state()
 
 		if jump["initial_pos"] == null:
 			jump["initial_pos"] = pos
@@ -44,8 +44,8 @@ func _fixed_process(delta):
 
 			var new_motion_state = get_new_motion_state(delta, jump["initial_pos"], pos, jump["destinations"][0])
 
-			apply_new_motion_state(new_motion_state)
-			rset("slave_motion_state", new_motion_state)
+			rpc("apply_new_motion_state", new_motion_state )
+#			rset("slave_motion_state", new_motion_state)
 
 
 		if weapon["target_loc"] != null:

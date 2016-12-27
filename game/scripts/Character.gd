@@ -56,11 +56,13 @@ var respawn_state = {
 ## SetGetters / queries ##
 ##########################
 
+#-------------
+# General state
 
 func set_state(new_st):
-#	if not is_state(new_st):
-#		if is_state(MOVING):
-#			stop_moving()
+	if not is_state(new_st):
+		if is_state(MOVING):
+			stop_moving()
 	state = new_st
 	return new_st
 
@@ -72,9 +74,12 @@ func get_state():
 func is_state(st):
 	return true if st == get_state() else false
 
+#-------------
+#-------------
+# Jump state
 
 func set_jump_state(new_st):
-	if new_st["destinations"] == []:	set_state(IDLE)
+#	if new_st["destinations"] == []:	set_state(IDLE)
 	jump_state = new_st
 
 
@@ -92,6 +97,9 @@ func clear_jump():
 	jump_state["initial_pos"] = null
 	jump_state["destinations"].pop_front()
 
+#-------------
+#-------------
+# Weapon state
 
 func set_weapon_state(new_st):
 	weapon_state = new_st
@@ -100,6 +108,9 @@ func set_weapon_state(new_st):
 func get_weapon_state():
 	return weapon_state
 
+#-------------
+#-------------
+# Shield state
 
 func set_shield_state(new_st):
 	shield_state = new_st
@@ -108,6 +119,9 @@ func set_shield_state(new_st):
 func get_shield_state():
 	return shield_state
 
+#-------------
+#-------------
+# Respawn state
 
 func set_respawn_state(new_st):
 	respawn_state = new_st
@@ -116,6 +130,7 @@ func set_respawn_state(new_st):
 func get_respawn_state():
 	return respawn_state
 
+#-------------
 
 ##########################
 
