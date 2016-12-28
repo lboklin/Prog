@@ -153,7 +153,7 @@ func update_states(delta):  ## IMPURE
 		else:
 			set_jumps(null, [])
 
-  # Check if stunned
+	# Check if stunned
 	if stunned_timer > 0:
 		stunned_timer -= delta
 		if not is_state(STUNNED):
@@ -161,7 +161,7 @@ func update_states(delta):  ## IMPURE
 	elif is_state(STUNNED):
 		return set_state(IDLE)
 
-  # Check if performing an action
+	# Check if performing an action
 	if action_timer > 0:
 		action_timer -= delta
 		if not is_state(BUSY):
@@ -169,7 +169,7 @@ func update_states(delta):  ## IMPURE
 	elif is_state(BUSY):
 		return set_state(IDLE)
 
-  # Check if supposed to respawn (and if dead)
+	# Check if supposed to respawn (and if dead)
 	var respawn = get_respawn_state()
 	if respawn["respawn_timer"] > 0:
 		respawn["respawn_timer"] -= delta
@@ -179,14 +179,14 @@ func update_states(delta):  ## IMPURE
 	elif is_state(DEAD):
 		return set_state(RESPAWNING)
 
-  # Check the state of the shield as necessary
+	# Check the state of the shield as necessary
 	var shield = get_shield_state()
 	shield["state"] = Power.ON if shield["duration_timer"] > 0 else Power.OFF
 	if shield["state"] == Power.ON:
 		shield["duration_timer"] -= delta
 	set_shield_state(shield["state"], shield["duration_timer"])
 
-  # Check the state of the weapon and update if necessary
+	# Check the state of the weapon and update if necessary
 	var weapon = get_weapon_state()
 	weapon["state"] = Power.OFF if weapon["cooldown_timer"] > 0 else Power.ON
 	if weapon["state"] == Power.OFF:
@@ -224,9 +224,9 @@ master func look_towards(point):  ## IMPURE
 	dir.y *= 2
 	dir = dir.normalized()
 
-  # Need to compensate with offset of the dir because the
-  # viewport only includes quadrant IV so sprite had to be moved into it
-  # Don't waste any more time looking at this. Just leave it. This is how it is.
+	# Need to compensate with offset of the dir because the
+	# viewport only includes quadrant IV so sprite had to be moved into it
+	# Don't waste any more time looking at this. Just leave it. This is how it is.
 	var insignia = find_node("InsigniaSprite")
 	var dir_compensated = dir + insignia.get_pos()
 	var angle = insignia.get_angle_to(dir_compensated)
@@ -246,7 +246,7 @@ func hit():  ## IMPURE
 		set_monitorable(false)
 		set_hidden(true)
 
-  ## Reset all active timers and states  ##
+		## Reset all active timers and states  ##
 		self.weapon["cooldown_timer"] = 0
 		self.stunned_timer = 0
 		self.action_timer = 0
@@ -255,9 +255,9 @@ func hit():  ## IMPURE
 		self.jump["active_jump_origin"] = null
 
 		update_states()
-  #########################################
+		#########################################
 
-  # Set respawn timer based on elapsed game round time
+		# Set respawn timer based on elapsed game round time
 		self.time_of_death = GameRound.round_timer
 		self.respawn_timer = self.time_of_death / 10
 		print(self.respawn_timer)
@@ -285,11 +285,11 @@ master func attack(loc):  ## IMPURE
 #	var not_the_time_to_use_that = moving || busy
 	return set_state(BUSY if is_state(IDLE) && self.weapon["state"] == ON else get_state())
 #
-#  ## PLACEHOLDER  ##
+#		## PLACEHOLDER  ##
 #		GameRound.points += 1
-#  #################
+#		#################
 #
-#  # Spawn projectile
+#		# Spawn projectile
 #		var character_pos = get_pos()
 #		var projectile = preload("res://common/Projectile/Projectile.tscn").instance()
 #		var attack_dir = (self.weapon["target_loc"] - character_pos)
@@ -336,7 +336,7 @@ sync func set_motion_state(motion_state):  ## IMPURE
 	animate_jump(motion_state["jump_height"])
 #	rpc("animate_jump", motion_state["jump_height"])
 
-  # Check if moving
+	# Check if moving
 	if (motion_state["motion"].length() > 0 or
 			dests.size() > 0):
 		set_monitorable(false)  # Disable detection by other bodies and areas
@@ -366,7 +366,7 @@ master func new_motion_state(delta, init_pos, pos, dest):  ## PURE
 	dir = dir.normalized()
 
 
-  # Where to put ourselves next
+	# Where to put ourselves next
 	var speed = min(dist_total*2, MAX_SPEED)
 	motion = dir * speed * delta
 	motion.y *= 0.5
@@ -378,7 +378,7 @@ master func new_motion_state(delta, init_pos, pos, dest):  ## PURE
 	var jump_completion = dist_covered / dist_total if dist_total > 0 else 1
 	jump_height = sin(deg2rad(180*jump_completion)) * dist_total * -0.2
 
-  # Bundle up and return the new state in a nice little dict
+	# Bundle up and return the new state in a nice little dict
 	return {
 		"motion"		: 	motion,
 		"jump_height" 	: 	jump_height,
@@ -389,10 +389,10 @@ master func new_motion_state(delta, init_pos, pos, dest):  ## PURE
 #master func should_be_moving():
 #	var limit = 2  # Jump queue limit
 #	var dests = self.jump["destinations"]
-#  # Check if any jumps are queued
+#	# Check if any jumps are queued
 #	if dests.size() < 1:
 #		return false
-#  # Limit amount of queued jumps allowed, add one because active dest is not cleared until landing
+#	# Limit amount of queued jumps allowed, add one because active dest is not cleared until landing
 #	if dests.size() > limit:
 #		self.jump["destinations"].resize(limit + 1)
 #	return true if dests[0] != get_pos() else false
