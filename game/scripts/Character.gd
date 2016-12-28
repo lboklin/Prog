@@ -152,6 +152,7 @@ func update_states(delta):  ## IMPURE
 			set_jumps(pos, dests)
 		else:
 			set_jumps(null, [])
+			set_state(IDLE)
 
 	# Check if stunned
 	if stunned_timer > 0:
@@ -316,7 +317,7 @@ sync func stop_moving():  ## IMPURE
 
 
 sync func animate_jump(jump_height):  ## IMPURE
-	var sprite_pos = Vector2(0, 1) * jump_height
+	var sprite_pos = Vector2(0, -1) * jump_height
 	var shadow_scale = ( 1 - 0.08 * sin(deg2rad(-1 * jump_height)) )
 	var shadow_opacity = shadow_scale
 	shadow_scale *= Vector2(1, 1)
@@ -324,7 +325,7 @@ sync func animate_jump(jump_height):  ## IMPURE
 	get_node("Sprite").set_pos(sprite_pos)
 	get_node("Shadow").set_scale(shadow_scale)
 	get_node("Shadow").set_opacity(shadow_opacity)
-	set_z(jump_height)  # To render after everything below
+	set_z(jump_height + 1)  # To render after everything below
 	return
 
 
@@ -376,7 +377,7 @@ master func new_motion_state(delta, init_pos, pos, dest):  ## PURE
 		pass
 
 	var jump_completion = dist_covered / dist_total if dist_total > 0 else 1
-	jump_height = sin(deg2rad(180*jump_completion)) * dist_total * -0.2
+	jump_height = sin(deg2rad(180*jump_completion)) * dist_total * 0.2
 
 	# Bundle up and return the new state in a nice little dict
 	return {

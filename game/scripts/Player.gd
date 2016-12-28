@@ -25,7 +25,8 @@ func spawn_click_indicator(pos, anim):
 func _fixed_process(delta):
 
 	# Update all states, timers and other statuses and end processing here if stunned
-	if update_states(delta) == STUNNED:
+	update_states(delta)
+	if is_state(STUNNED):
 		return
 
 	if self.is_network_master():
@@ -43,8 +44,8 @@ func _fixed_process(delta):
 			rpc("set_motion_state", new_motion_state(delta, init_pos, pos, dests[0]))
 			if dests.size() > JUMP_Q_LIM:
 				dests.resize(JUMP_Q_LIM + 1)
-		else:
-			rpc("set_motion_state", { "motion" : Vector2(0,0), "jump_height" : 0 })
+#		else:
+#			rpc("set_motion_state", { "motion" : Vector2(0,0), "jump_height" : 0 })
 
 		if weapon["target_loc"] != null:
 			attack(weapon["target_loc"])
