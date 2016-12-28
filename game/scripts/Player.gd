@@ -1,5 +1,6 @@
 extends "res://scripts/Character.gd"
 
+var mouse_pos = Vector2()
 
 # Spawn an NPC to play with
 func spawn_enemy(loc):
@@ -24,7 +25,8 @@ func spawn_click_indicator(pos, anim):
 func _fixed_process(delta):
 
 	# Update all states, timers and other statuses and end processing here if stunned
-	if update_states(delta) == STUNNED: return
+	if update_states(delta) == STUNNED:
+		return
 
 	if self.is_network_master():
 
@@ -35,7 +37,8 @@ func _fixed_process(delta):
 
 		if dests.size() > 0:
 			var jump_origin = get_jumps()["active_jump_origin"]
-			if jump_origin == null:	jump_origin = pos
+			if jump_origin == null:
+				jump_origin = pos
 			rpc("set_motion_state", new_motion_state(delta, jump_origin, pos, dests[0]))
 			if dests.size() > JUMP_Q_LIM:
 				dests.resize(JUMP_Q_LIM + 1)
@@ -45,7 +48,7 @@ func _fixed_process(delta):
 		if weapon["target_loc"] != null:
 			attack(weapon["target_loc"])
 
-		var focus = weapon["target_loc"] if is_state(BUSY) else ( jumps["destinations"][0] if is_state(MOVING) else get_global_mouse_pos() )
+		var focus = weapon["target_loc"] if is_state(BUSY) else ( dests[0] if is_state(MOVING) else mouse_pos )
 		rset_unreliable("slave_focus", focus)
 		look_towards(focus)
 	else:
@@ -58,10 +61,11 @@ func _fixed_process(delta):
 
 
 func _unhandled_input(ev):
-	var mouse_pos = get_global_mouse_pos()
+	mouse_pos = get_global_mouse_pos()
 	if Input.is_action_just_pressed("move_to"):
 		var jumps = get_jumps()
-		if not ( jumps["destinations"].size() > 0 and mouse_pos == jumps["destinations"].back() ):
+		if not (jumps["destinations"].size() > 0 and
+					mouse_pos == jumps["destinations"].back()):
 			jumps["destinations"].append(mouse_pos)
 		set_jumps(jumps["active_jump_origin"], jumps["destinations"])
 		spawn_click_indicator(mouse_pos, "move_to")
@@ -70,7 +74,7 @@ func _unhandled_input(ev):
 		weapon["target_loc"] = mouse_pos
 		set_weapon_state(weapon)
 		rset("slave_atk_loc", weapon["target_loc"])
-	if ev.is_action_pressed("spawn_enemy"): # Spawn aggressive bot
+	if ev.is_action_pressed("spawn_enemy"):  # Spawn aggressive bot
 		spawn_enemy(rand_loc(mouse_pos, 200, 600))
 	if ev.is_action_pressed("quit_game"):
 		get_tree().quit()
@@ -82,5 +86,6 @@ func _unhandled_input(ev):
 
 
 func _ready():
-	if self.is_network_master(): set_process_unhandled_input(true)
+	if self.is_network_master():
+		set_process_unhandled_input(true)
 	set_fixed_process(true)
