@@ -141,12 +141,17 @@ func get_respawn_state():
 # This method modifies the member vars
 func update_states(delta):  ## IMPURE
 
-  # Check state of motion and stuff
+	# Check if there are any jumps queued and
+	# if we are at our destination.
 	var dests = get_jumps()["destinations"]
-	if dests.size() > 0:
-		while dests.size() > 0 and get_pos() == dests[0]:
-			dests.pop_front()
-			set_jumps(get_pos(), dests)
+	var pos = get_pos()
+	# Use while loop to catch any duplicates.
+	while dests.size() > 0 and pos == dests[0]:
+		dests.pop_front()
+		if dests.size() > 0:
+			set_jumps(pos, dests)
+		else:
+			set_jumps(null, [])
 
   # Check if stunned
 	if stunned_timer > 0:
@@ -364,10 +369,11 @@ master func new_motion_state(delta, init_pos, pos, dest):  ## PURE
   # Where to put ourselves next
 	var speed = min(dist_total*2, MAX_SPEED)
 	motion = dir * speed * delta
-	motion.y /= 2
-	var projected_pos = pos + motion
-	var coming_in_hot = motion.length() > 0 && speed >= pos.distance_to(dest)
-	motion = ( projected_pos - pos ) if not coming_in_hot else ( dest - pos )
+	motion.y *= 0.5
+	var coming_in_hot = motion.length() > 0 && motion.length() >= pos.distance_to(dest)
+	motion = motion if not coming_in_hot else ( dest - pos )
+	if coming_in_hot:
+		pass
 
 	var jump_completion = dist_covered / dist_total if dist_total > 0 else 1
 	jump_height = sin(deg2rad(180*jump_completion)) * dist_total * -0.2

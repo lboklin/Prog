@@ -31,15 +31,16 @@ func _fixed_process(delta):
 	if self.is_network_master():
 
 		var dests = get_jumps()["destinations"]
+		var init_pos = get_jumps()["active_jump_origin"]
 		var weapon = get_weapon_state()
 		var pos = get_pos()
 		rset_unreliable("slave_pos", pos)
 
 		if dests.size() > 0:
-			var jump_origin = get_jumps()["active_jump_origin"]
-			if jump_origin == null:
-				jump_origin = pos
-			rpc("set_motion_state", new_motion_state(delta, jump_origin, pos, dests[0]))
+			if init_pos == null:
+				init_pos = pos
+				set_jumps(init_pos, dests)
+			rpc("set_motion_state", new_motion_state(delta, init_pos, pos, dests[0]))
 			if dests.size() > JUMP_Q_LIM:
 				dests.resize(JUMP_Q_LIM + 1)
 		else:
@@ -63,16 +64,17 @@ func _fixed_process(delta):
 func _unhandled_input(ev):
 	mouse_pos = get_global_mouse_pos()
 	if Input.is_action_just_pressed("move_to"):
-		var jumps = get_jumps()
-		if not (jumps["destinations"].size() > 0 and
-					mouse_pos == jumps["destinations"].back()):
-			jumps["destinations"].append(mouse_pos)
-		set_jumps(jumps["active_jump_origin"], jumps["destinations"])
-		spawn_click_indicator(mouse_pos, "move_to")
+		var dests = get_jumps()["destinations"]
+		var init_pos = get_jumps()["active_jump_origin"]
+		if not (( dests.size() > 0 ) and ( mouse_pos == dests.back() )):
+			init_pos = init_pos if dests.size() > 0 else get_pos()
+			dests.append(mouse_pos)
+			set_jumps(init_pos, dests)
+			spawn_click_indicator(mouse_pos, "move_to")
 	if Input.is_action_just_pressed("attack"):
 		var weapon = get_weapon_state()
 		weapon["target_loc"] = mouse_pos
-		set_weapon_state(weapon)
+		set_weapon_state(weapon["state"], mouse_pos, weapon["cooldown_timer"])
 		rset("slave_atk_loc", weapon["target_loc"])
 	if ev.is_action_pressed("spawn_enemy"):  # Spawn aggressive bot
 		spawn_enemy(rand_loc(mouse_pos, 200, 600))
