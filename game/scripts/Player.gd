@@ -25,25 +25,32 @@ func spawn_click_indicator(pos, anim):
 func _fixed_process(delta):
 
 	# Update all states, timers and other statuses and end processing here if stunned
-	update_states(delta, get_state(), get_condition_timers())
+	var t = update_states(delta, get_state(), get_condition_timers()) # Yes, temporary inelegancy
+	var state = t[0]
+	state["position"] = get_pos()
+	var ctimers = set_condition_timers(t[1])
 
-	if get_state()["condition"] == STUNNED:
+#	if not ctimers.empty():
+#		var conditions = ctimers.keys()
+#		var timers = ctimers.values()
+#		for i in ctimers.size():
+#			apply_condition_timer(conditions[i], values[i])
+	if state["condition"] == STUNNED:
 		return
 
 	if self.is_network_master():
 
 		var path = get_path()
 		var weapon = get_weapon_state()
-		var pos = get_pos()
-		rset_unreliable("slave_pos", pos)
+		rset_unreliable("slave_pos", state["position"])
 
 		if path["to"].size() > 0:
 			if path["to"].size() > JUMP_Q_LIM:
 				path["to"].resize(JUMP_Q_LIM + 1)
 			if path["from"] == null:
-				path["from"] = pos
+				path["from"] = state["position"]
 			set_path(path)
-			rpc("set_motion_state", path, new_motion_state(delta, path, get_state()))
+			rpc("set_motion_state", path, new_motion_state(delta, path, state), get_condition_timers())
 #		else:
 #			rpc("set_motion_state", { "motion" : Vector2(0,0), "jump_height" : 0 })
 
@@ -52,9 +59,12 @@ func _fixed_process(delta):
 
 		var focus = weapon["target_loc"] if get_state() == BUSY else ( path["to"][0] if get_state() == MOVING else mouse_pos )
 		rset("slave_focus", focus)
-		look_towards(focus)
+
+		var insignia = get_node("Sprite/Insignia")
+		look_towards(delta, state["position"], insignia.get_rot(), focus)
 	else:
-		look_towards(slave_focus)
+		var insignia = get_node("Sprite/Insignia")
+		look_towards(delta, state["position"], insignia.get_rot(), slave_focus)
 
 
 #####################################################################

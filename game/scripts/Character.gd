@@ -42,7 +42,7 @@ var p_condition_timers = {
 #	"dead"				: 0.0,
 #	"respawning"		: 0.0,
 #	"busy"				: 0.0,
-} setget apply_condition_timer, get_condition_timers
+} setget set_condition_timers, get_condition_timers
 
 var p_path = {
 	"from"				: null,
@@ -76,7 +76,7 @@ sync func set_state(new_state):
 		new_state["action"] = Action.IDLE
 
 	p_state = new_state
-	return
+	return p_state
 
 func get_state():
 	return p_state
@@ -84,8 +84,9 @@ func get_state():
 #-------------
 # General state
 
-func apply_condition_timer(condition, value):
-	p_condition_timers[condition] = value
+func set_condition_timers(cts):
+	p_condition_timers = cts
+	return p_condition_timers
 
 func get_condition_timers():
 	return p_condition_timers
@@ -96,7 +97,7 @@ func get_condition_timers():
 
 sync func set_path(new_path):
 	p_path = new_path
-	return
+	return p_path
 
 func get_path():
 	return p_path
@@ -107,7 +108,7 @@ func get_path():
 
 func set_weapon_state(new_state):
 	p_weapon_state = new_state
-	return
+	return p_weapon_state
 
 func get_weapon_state():
 	return p_weapon_state
@@ -118,7 +119,7 @@ func get_weapon_state():
 
 func set_shield_state(new_state):
 	p_shield_state = new_state
-	return
+	return p_shield_state
 
 func get_shield_state():
 	return p_shield_state
@@ -129,62 +130,64 @@ func get_shield_state():
 
 
 # This method modifies the member vars
-func update_states(delta, state, condition_t):  ## PURE
+func update_states(delta, state, ctimers):  ## PURE
 
 #	var state = get_state()
 #	var ct = get_condition_timers()
 
 	## TODO: generalize the if conditions below ##
-#	for timer in condition_t:
+#	for timer in ctimers:
 #		timer -=delta
 #		if timer <= 0:
-#			condition_t.erase(timer)
+#			ctimers.erase(timer)
 #		elif state["condition"] != Condition
 	################################################
 
-	if not condition_t.empty():
+	if ctimers.empty():
+		state["condition"] = OK
+	else:
 		# Check if stunned
-		if condition_t.has("stunned"):
-			condition_t["stunned"] -= delta
-			if condition_t["stunned"] <= 0:
-				condition_t.erase("stunned")
+		if ctimers.has("stunned"):
+			ctimers["stunned"] -= delta
+			if ctimers["stunned"] <= 0:
+				ctimers.erase("stunned")
 			elif state["condition"] != Condition.STUNNED:
 				state["condition"] = Condition.STUNNED
-				return [state, condition_t]
+				return [state, ctimers]
 		# We will adjust state next time around instead of rechecking
 		elif state["condition"] == Condition.STUNNED:
 			state["action"] = Action.IDLE
-			return [state, condition_t]
+			return [state, ctimers]
 
 		# Check if performing an action
-		if condition_t.has("busy"):
-			condition_t["busy"] -= delta
-			if condition_t["busy"] <= 0:
-				condition_t.erase("busy")
+		if ctimers.has("busy"):
+			ctimers["busy"] -= delta
+			if ctimers["busy"] <= 0:
+				ctimers.erase("busy")
 			elif state["condition"] != Condition.BUSY:
 				state["condition"] = Condition.BUSY
-				return [state, condition_t]
+				return [state, ctimers]
 		# We will adjust state next time around instead of rechecking
 		elif state["condition"] == Condition.BUSY:
 			state["action"] = Action.IDLE
-			return [state, condition_t]
+			return [state, ctimers]
 
 		# Check if supposed to respawn (is dead)
-		if condition_t.has("respawn"):
-			condition_t["respawn"] -= delta
-			if condition_t["respawn"] <= 0:
-				condition_t.erase("respawn")
+		if ctimers.has("respawn"):
+			ctimers["respawn"] -= delta
+			if ctimers["respawn"] <= 0:
+				ctimers.erase("respawn")
+				ctimers.erase("dead")
+				state["condition"] = Condition.RESPAWNING
 			elif state["condition"] != DEAD:
 				state["condition"] = Condition.DEAD
-				return [state, condition_t]
+				return [state, ctimers]
 		# We will adjust state next time around instead of rechecking
 		elif state["condition"] == DEAD:
 			state["condition"] = Condition.RESPAWNING
-			return [state, condition_t]
-	if state["condition"] == Condition.DEAD:
-		condition_t["dead"] += delta
-	elif condition_t.has("dead"):
-		condition_t.erase("dead")
+			return [state, ctimers]
+
+	return[state, ctimers]
 
 	## TODO: Do something about this mess. It messes with my purity.
 
@@ -226,24 +229,25 @@ func success(chance):  ## IMPURE
 ##################################################
 
 # Rotates the insignia sprite towards the given point (point is not relative to prog)
-master func look_towards(point):  ## IMPURE
+master func look_towards(delta, self_pos, self_rot, point):  ## PURE
 
-	var delta = get_fixed_process_delta_time()
-	var dir = point - get_pos()
+	var dir = point - self_pos
 	dir.y *= 2
 	dir = dir.normalized()
 
 	# Need to compensate with offset of the dir because the
 	# viewport only includes quadrant IV so sprite had to be moved into it
 	# Don't waste any more time looking at this. Just leave it. This is how it is.
-	var insignia = find_node("InsigniaSprite")
-	var dir_compensated = dir + insignia.get_pos()
-	var angle = insignia.get_angle_to(dir_compensated)
+#	var insignia = find_node("InsigniaSprite")
+#	var dir_compensated = dir + insignia.get_pos()
+	var dir_compensated = dir + Vector2(4, -52) # Offset of insignia sprite
+	var angle = self_pos.angle_to(dir_compensated)
 	var s = sign(angle)
 	angle = abs(angle)
 	var rot_speed = 2
 	var rot = min(angle, (delta*rot_speed*angle*angle)+0.1)*s
-	insignia.rotate(rot)
+	return rot
+#	insignia.rotate(rot)
 #	insignia.rpc("rotate", rot)
 
 
@@ -336,7 +340,8 @@ master func attack(loc):  ## IMPURE
 #	return
 
 
-sync func animate_jump(jump_height):  ## IMPURE
+sync func animate_jump(state, path):  ## IMPURE
+	var jump_height = state["height"]
 	# If we're not in the air, just set everything
 	# accordingly and skip the calculations.
 	if jump_height <= 0:
@@ -344,12 +349,14 @@ sync func animate_jump(jump_height):  ## IMPURE
 		set_z(1)  # Back onto ground
 		get_node("Sprite").set_pos(Vector2(0, 0))  # y is jump height
 
-		var path = get_path()
-		path["from"] = null
-		path["to"].pop_front()
-		set_path(path)
+		if not state["motion"].length() > 0:
+			path["from"] = null
+			path["to"].pop_front()
+			set_path(path)
 
-		apply_condition_timer("stunned", JUMP_CD)
+			var cts = get_condition_timers()
+			cts["stunned"] = JUMP_CD
+			set_condition_timers(cts)
 	else:
 		var sprite_pos = Vector2(0, -1) * jump_height
 		var shadow_scale = ( 1 - 0.08 * sin(deg2rad(-1 * jump_height)) )
@@ -375,7 +382,7 @@ sync func set_motion_state(path, state, condition_timers):  ## IMPURE
 		path["from"] = state["position"] if path["to"].size() > 0 else null
 		set_path(path)
 
-	animate_jump(state["height"])
+	animate_jump(state, path)
 
 	# Check if (supposed to be) moving and apply motion
 	if (state["motion"].length() > 0 or path["to"].size() > 0):
@@ -409,7 +416,8 @@ master func new_motion_state(delta, path, state):  ## PURE
 	var speed = min(dist_total*2, MAX_SPEED)
 	state["motion"] = dir * speed * delta
 	state["motion"].y *= 0.5
-	var coming_in_hot = state["motion"].length() > 0 && state["motion"].length() >= state["position"].distance_to(path["to"][0])
+	# If about to overshoot destination
+	var coming_in_hot = ( state["motion"].length() > 0 ) and ( state["motion"].length() >= state["position"].distance_to(path["to"][0]) )
 	if coming_in_hot:
 		state["motion"] = path["to"][0] - state["position"]
 
