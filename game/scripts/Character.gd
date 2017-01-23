@@ -359,7 +359,7 @@ sync func animate_jump(state, path):  ## IMPURE
 			set_condition_timers(cts)
 	else:
 		var sprite_pos = Vector2(0, -1) * jump_height
-		var shadow_scale = ( 1 - 0.08 * sin(deg2rad(-1 * jump_height)) )
+		var shadow_scale = ( 0.45 - 0.08 * -cos(deg2rad(jump_height)) )
 		# Use shadow scale as a basis for the opacity too
 		var shadow_opacity = shadow_scale
 		# Then convert the scale into the proper type
