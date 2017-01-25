@@ -129,7 +129,6 @@ func get_shield_state():
 ##########################
 
 
-# This method modifies the member vars
 func update_states(delta, state, ctimers):  ## PURE
 
 #	var state = get_state()
@@ -224,31 +223,47 @@ func success(chance):  ## IMPURE
 
 	if diceroll <= (chance * delta):
 		return true
+	else:
+		false
 
 
 ##################################################
 
-# Rotates the insignia sprite towards the given point (point is not relative to prog)
-master func look_towards(delta, self_pos, self_rot, point):  ## PURE
-
-	var dir = point - self_pos
+# For rotating the insignia sprite towards the given point (point is in global coords)
+master func new_rot(delta, current_pos, current_rot, point):  ## PURE
+	var dir = point - current_pos
 	dir.y *= 2
-	dir = dir.normalized()
 
-	# Need to compensate with offset of the dir because the
-	# viewport only includes quadrant IV so sprite had to be moved into it
-	# Don't waste any more time looking at this. Just leave it. This is how it is.
-#	var insignia = find_node("InsigniaSprite")
-#	var dir_compensated = dir + insignia.get_pos()
-	var dir_compensated = dir + Vector2(4, -52) # Offset of insignia sprite
-	var angle = self_pos.angle_to(dir_compensated)
-	var s = sign(angle)
-	angle = abs(angle)
-	var rot_speed = 2
-	var rot = min(angle, (delta*rot_speed*angle*angle)+0.1)*s
-	return rot
-#	insignia.rotate(rot)
-#	insignia.rpc("rotate", rot)
+	# Use degrees 'cause it be more intuitive
+	var new_rot = rad2deg(dir.angle())
+	current_rot = rad2deg(current_rot)
+
+	# Always count rot in the positive
+	while new_rot < 0:
+		new_rot = new_rot + 360
+	while current_rot < 0:
+		current_rot = current_rot + 360
+
+	var d_angle_deg = new_rot - current_rot
+
+	var s = sign(d_angle_deg)
+	var d_angle_deg = abs(d_angle_deg)
+
+	# Don't go the long way around, it's stupid
+	if d_angle_deg > 180:
+		s *= -1
+		d_angle_deg = 360 - d_angle_deg
+
+	# Now go back to radians to make Godot happy
+	var d_angle = deg2rad(d_angle_deg)
+
+	var rot_speed = 0.5
+	var min_rot_speed = 0.05
+
+	var smooth_rot_speed = delta * rot_speed * d_angle * d_angle
+	var d_rot = s * min(d_angle, max(smooth_rot_speed, min_rot_speed))
+
+	return d_rot
 
 
 # Get hit (and die - at least until better implementation is implemented)
