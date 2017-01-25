@@ -1,8 +1,25 @@
-# Prog
-Prototype stage, minimalistic sci-fi game built with Godot Engine.
+# **PROG**
 
-The goal of this project is to try and fill the void of isometric combat
-in a style similar to that in Conquer Online. 
+Minimalistic arena-style PvP-game with a click-to-move control scheme and an emphasis on mouse-aim precision and predicting the movements of your opponent(s).
 
-Fully Open Source. Contribute or fork to your hearts desire
-for everyone's benefit.
+The main goals of this project are to:
+
+* **Try and fill the void of isometric combat in a style similar to that in _Conquer Online 2.0_** as I knew it before the addition of the 131+ levels and additional classes (Ninjas and Pirates and whatever else) which happened around 2008.
+* **Offer first-class support for the GNU/Linux PC and SteamOS platform.**
+    _Note: Support for Mac and Windows is trivially provided, but I will leave that up to the community._
+
+The project is Open Source under the AGPLv3 for the ultimate end-user freedom experience. Contribute or fork to your hearts desire for the benefit of those who wants to see this reach its full potential.
+
+The project is in heavy flux and core code is being rewritten all the time (well.. when I _have_ time). As such, changes will break things and the game will go through several iterations to see what works and what doesn't.
+
+Don't hesitate to contribute with ideas or code. Contributing code is a little awkward at the moment because the project uses an unstable build of the Godot Engine because the multiplayer rewrite demands some very recently implemented features which have not yet been added to the stable version (and likely won't until 3.0), and the master branch of Godot is right now in an even more unstable state, so I would recommend finding a dev-build from sometime in november last year.
+
+Roadmap:
+
+* [ ] Multiplayer _(In Progress - see the multiplayer branch)_
+* [ ] Gaining points for eliminating another Prog
+* [ ] Round start and end with a timer and/or alt. win conditions and a useful lobby
+    * [ ] Respawn mechanic tied to round timer
+* [ ] Energy shields and some form of stamina/energy bar
+* [ ] Power stations to give a reason to stay around an area
+* [ ] Add non-placeholder art
