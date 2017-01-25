@@ -96,6 +96,8 @@ func _unhandled_input(ev):
 
 
 func _ready():
+	get_node("Sprite").set_modulate(primary_color)
+	insignia.set_modulate(secondary_color)
 	if self.is_network_master():
 		set_process_unhandled_input(true)
 	set_fixed_process(true)

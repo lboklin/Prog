@@ -17,7 +17,7 @@ enum Power {ON, OFF}
 
 slave var slave_pos = Vector2()
 slave var slave_atk_loc = Vector2()
-slave var slave_motion = Vector2()
+#slave var slave_motion = Vector2()
 slave var slave_focus = Vector2()
 
 # Counters
@@ -27,7 +27,7 @@ var points = 0
 
 ## Dicts
 
-var p_state = {
+sync var p_state = {
 	"condition"			: Condition.OK,
 	"action"			: Action.IDLE,
 	"action_timer"		: 0.0,
@@ -206,25 +206,12 @@ func update_states(delta, state, ctimers):  ## PURE
 
 
 # Produce a random point inside a circle of a given radius
-func rand_loc(location, radius_min, radius_max):  ## IMPURE
+func rand_loc(location, radius_min, radius_max):  ## PURE
 
 	var new_radius = rand_range(radius_min, radius_max)
 	var angle = deg2rad(rand_range(0, 360))
 	var point_on_circ = Vector2(new_radius, 0).rotated(angle)
 	return location + point_on_circ
-
-
-# Take a probability percentage and return true or false after diceroll
-func success(chance):  ## IMPURE
-
-	var delta = get_fixed_process_delta_time()
-	var diceroll = rand_range(0, 100)
-	randomize()
-
-	if diceroll <= (chance * delta):
-		return true
-	else:
-		false
 
 
 ##################################################
@@ -308,18 +295,17 @@ func respawn():  ## IMPURE
 
 	set_shield_state(Power.ON, 2.0)
 	rpc("set_path", { "from" : null, "to" : [] })
-#	set_path({ "from" : null, "to" : [] })
 
 
 # Attack given location (not relative to prog)
 master func attack(loc):  ## IMPURE
+	return
 
 #	var not_the_time_to_use_that = moving || busy
 #	var state = get_state()
 #	if state["action"] == Action.IDLE and get_weapon_state()["power"] == ON:
 #		state["action"] = Condition.BUSY
 #		set_state(state)
-	return
 #
 #		## PLACEHOLDER  ##########
 #		GameRound.points += 1  ##
@@ -338,21 +324,6 @@ master func attack(loc):  ## IMPURE
 #
 #		gget_weapon_state()["timer"] = weapon_cooldown
 #		self.state["timer"] = 0.2
-
-
-# This one stops your movement..
-#sync func reset_motion_state():  ## IMPURE
-#	set_monitorable(true)  # Can be detected by other bodies and areas
-#	set_z(1)  # Back onto ground
-#	get_node("Sprite").set_pos(Vector2(0, 0))  # y is jump height
-#
-#	var p = get_path()
-#	p["from"] = null
-#	set_path(p)
-#
-#	apply_condition_timer("stunned", JUMP_CD)
-#
-#	return
 
 
 sync func animate_jump(state, path):  ## IMPURE
