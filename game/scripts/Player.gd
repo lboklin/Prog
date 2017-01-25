@@ -5,7 +5,9 @@ onready var insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite
 var mouse_pos = Vector2()
 
 # Spawn an NPC to play with
-#sync func spawn_enemy(loc):
+sync func spawn_enemy(loc):
+	return
+	## Bot.gd needs serious cleanup before we can do this again
 #	var enemy = preload("res://npc/Bot.tscn").instance()
 #	enemy.set_pos(loc)
 #	get_parent().add_child(enemy)
@@ -28,16 +30,11 @@ func _fixed_process(delta):
 	mouse_pos = get_global_mouse_pos()
 
 	# Update all states, timers and other statuses and end processing here if stunned
-	var t = update_states(delta, get_state(), get_condition_timers()) # Yes, temporary inelegancy
-	var state = t[0]
+	var tmp = update_states(delta, get_state(), get_condition_timers()) # Yes, temporary inelegancy
+	var state = tmp[0]
 	state["position"] = get_pos()
-	var ctimers = set_condition_timers(t[1])
+	var ctimers = set_condition_timers(tmp[1])
 
-#	if not ctimers.empty():
-#		var conditions = ctimers.keys()
-#		var timers = ctimers.values()
-#		for i in ctimers.size():
-#			apply_condition_timer(conditions[i], values[i])
 	if state["condition"] == STUNNED:
 		return
 
@@ -87,7 +84,7 @@ func _unhandled_input(ev):
 		weapon["target_loc"] = mouse_pos
 		set_weapon_state(weapon)
 		rset("slave_atk_loc", weapon["target_loc"])
-	if ev.is_action_pressed("spawn_enemy"):  # Spawn aggressive bot
+	if ev.is_action_pressed("spawn_enemy"):
 		spawn_enemy(rand_loc(mouse_pos, 200, 600))
 	if ev.is_action_pressed("quit_game"):
 		get_tree().quit()
