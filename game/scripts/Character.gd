@@ -129,7 +129,7 @@ func get_shield_state():
 ##########################
 
 
-func update_states(delta, state, ctimers):  ## PURE
+func update_states(delta, state, ctimers):  ## PURE (but needs a more complete solution)
 
 #	var state = get_state()
 #	var ct = get_condition_timers()
@@ -222,16 +222,16 @@ master func new_rot(delta, current_pos, current_rot, point):  ## PURE
 	dir.y *= 2
 
 	# Use degrees 'cause it be more intuitive
-	var new_rot = rad2deg(dir.angle())
-	current_rot = rad2deg(current_rot)
+	var new_rot_deg = rad2deg(dir.angle())
+	var current_rot_deg = rad2deg(current_rot)
 
 	# Always count rot in the positive
-	while new_rot < 0:
-		new_rot = new_rot + 360
-	while current_rot < 0:
-		current_rot = current_rot + 360
+	while new_rot_deg < 0:
+		new_rot_deg = new_rot_deg + 360
+	while current_rot_deg < 0:
+		current_rot_deg = current_rot_deg + 360
 
-	var d_angle_deg = new_rot - current_rot
+	var d_angle_deg = new_rot_deg - current_rot_deg
 
 	var s = sign(d_angle_deg)
 	var d_angle_deg = abs(d_angle_deg)
@@ -244,17 +244,24 @@ master func new_rot(delta, current_pos, current_rot, point):  ## PURE
 	# Now go back to radians to make Godot happy
 	var d_angle = deg2rad(d_angle_deg)
 
-	var rot_speed = 0.5
-	var min_rot_speed = 0.05
+	var rot_speed = 3
+	var min_rot_speed = 0.04
 
 	var smooth_rot_speed = delta * rot_speed * d_angle * d_angle
 	var d_rot = s * min(d_angle, max(smooth_rot_speed, min_rot_speed))
+	var new_rot = current_rot + d_rot
 
-	return d_rot
+	# Don't keep inflating the rot value
+	if new_rot > 2*PI:
+		new_rot -= 2*PI
+	elif new_rot < 0:
+		new_rot += 2*PI
+
+	return new_rot
 
 
 # Get hit (and die - at least until better implementation is implemented)
-func hit():  ## IMPURE
+func hit():  ## IMPURE (Could be purified?)
 	return
 #	var state = get_state()
 #	var condition_timers = get_condition_timers()
@@ -288,7 +295,7 @@ func hit():  ## IMPURE
 
 
 # Well, this one makes you respawn
-func respawn():  ## IMPURE
+func respawn():  ## IMPURE BD
 
 	set_monitorable(true)  # Enable detecondition_tion by other bodies and areas
 	set_pos(rand_loc(Vector2(0,0), 0, 1000))
@@ -298,7 +305,7 @@ func respawn():  ## IMPURE
 
 
 # Attack given location (not relative to prog)
-master func attack(loc):  ## IMPURE
+master func attack(loc):  ## IMPURE BD
 	return
 
 #	var not_the_time_to_use_that = moving || busy
@@ -322,11 +329,11 @@ master func attack(loc):  ## IMPURE
 #		projectile.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
 #		get_parent().add_child(projectile)
 #
-#		gget_weapon_state()["timer"] = weapon_cooldown
+#		get_weapon_state()["timer"] = weapon_cooldown
 #		self.state["timer"] = 0.2
 
 
-sync func animate_jump(state, path):  ## IMPURE
+sync func animate_jump(state, path):  ## IMPURE BD
 	var jump_height = state["height"]
 	# If we're not in the air, just set everything
 	# accordingly and skip the calculations.
@@ -358,7 +365,7 @@ sync func animate_jump(state, path):  ## IMPURE
 	return
 
 
-sync func set_motion_state(path, state, condition_timers):  ## IMPURE
+sync func set_motion_state(path, state, condition_timers):  ## IMPURE BD
 
 	# Check if there are any jumps queued and
 	# if so pop any that hold our current pos.
@@ -411,8 +418,3 @@ master func new_motion_state(delta, path, state):  ## PURE
 	state["height"] = sin(deg2rad(180*jump_completion)) * dist_total * 0.2
 
 	return state
-
-
-#####################################################################
-#####################################################################
-#####################################################################

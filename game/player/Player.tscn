@@ -31,8 +31,8 @@ linear_damp = 0.1
 angular_damp = 1.0
 script/script = ExtResource( 1 )
 __meta__ = { "__editor_plugin_screen__":"3D" }
-primary_color = Color( 0, 0, 0, 1 )
-secondary_color = Color( 0, 0, 0, 1 )
+primary_color = Color( 0.640625, 0.212708, 0.212708, 1 )
+secondary_color = Color( 0.109375, 0.0303345, 0.0303345, 1 )
 
 [node name="Shadow" type="Sprite" parent="."]
 

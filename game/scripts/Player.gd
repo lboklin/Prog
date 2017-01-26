@@ -57,13 +57,18 @@ func _fixed_process(delta):
 		if weapon["target_loc"] != null:
 			attack(weapon["target_loc"])
 
-		var focus = weapon["target_loc"] if get_state() == BUSY else ( path["to"][0] if get_state() == MOVING else mouse_pos )
+		var focus = weapon["target_loc"] if state["action"] == BUSY else ( path["to"][0] if state["action"] == MOVING else mouse_pos )
 		rset("slave_focus", focus)
 
 		var current_rot = insignia.get_rot()
-		insignia.rotate(new_rot(delta, state["position"], current_rot, focus))
+		var new_rot = new_rot(delta, state["position"], current_rot, focus)
+		print(new_rot)
+		insignia.set_rot(new_rot)
 	else:
-		new_rot(delta, state["position"], insignia.get_rot(), slave_focus)
+		var current_rot = insignia.get_rot()
+		var new_rot = new_rot(delta, state["position"], current_rot, slave_focus)
+
+		insignia.set_rot(new_rot)
 
 
 #####################################################################
