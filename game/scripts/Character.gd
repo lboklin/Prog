@@ -36,6 +36,7 @@ const JUMP_Q_LIM = 2  # Jump queue limit
 
 onready var nd_shadow = get_node("Shadow")
 onready var nd_shadow_opacity = nd_shadow.get_opacity()
+onready var nd_shadow_scale = nd_shadow.get_scale()
 onready var nd_sprite = get_node("Sprite")
 
 # State enums
@@ -368,8 +369,9 @@ sync func animate_jump(state, path):  ## IMPURE BD
 	if jump_height <= 0:
 		set_monitorable(true)  # Can be detected by other bodies and areas
 		set_z(1)  # Back onto ground
-		nd_sprite.set_pos(Vector2(0, 0))  # y is jump height
+		nd_sprite.set_pos(Vector2(0, 0))
 		nd_shadow.set_opacity(nd_shadow_opacity)
+		nd_shadow.set_scale(nd_shadow_scale)
 
 		if not state["motion"].length() > 0:
 			path["from"] = null
@@ -380,17 +382,27 @@ sync func animate_jump(state, path):  ## IMPURE BD
 			cts["stunned"] = JUMP_CD
 			set_condition_timers(cts)
 	else:
-		var sprite_pos = Vector2(0, -1) * jump_height
+		# Set sprite vertical pos based on height and adjusted for the perspective
+		var sprite_pos = Vector2(0, -1) * ( jump_height / 2 )
 
-		var no_shadow_h = 256
+		# Since the lightsource is ~26 degrees rotated downwards vertically
+		# the shadow should project about halfway between directly below
+		# and (from the camera's perspective) directly behind the Prog.
+		var shadow_pos = sprite_pos * 0.5
+
+		var no_shadow_h = 800
 		var shadow_opacity = 1 - max(0, min(1, ( jump_height / no_shadow_h )))
 		shadow_opacity *= nd_shadow_opacity
 		if shadow_opacity > nd_shadow_opacity:
 			print("That's not right...")
-#		shadow_scale *= Vector2(1, 1)
+
+		var shadow_shrink_ratio = Vector2(0.8, 0.5) * max(0, min(1, ( jump_height / (no_shadow_h*4) )))
+		var shadow_scale = Vector2(1, 1) - shadow_shrink_ratio
+		shadow_scale *= nd_shadow_scale
 
 		nd_sprite.set_pos(sprite_pos)
-#		nd_shadow.set_scale(shadow_scale)
+		nd_shadow.set_pos(shadow_pos)
+		nd_shadow.set_scale(shadow_scale)
 		nd_shadow.set_opacity(shadow_opacity)
 		set_z(jump_height + 1)  # +1 to render after everything below
 	return
@@ -446,6 +458,6 @@ master func new_motion_state(delta, path, state):  ## PURE
 		state["motion"] = path["to"][0] - state["position"]
 
 	var jump_completion = dist_covered / dist_total if dist_total > 0 else 1
-	state["height"] = sin(deg2rad(180*jump_completion)) * dist_total * 0.2
+	state["height"] = sin(PI*jump_completion) * dist_total * 0.4
 
 	return state

@@ -62,7 +62,6 @@ func _fixed_process(delta):
 
 		var current_rot = insignia.get_rot()
 		var new_rot = new_rot(delta, state["position"], current_rot, focus)
-#		print(new_rot)
 		insignia.set_rot(new_rot)
 	else:
 		var current_rot = insignia.get_rot()
