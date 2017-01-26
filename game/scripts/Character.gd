@@ -1,3 +1,27 @@
+"""
+The base character class which is meant to be
+inherited by all characters. It contains necessary
+common functions for it to behave like a character,
+but does not have a process of its own.
+It is designed to be inherited in particular by
+player characters and bots.
+
+Functions are to be as pure as possible, meaning
+that they should cause no or as few side effects as
+possible, and they should ideally always return
+the same value when the arguments provided have the
+same value. This makes it much easier to predict
+the results and also allows for easier syncing
+between clients over a network.
+
+In an effort to provide an overview of which funcs
+are pure and which are not, each one is tagged inline
+with either '## PURE' or '## IMPURE', and 'BD' appended
+if the function is impure "by design", and thus
+discourages looking through it again in hopes of
+purifying it.
+"""
+
 extends Area2D
 
 # Your Prog's very own beautiful color scheme
@@ -9,6 +33,10 @@ const JUMP_CD = 0.1  # Jump cooldown after landing
 const MAX_SPEED = 1500  # Max horizontal (ground) speed
 const MAX_JUMP_RANGE = 1000  # How far you can jump from any given starting pos
 const JUMP_Q_LIM = 2  # Jump queue limit
+
+onready var nd_shadow = get_node("Shadow")
+onready var nd_shadow_opacity = nd_shadow.get_opacity()
+onready var nd_sprite = get_node("Sprite")
 
 # State enums
 enum Condition {OK, DEAD, RESPAWNING, STUNNED, BUSY}
@@ -340,7 +368,8 @@ sync func animate_jump(state, path):  ## IMPURE BD
 	if jump_height <= 0:
 		set_monitorable(true)  # Can be detected by other bodies and areas
 		set_z(1)  # Back onto ground
-		get_node("Sprite").set_pos(Vector2(0, 0))  # y is jump height
+		nd_sprite.set_pos(Vector2(0, 0))  # y is jump height
+		nd_shadow.set_opacity(nd_shadow_opacity)
 
 		if not state["motion"].length() > 0:
 			path["from"] = null
@@ -352,16 +381,18 @@ sync func animate_jump(state, path):  ## IMPURE BD
 			set_condition_timers(cts)
 	else:
 		var sprite_pos = Vector2(0, -1) * jump_height
-		var shadow_scale = ( 0.45 - 0.08 * -cos(deg2rad(jump_height)) )
-		# Use shadow scale as a basis for the opacity too
-		var shadow_opacity = shadow_scale
-		# Then convert the scale into the proper type
-		shadow_scale *= Vector2(1, 1)
 
-		get_node("Sprite").set_pos(sprite_pos)
-		get_node("Shadow").set_scale(shadow_scale)
-		get_node("Shadow").set_opacity(shadow_opacity)
-		set_z(jump_height + 1)  # To render after everything below
+		var no_shadow_h = 256
+		var shadow_opacity = 1 - max(0, min(1, ( jump_height / no_shadow_h )))
+		shadow_opacity *= nd_shadow_opacity
+		if shadow_opacity > nd_shadow_opacity:
+			print("That's not right...")
+#		shadow_scale *= Vector2(1, 1)
+
+		nd_sprite.set_pos(sprite_pos)
+#		nd_shadow.set_scale(shadow_scale)
+		nd_shadow.set_opacity(shadow_opacity)
+		set_z(jump_height + 1)  # +1 to render after everything below
 	return
 
 

@@ -62,7 +62,7 @@ func _fixed_process(delta):
 
 		var current_rot = insignia.get_rot()
 		var new_rot = new_rot(delta, state["position"], current_rot, focus)
-		print(new_rot)
+#		print(new_rot)
 		insignia.set_rot(new_rot)
 	else:
 		var current_rot = insignia.get_rot()
@@ -101,8 +101,10 @@ func _unhandled_input(ev):
 
 
 func _ready():
-	get_node("Sprite").set_modulate(primary_color)
-	insignia.set_modulate(secondary_color)
+	if primary_color:
+		get_node("Sprite").set_modulate(primary_color)
+	if secondary_color:
+		get_node("Sprite/Insignia").set_modulate(secondary_color)
 	if self.is_network_master():
 		set_process_unhandled_input(true)
 	set_fixed_process(true)
