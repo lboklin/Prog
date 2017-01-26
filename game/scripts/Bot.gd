@@ -5,6 +5,8 @@ export var accuracy_percentage = 80 # Better than a stormtrooper
 
 onready var awareness_area = get_node("AwarenessArea")
 
+var fake_mouse_pos = Vector2(0,0)
+
 # Holds the active target to attack and pursue
 sync var p_botbrain = {
 	"target"			:	null,
@@ -59,7 +61,7 @@ func _fixed_process(delta):
 	if state["condition"] == STUNNED:
 		return
 
-	var mouse_pos = rand_loc(path["position"], 0, 50)
+	fake_mouse_pos = rand_loc(path["position"], 0, 1) if ( (randi() % 100) <= (60 * delta) ) else fake_mouse_pos
 
 	var focus = Vector2()
 
@@ -75,7 +77,9 @@ func _fixed_process(delta):
 		var botbrain = get_botbrain()
 
 		# Maybe attack
-		if randi() % 100 <= 45:
+		var attack_chance = 45 * delta
+		if (randi() % 100) <= (attack_chance) :
+			print(get_name(), ": Pew")
 			var aim_pos
 			var no_target = botbrain["target"] == null
 			if no_target:
@@ -87,12 +91,13 @@ func _fixed_process(delta):
 
 		# Maybe jump
 		var moving = state["motion"].length() > 0
-		var chance_of_jumping = 70 if moving else 85
-		var want_to_jump = randi() % 100 <= chance_of_jumping
+		var chance_of_jumping = ( 70 if moving else 85 ) * delta
+		var want_to_jump = (randi() % 100) <= (chance_of_jumping)
 		if want_to_jump:
 			var from = path["to"][0] if moving else path["position"]
 			var to = rand_loc(from, 50, MAX_JUMP_RANGE)
 			path["to"].append(to)
+			print(get_name(), ": Hop")
 
 		#################
 
@@ -107,7 +112,7 @@ func _fixed_process(delta):
 		if weapon["aim_pos"] != null:
 			attack(weapon["aim_pos"])
 
-		focus = weapon["aim_pos"] if ( state["action"] == BUSY ) else ( path["to"][0] if ( state["action"] == MOVING ) else mouse_pos )
+		focus = weapon["aim_pos"] if ( state["action"] == BUSY ) else ( path["to"][0] if not path["to"].empty() else fake_mouse_pos )
 		rset("slave_focus", focus)
 
 		set_botbrain(botbrain)

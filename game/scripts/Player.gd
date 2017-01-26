@@ -57,7 +57,7 @@ func _fixed_process(delta):
 		if weapon["aim_pos"] != null:
 			attack(weapon["aim_pos"])
 
-		focus = weapon["aim_pos"] if ( state["action"] == BUSY ) else ( path["to"][0] if ( state["action"] == MOVING ) else mouse_pos )
+		focus = weapon["aim_pos"] if ( state["action"] == BUSY ) else ( path["to"][0] if not path["to"].empty() else mouse_pos )
 		rset("slave_focus", focus)
 
 		set_state(state)

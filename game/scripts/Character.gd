@@ -391,7 +391,7 @@ sync func animate_jump(state, path):  ## IMPURE BD
 		# and (from the camera's perspective) directly behind the Prog.
 		var shadow_pos = sprite_pos * 0.5
 
-		var no_shadow_h = 800
+		var no_shadow_h = 1200
 		var shadow_opacity = 1 - max(0, min(1, ( jump_height / no_shadow_h )))
 		shadow_opacity *= nd_shadow_opacity
 		if shadow_opacity > nd_shadow_opacity:
