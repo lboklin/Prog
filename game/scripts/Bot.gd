@@ -3,61 +3,119 @@ extends "res://scripts/Character.gd"
 
 export var accuracy_percentage = 80 # Better than a stormtrooper
 
+onready var awareness_area = get_node("AwarenessArea")
+
 # Holds the active target to attack and pursue
-var target = null
+sync var p_botbrain = {
+	"target"			:	null,
+	"attack_location"	:	Vector2(),
+} setget set_botbrain, get_botbrain
+
+func set_botbrain(botbrain):
+	p_botbrain = botbrain
+	return botbrain
+
+func get_botbrain():
+	return p_botbrain
+
+
+func acquire_target(possible_targets):
+	var new_target = null
+	if possible_targets.size() > 0:
+		var valid_targets = []
+		for target in possible_targets:
+			if target.is_in_group("Prog") and target != self:
+				valid_targets.append(target)
+		new_target = null if valid_targets.empty() else valid_targets[randi() % valid_targets.size()]
+
+	return new_target
+
+
+func take_aim(target_path):
+	# How much bot could miss - diameter of a prog is ~90
+	var radius = 90 * 100 / accuracy_percentage
+	# Take aim, and if target is moving, aim towards where it's going
+	var aim_pos = target_path["position"] if target_path["to"].empty() else target_path["to"][0]
+	var attack_pos = rand_loc(aim_pos, 0, radius) # Generate where we (bot) accidentally/actually aimed
+
+	return attack_pos
+
+
+#####################################################################
+#####################################################################
+#####################################################################
 
 
 func _fixed_process(delta):
 
-	# Probabilities are a percentage of likelyhood within the timespan of a second
+	# Update all states, timers and other statuses and end processing here if stunned
+	var tmp = update_states(delta, get_state(), get_condition_timers()) # Yes, temporary inelegancy
+	var state = tmp[0]
+	var path = get_path()
+	var ctimers = set_condition_timers(tmp[1])
 
-	if success(45): # Maybe consider possibly attacking, perhaps
-		var awareness_area = self.get_node("AwarenessArea")
-		# Try to acquire a target
-		if self.target != null:
-			if awareness_area.overlaps_area(self.target): # If target in sight
-				# How much bot could miss - diameter of a prog is ~90
-				var radius = 90 * 100 / accuracy_percentage
-				var target_loc = Vector2()
-				if self.target.moving:
-					target_loc = self.target.jump_destination[0] # Attack target's dest
-				else:
-					target_loc = self.target.get_pos() # Attack target's current pos
-				self.attack_location = rand_loc(target_loc, 0, radius) # Generate where bot accidentally/actually aimed
-			elif not awareness_area.overlaps_body(self.target): # If target is lost
-				self.target = null # Give up
-		else:
-			var possible_targets = awareness_area.get_overlapping_areas()
-			if possible_targets.size() > 0:
-				var valid_targets = []
-				for target in possible_targets:
-					if target.is_in_group("Prog") and target != self:
-						valid_targets.append(target)
-				var target_count = valid_targets.size()
-				if target_count > 0:
-					var chosen_target = randi() % target_count # choose one of them at random
-					self.target = valid_targets[chosen_target] # make it bot's life goal to kill it.. for the moment
-				else:
-					self.target = null
+	path["position"] = get_pos()
 
-	# Maybe jump - More likely to queue jumps while already doing it
-	var want_to_jump = false
-	if not self.moving:
-		want_to_jump = success(85)
+	if state["condition"] == STUNNED:
+		return
+
+	var mouse_pos = rand_loc(path["position"], 0, 50)
+
+	var focus = Vector2()
+
+	if not is_network_master():
+		focus = slave_focus
 	else:
-		want_to_jump = success(70)
+		var path = get_path()
+		var weapon = get_weapon_state()
+		rset_unreliable("slave_pos", path["position"])
 
-	if want_to_jump:
-		var jump_dest
-		if self.moving:
-			jump_dest = rand_loc(self.jump_destination[0], 50, MAX_JUMP_RANGE)
-		else:
-			jump_dest = rand_loc(self.get_pos(), 50, MAX_JUMP_RANGE)
-		self.jump_destination.append(jump_dest)
+		## Bot things ##
 
+		var botbrain = get_botbrain()
 
+		# Maybe attack
+		if randi() % 100 <= 45:
+			var aim_pos
+			var no_target = botbrain["target"] == null
+			if no_target:
+				botbrain["target"] = acquire_target(awareness_area.get_overlapping_areas())
+			elif awareness_area.overlaps_area(botbrain["target"]):
+				weapon["aim_pos"] = take_aim(botbrain["target"].get_path())
+			else: # If target is lost
+				botbrain["target"] = null # Give up
 
-	act(delta)
+		# Maybe jump
+		var moving = state["motion"].length() > 0
+		var chance_of_jumping = 70 if moving else 85
+		var want_to_jump = randi() % 100 <= chance_of_jumping
+		if want_to_jump:
+			var from = path["to"][0] if moving else path["position"]
+			var to = rand_loc(from, 50, MAX_JUMP_RANGE)
+			path["to"].append(to)
+
+		#################
+
+		if path["to"].size() > 0:
+			if path["to"].size() > JUMP_Q_LIM:
+				path["to"].resize(JUMP_Q_LIM + 1)
+			if path["from"] == null:
+				path["from"] = path["position"]
+			set_path(path)
+			rpc("set_motion_state", path, new_motion_state(delta, path, state), get_condition_timers())
+
+		if weapon["aim_pos"] != null:
+			attack(weapon["aim_pos"])
+
+		focus = weapon["aim_pos"] if ( state["action"] == BUSY ) else ( path["to"][0] if ( state["action"] == MOVING ) else mouse_pos )
+		rset("slave_focus", focus)
+
+		set_botbrain(botbrain)
+		set_state(state)
+
+	insignia.set_rot(new_rot(delta, path["position"], insignia.get_rot(), focus))
+
+	return
 
 
 #####################################################################
@@ -67,12 +125,9 @@ func _fixed_process(delta):
 
 func _ready():
 
-	if primary_color ==  Color():
-		primary_color = Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1))
-	if secondary_color == Color():
-		secondary_color = Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1))
-
+	primary_color = Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1))
 	get_node("Sprite").set_modulate(primary_color)
-	get_node("Sprite/Insignia").set_modulate(secondary_color)
+	secondary_color = Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1))
+	get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite").set_modulate(secondary_color)
 
 	set_fixed_process(true)

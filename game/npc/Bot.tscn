@@ -22,7 +22,7 @@ polygon = Vector2Array( -257, 13, -247, 43, -212, 78, -137, 113, -47, 128, 48, 1
 custom_solver_bias = 0.0
 extents = Vector2( 1920, 1080 )
 
-[node name="Bot" type="Area2D" groups=[ "Prog" ]]
+[node name="Bot" type="Area2D" groups=[ "Prog", "Bot" ]]
 
 z/z = 1
 input/pickable = false

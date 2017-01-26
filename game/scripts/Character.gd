@@ -34,6 +34,7 @@ const MAX_SPEED = 1500  # Max horizontal (ground) speed
 const MAX_JUMP_RANGE = 1000  # How far you can jump from any given starting pos
 const JUMP_Q_LIM = 2  # Jump queue limit
 
+onready var insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
 onready var nd_shadow = get_node("Shadow")
 onready var nd_shadow_opacity = nd_shadow.get_opacity()
 onready var nd_shadow_scale = nd_shadow.get_scale()
@@ -60,7 +61,6 @@ sync var p_state = {
 	"condition"			: Condition.OK,
 	"action"			: Action.IDLE,
 	"action_timer"		: 0.0,
-	"position"			: Vector2(),
 	"motion"			: Vector2(),  # Horizontal
 	"height"			: 0  # Vertical
 } setget set_state, get_state
@@ -74,13 +74,14 @@ var p_condition_timers = {
 } setget set_condition_timers, get_condition_timers
 
 var p_path = {
+	"position"			: Vector2(),
 	"from"				: null,
 	"to"				: [],  # Take note that this is a jump queue array
 } setget set_path, get_path
 
 var p_weapon_state = {
 	"power" 			: Power.ON,
-	"target_loc"		: null,
+	"aim_pos"		: null,
 	"timer"	: 0.0
 } setget set_weapon_state, get_weapon_state
 
@@ -235,7 +236,7 @@ func update_states(delta, state, ctimers):  ## PURE (but needs a more complete s
 
 
 # Produce a random point inside a circle of a given radius
-func rand_loc(location, radius_min, radius_max):  ## PURE
+func rand_loc(location, radius_min, radius_max):  ## PURE (almost? what does rand_range() really do?)
 
 	var new_radius = rand_range(radius_min, radius_max)
 	var angle = deg2rad(rand_range(0, 360))
@@ -301,7 +302,7 @@ func hit():  ## IMPURE (Could be purified?)
 #		## Reset all active timers and states  ##
 #		var wep_st = get_weapon_state()
 #		wep_state["timer"] = 0
-#		wep_state["target_loc"] = null
+#		wep_state["aim_pos"] = null
 #		condition_timers.clear()
 #		## TODO: Fix line below
 #		self.jump["active_jump_origin"] = null
@@ -350,11 +351,11 @@ master func attack(loc):  ## IMPURE BD
 #		# Spawn projectile
 #		var character_pos = get_pos()
 #		var projectile = preload("res://common/Projectile/Projectile.tscn").instance()
-#		var attack_dir = (gget_weapon_state()["target_loc"] - character_pos)
+#		var attack_dir = (gget_weapon_state()["aim_pos"] - character_pos)
 #		attack_dir.y *= 2
 #		attack_dir = attack_dir.normalized()
 #
-#		projectile.destination = gget_weapon_state()["target_loc"]
+#		projectile.destination = gget_weapon_state()["aim_pos"]
 #		projectile.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
 #		get_parent().add_child(projectile)
 #
@@ -413,9 +414,9 @@ sync func set_motion_state(path, state, condition_timers):  ## IMPURE BD
 	# Check if there are any jumps queued and
 	# if so pop any that hold our current pos.
 	# Use while loop to catch any duplicates.
-	while path["to"].size() > 0 and state["position"] == path["to"][0]:
+	while path["to"].size() > 0 and path["position"] == path["to"][0]:
 		path["to"].pop_front()
-		path["from"] = state["position"] if path["to"].size() > 0 else null
+		path["from"] = path["position"] if path["to"].size() > 0 else null
 		set_path(path)
 
 	animate_jump(state, path)
@@ -426,7 +427,7 @@ sync func set_motion_state(path, state, condition_timers):  ## IMPURE BD
 		# This is to avoid hitting or being hit by anything while jumping.
 		set_monitorable(false)
 
-		set_pos(state["position"] + state["motion"])
+		set_pos(path["position"] + state["motion"])
 	# Stun on landing
 	elif state["action"] == Action.MOVING:
 		condition_timers["stunned"] += JUMP_CD
@@ -435,7 +436,7 @@ sync func set_motion_state(path, state, condition_timers):  ## IMPURE BD
 # Update the state of motion to reflect what is desired
 master func new_motion_state(delta, path, state):  ## PURE
 
-	var dist_covered = state["position"] - path["from"]
+	var dist_covered = path["position"] - path["from"]
 	dist_covered.y *= 2
 	dist_covered = dist_covered.length()
 
@@ -443,7 +444,7 @@ master func new_motion_state(delta, path, state):  ## PURE
 	dist_total.y *= 2
 	dist_total = dist_total.length()
 
-	var dir = path["to"][0] - state["position"]
+	var dir = path["to"][0] - path["position"]
 	dir.y *= 2
 	dir = dir.normalized()
 
@@ -453,9 +454,9 @@ master func new_motion_state(delta, path, state):  ## PURE
 	state["motion"] = dir * speed * delta
 	state["motion"].y *= 0.5
 	# If about to overshoot destination
-	var coming_in_hot = ( state["motion"].length() > 0 ) and ( state["motion"].length() >= state["position"].distance_to(path["to"][0]) )
+	var coming_in_hot = ( state["motion"].length() > 0 ) and ( state["motion"].length() >= path["position"].distance_to(path["to"][0]) )
 	if coming_in_hot:
-		state["motion"] = path["to"][0] - state["position"]
+		state["motion"] = path["to"][0] - path["position"]
 
 	var jump_completion = dist_covered / dist_total if dist_total > 0 else 1
 	state["height"] = sin(PI*jump_completion) * dist_total * 0.4
