@@ -48,7 +48,7 @@ offset = Vector2( 0.604309, -51.5539 )
 transform/scale = Vector2( 0.18, 0.18 )
 texture = ExtResource( 3 )
 offset = Vector2( 0, -134 )
-modulate = Color( 0.217712, 0.375777, 0.480469, 1 )
+modulate = Color( 0.237986, 0.167175, 0.257812, 0.655725 )
 
 [node name="Insignia" type="ViewportSprite" parent="Sprite"]
 
@@ -56,7 +56,6 @@ visibility/blend_mode = 4
 transform/pos = Vector2( 4, -52 )
 transform/scale = Vector2( 1, 0.5 )
 viewport = NodePath("InsigniaViewport")
-modulate = Color( 0.285416, 0.46762, 0.566406, 1 )
 
 [node name="InsigniaViewport" type="Viewport" parent="Sprite/Insignia"]
 
@@ -72,14 +71,15 @@ render_target/gen_mipmaps = true
 render_target/update_mode = 2
 audio_listener/enable_2d = false
 audio_listener/enable_3d = false
-physics/object_picking = false
-gui/disable_input = false
+physics/object_picking = true
+gui/disable_input = true
 
 [node name="InsigniaSprite" type="Sprite" parent="Sprite/Insignia/InsigniaViewport"]
 
 transform/pos = Vector2( 256, 256 )
 transform/scale = Vector2( 0.9, 0.9 )
 texture = ExtResource( 4 )
+modulate = Color( 0.539062, 0.120026, 0.120026, 0.437176 )
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="."]
 
