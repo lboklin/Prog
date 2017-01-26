@@ -2,7 +2,7 @@
 
 [ext_resource path="res://scripts/Player.gd" type="Script" id=1]
 [ext_resource path="res://common/Character/character-shadow-lighter.png" type="Texture" id=2]
-[ext_resource path="res://common/Character/character.png" type="Texture" id=3]
+[ext_resource path="res://common/Character/progmodel_v2-blender-fit.png" type="Texture" id=3]
 [ext_resource path="res://player/insignia.png" type="Texture" id=4]
 [ext_resource path="res://gui/HUD.tscn" type="PackedScene" id=5]
 
@@ -31,13 +31,14 @@ linear_damp = 0.1
 angular_damp = 1.0
 script/script = ExtResource( 1 )
 __meta__ = { "__editor_plugin_screen__":"3D" }
-primary_color = Color( 0.640625, 0.212708, 0.212708, 1 )
-secondary_color = Color( 0.109375, 0.0303345, 0.0303345, 1 )
+primary_color = null
+secondary_color = null
 
 [node name="Shadow" type="Sprite" parent="."]
 
+visibility/opacity = 0.5
 visibility/behind_parent = true
-transform/scale = Vector2( 0.5004, 0.5004 )
+transform/scale = Vector2( 0.5, 0.5 )
 z/z = -1
 texture = ExtResource( 2 )
 offset = Vector2( 0.604309, -51.5539 )
@@ -47,7 +48,7 @@ offset = Vector2( 0.604309, -51.5539 )
 transform/scale = Vector2( 0.18, 0.18 )
 texture = ExtResource( 3 )
 offset = Vector2( 0, -134 )
-modulate = Color( 1, 0.539001, 0.289062, 1 )
+modulate = Color( 0.217712, 0.375777, 0.480469, 1 )
 
 [node name="Insignia" type="ViewportSprite" parent="Sprite"]
 
@@ -55,6 +56,7 @@ visibility/blend_mode = 4
 transform/pos = Vector2( 4, -52 )
 transform/scale = Vector2( 1, 0.5 )
 viewport = NodePath("InsigniaViewport")
+modulate = Color( 0.285416, 0.46762, 0.566406, 1 )
 
 [node name="InsigniaViewport" type="Viewport" parent="Sprite/Insignia"]
 
@@ -76,8 +78,8 @@ gui/disable_input = false
 [node name="InsigniaSprite" type="Sprite" parent="Sprite/Insignia/InsigniaViewport"]
 
 transform/pos = Vector2( 256, 256 )
+transform/scale = Vector2( 0.9, 0.9 )
 texture = ExtResource( 4 )
-modulate = Color( 0.332031, 0.332031, 0.332031, 1 )
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="."]
 
