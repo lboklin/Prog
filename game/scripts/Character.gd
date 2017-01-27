@@ -1,8 +1,7 @@
 """
 The base character class which is meant to be
 inherited by all characters. It contains necessary
-common functions for it to behave like a character,
-but does not have a process of its own.
+common functions for it to behave like a character.
 It is designed to be inherited in particular by
 player characters and bots.
 
@@ -45,7 +44,9 @@ enum Condition {OK, DEAD, RESPAWNING, STUNNED, BUSY}
 enum Action {IDLE, MOVING, ATTACKING}
 enum Power {ON, OFF}
 
-slave var slave_pos = Vector2()
+var mouse_pos = Vector2()
+
+#slave var slave_pos = Vector2()
 slave var slave_atk_loc = Vector2()
 #slave var slave_motion = Vector2()
 slave var slave_focus = Vector2()
@@ -58,36 +59,36 @@ var points = 0
 ## Dicts
 
 sync var p_state = {
-	"condition"			: Condition.OK,
-	"action"			: Action.IDLE,
-	"action_timer"		: 0.0,
-	"motion"			: Vector2(),  # Horizontal
-	"height"			: 0  # Vertical
+	"condition" : Condition.OK,
+	"action" : Action.IDLE,
+	"action_timer" : 0.0,
+	"motion" : Vector2(),  # Horizontal
+	"height" : 0  # Vertical
 } setget set_state, get_state
 
 # Add timers when applied and remove when they expire
 var p_condition_timers = {
-#	"stunned"			: 0.0,
-#	"dead"				: 0.0,
-#	"respawning"		: 0.0,
-#	"busy"				: 0.0,
+#	"stunned" : 0.0,
+#	"dead" : 0.0,
+#	"respawning" : 0.0,
+#	"busy" : 0.0,
 } setget set_condition_timers, get_condition_timers
 
 var p_path = {
-	"position"			: Vector2(),
-	"from"				: null,
-	"to"				: [],  # Take note that this is a jump queue array
+	"position" : Vector2(),
+	"from" : null,
+	"to" : [],  # Take note that this is a jump queue array
 } setget set_path, get_path
 
 var p_weapon_state = {
-	"power" 			: Power.ON,
-	"aim_pos"		: null,
-	"timer"	: 0.0
+	"power" : Power.ON,
+	"aim_pos" : null,
+	"timer" : 0.0
 } setget set_weapon_state, get_weapon_state
 
 var p_shield_state = {
-	"power"				: Power.ON,
-	"timer"				: 2.0  # Spawn in with 2 sec protective shield
+	"power" : Power.ON,
+	"timer" : 2.0  # Spawn in with 2 sec protective shield
 } setget set_shield_state, get_shield_state
 
 
@@ -462,3 +463,75 @@ master func new_motion_state(delta, path, state):  ## PURE
 	state["height"] = sin(PI*jump_completion) * dist_total * 0.4
 
 	return state
+
+
+#####################################################################
+#####################################################################
+#####################################################################
+
+
+func _process(delta):
+	# Update all states, timers and other statuses and end processing here if stunned
+	var tmp = update_states(delta, get_state(), get_condition_timers()) # Yes, temporary inelegancy
+	var state = tmp[0]
+	var path = get_path()
+	path["position"] = get_pos()
+
+	if state["condition"] == STUNNED:
+		return
+
+	var focus = Vector2()
+
+	if is_network_master():
+		if is_in_group("Bot"):
+			mouse_pos = rand_loc(path["position"], 0, 1) if ( (randi() % 100) <= (60 * delta) ) else mouse_pos
+			var botbrain = get_botbrain()
+			botbrain = ai_processing(delta, botbrain, state)
+			path = botbrain["path"]
+			set_botbrain(botbrain)
+		else:
+            mouse_pos = get_global_mouse_pos()
+
+
+		var ctimers = tmp[1]
+		var weapon = get_weapon_state()
+
+		if path["to"].size() > 0:
+			if path["to"].size() > JUMP_Q_LIM:
+				path["to"].resize(JUMP_Q_LIM + 1)
+			if path["from"] == null:
+				path["from"] = path["position"]
+			set_path(path)
+			rpc("set_motion_state", path, new_motion_state(delta, path, state), ctimers)
+
+		if weapon["aim_pos"] != null:
+			attack(weapon["aim_pos"])
+
+		focus = weapon["aim_pos"] if ( state["action"] == BUSY ) else ( path["to"][0] if not path["to"].empty() else mouse_pos )
+		rset("slave_focus", focus)
+
+		set_state(state)
+	else:
+		focus = slave_focus
+
+	insignia.set_rot(new_rot(delta, path["position"], insignia.get_rot(), focus))
+
+	return
+
+
+######################
+######################
+######################
+
+
+func _ready():
+	if is_in_group("Bot"):
+		primary_color = Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1))
+		secondary_color = Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1))
+
+	if primary_color != null:
+		get_node("Sprite").set_modulate(primary_color)
+	if secondary_color != null:
+		get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite").set_modulate(secondary_color)
+
+	set_process(true)

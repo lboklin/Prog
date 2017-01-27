@@ -1,7 +1,5 @@
 extends "res://scripts/Character.gd"
 
-var mouse_pos = Vector2()
-
 # Spawn an NPC to play with
 sync func spawn_enemy(loc):
 #	return
@@ -17,54 +15,6 @@ func spawn_click_indicator(pos, anim):
 	indicator.set_pos(pos)
 	self.get_parent().add_child(indicator)
 	indicator.get_node("AnimationPlayer").play(anim)
-
-
-#####################################################################
-#####################################################################
-#####################################################################
-
-
-func _fixed_process(delta):
-	mouse_pos = get_global_mouse_pos()
-
-	# Update all states, timers and other statuses and end processing here if stunned
-	var tmp = update_states(delta, get_state(), get_condition_timers()) # Yes, temporary inelegancy
-	var state = tmp[0]
-	var path = get_path()
-	var ctimers = set_condition_timers(tmp[1])
-
-	path["position"] = get_pos()
-
-	if state["condition"] == STUNNED:
-		return
-
-	var focus = Vector2()
-
-	if not is_network_master():
-		focus = slave_focus
-	else:
-		var weapon = get_weapon_state()
-		rset_unreliable("slave_pos", path["position"])
-
-		if path["to"].size() > 0:
-			if path["to"].size() > JUMP_Q_LIM:
-				path["to"].resize(JUMP_Q_LIM + 1)
-			if path["from"] == null:
-				path["from"] = path["position"]
-			set_path(path)
-			rpc("set_motion_state", path, new_motion_state(delta, path, state), get_condition_timers())
-
-		if weapon["aim_pos"] != null:
-			attack(weapon["aim_pos"])
-
-		focus = weapon["aim_pos"] if ( state["action"] == BUSY ) else ( path["to"][0] if not path["to"].empty() else mouse_pos )
-		rset("slave_focus", focus)
-
-		set_state(state)
-
-	insignia.set_rot(new_rot(delta, path["position"], insignia.get_rot(), focus))
-
-	return
 
 
 #####################################################################
@@ -97,10 +47,4 @@ func _unhandled_input(ev):
 
 
 func _ready():
-	if primary_color:
-		get_node("Sprite").set_modulate(primary_color)
-	if secondary_color:
-		get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite").set_modulate(secondary_color)
-	if self.is_network_master():
-		set_process_unhandled_input(true)
-	set_fixed_process(true)
+	set_process_unhandled_input(is_network_master())
