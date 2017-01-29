@@ -36,7 +36,7 @@ func _unhandled_input(ev):
 		set_weapon_state(weapon)
 		rset("slave_atk_loc", weapon["aim_pos"])
 	if ev.is_action_pressed("spawn_enemy"):
-		spawn_enemy(rand_loc(mouse_pos, 200, 600))
+		rpc("spawn_enemy", rand_loc(mouse_pos, 200, 600))
 	if ev.is_action_pressed("quit_game"):
 		get_tree().quit()
 

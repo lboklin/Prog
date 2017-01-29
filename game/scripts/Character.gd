@@ -24,8 +24,8 @@ purifying it.
 extends Area2D
 
 # Your Prog's very own beautiful color scheme
-export(Color) var primary_color
-export(Color) var secondary_color
+export(Color) sync var primary_color
+export(Color) sync var secondary_color
 
 const WEP_CD = 1.0  # Weapon cooldown
 const JUMP_CD = 0.1  # Jump cooldown after landing
@@ -33,11 +33,11 @@ const MAX_SPEED = 1500  # Max horizontal (ground) speed
 const MAX_JUMP_RANGE = 1000  # How far you can jump from any given starting pos
 const JUMP_Q_LIM = 2  # Jump queue limit
 
-onready var insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
+onready var nd_sprite = get_node("Sprite")
+onready var nd_insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
 onready var nd_shadow = get_node("Shadow")
 onready var nd_shadow_opacity = nd_shadow.get_opacity()
 onready var nd_shadow_scale = nd_shadow.get_scale()
-onready var nd_sprite = get_node("Sprite")
 
 # State enums
 enum Condition {OK, DEAD, RESPAWNING, STUNNED, BUSY}
@@ -74,7 +74,7 @@ var p_condition_timers = {
 #	"busy" : 0.0,
 } setget set_condition_timers, get_condition_timers
 
-var p_path = {
+sync var p_path = {
 	"position" : Vector2(),
 	"from" : null,
 	"to" : [],  # Take note that this is a jump queue array
@@ -364,6 +364,18 @@ master func attack(loc):  ## IMPURE BD
 #		self.state["timer"] = 0.2
 
 
+master func set_colors(primary, secondary):
+
+	if primary_color != null:
+		nd_sprite.set_modulate(primary)
+	if secondary_color != null:
+		nd_insignia.set_modulate(secondary)
+	return
+#	nd_sprite.rpc("set_modulate", primary_color)
+#	nd_insignia.rpc("set_modulate", secondary_color)
+#	return
+
+
 sync func animate_jump(state, path):  ## IMPURE BD
 	var jump_height = state["height"]
 	# If we're not in the air, just set everything
@@ -470,7 +482,7 @@ master func new_motion_state(delta, path, state):  ## PURE
 #####################################################################
 
 
-func _process(delta):
+func _fixed_process(delta):
 	# Update all states, timers and other statuses and end processing here if stunned
 	var tmp = update_states(delta, get_state(), get_condition_timers()) # Yes, temporary inelegancy
 	var state = tmp[0]
@@ -488,7 +500,8 @@ func _process(delta):
 			var botbrain = get_botbrain()
 			botbrain = ai_processing(delta, botbrain, state)
 			path = botbrain["path"]
-			set_botbrain(botbrain)
+			rpc("set_botbrain", botbrain)
+#			set_botbrain(botbrain)
 		else:
             mouse_pos = get_global_mouse_pos()
 
@@ -509,12 +522,12 @@ func _process(delta):
 
 		focus = weapon["aim_pos"] if ( state["action"] == BUSY ) else ( path["to"][0] if not path["to"].empty() else mouse_pos )
 		rset("slave_focus", focus)
-
-		set_state(state)
+		rpc("set_state", state)
+		rpc("set_path", path)
 	else:
 		focus = slave_focus
 
-	insignia.set_rot(new_rot(delta, path["position"], insignia.get_rot(), focus))
+	nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))
 
 	return
 
@@ -525,13 +538,11 @@ func _process(delta):
 
 
 func _ready():
-	if is_in_group("Bot"):
-		primary_color = Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1))
-		secondary_color = Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1))
+	if is_network_master():
+		if is_in_group("Bot"):
+			rset("primary_color", Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1)))
+			rset("secondary_color", Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1)))
 
-	if primary_color != null:
-		get_node("Sprite").set_modulate(primary_color)
-	if secondary_color != null:
-		get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite").set_modulate(secondary_color)
+	set_colors(primary_color, secondary_color)
 
-	set_process(true)
+	set_fixed_process(true)
