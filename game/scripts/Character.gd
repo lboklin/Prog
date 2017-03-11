@@ -23,6 +23,8 @@ purifying it.
 
 extends Area2D
 
+signal hit()
+
 # Your Prog's very own beautiful color scheme
 export(Color) sync var primary_color
 export(Color) sync var secondary_color
@@ -292,8 +294,11 @@ master func new_rot(delta, current_pos, current_rot, point):  ## PURE
 
 
 # Get hit (and die - at least until better implementation is implemented)
-func hit():  ## IMPURE (Could be purified?)
+func _hit(by):
+  # die() or be damaged()
+  # emit_signal("player_killed")
 	return
+# func _hit(by, damage):  ## IMPURE (Could be purified?)
 #	var state = get_state()
 #	var condition_timers = get_condition_timers()
 #

@@ -6,7 +6,7 @@ extends Node
 const SERVER_PORT = 31041
 
 # GAMEDATA
-var players = {} # Dictionary containing player names and their ID
+sync var players = {} # Dictionary containing player names and their ID
 var player_name # Your own player name
 
 # SIGNALS to Main Menu (GUI)

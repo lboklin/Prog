@@ -9,11 +9,9 @@ onready var points_label = get_node("Points")
 
 
 func _process(delta):
-
-	var points = str(GameRound.points)
+  var points = str(GameRound.points[get_network_unique_id()])
 	points_label.set_text("Score: " + points)
 
 
 func _ready():
-
 	set_process(true)

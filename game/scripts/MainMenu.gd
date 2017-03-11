@@ -32,7 +32,6 @@ func _on_host_game_button_pressed():
 	host_container.show()
 	var lineedit_nickname = host_container.find_node("LineEditNickname")
 	lineedit_nickname.select_all()
-#	lineedit_nickname.
 	lineedit_nickname.grab_focus()
 
 
