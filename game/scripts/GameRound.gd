@@ -7,15 +7,21 @@ var timer_round = 0
 var timer_point_reward = 0
 var scorekeeper = {}
 
-signal add_points()
+signal score_updated()
 
 
-func _add_points(name, points):
+func get_participants():
+    return scorekeeper.keys()
+
+
+func add_points(name, points):
     if name == "all":
-        for p in scorekeeper.keys():
-            scorekeeper[p] += scorekeeper[p]
+        for p in get_participants():
+            scorekeeper[p] += points
+            emit_signal("score_updated", p, scorekeeper[p])
     else:
-        scorekeeper[name] += scorekeeper[name]
+        scorekeeper[name] += points
+        emit_signal("score_updated", name, scorekeeper[name])
     # if is_network_master():
     #     get_tree().find_node(name).get_node("HUD/Points").set_text("Score: " + str(scorekeeper[name]))
 
@@ -25,8 +31,7 @@ func _process(delta):
 
     timer_point_reward += delta
     if timer_point_reward > REWARD_TIMER:
-        # emit_signal("add_points")
-        _add_points("all", 1)
+        add_points("all", 1)
         timer_point_reward = 0
 
 

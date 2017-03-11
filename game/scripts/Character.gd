@@ -551,4 +551,10 @@ func _ready():
 
     set_colors(primary_color, secondary_color)
 
+    var my_id = get_tree().get_network_unique_id()
+    var my_name = self.get_name()
+    GameState.players[my_id] = my_name
+    rset("GameState.players[my_id]", my_name)
+    print(GameState.players.values())
+
     set_fixed_process(true)

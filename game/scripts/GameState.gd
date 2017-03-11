@@ -6,7 +6,7 @@ extends Node
 const SERVER_PORT = 31041
 
 # GAMEDATA
-sync var players = {} # Dictionary containing player names and their ID
+var players = {} # Dictionary containing player names and their ID
 var player_name # Your own player name
 
 # SIGNALS to Main Menu (GUI)
@@ -114,7 +114,7 @@ remote func register_new_player(id, name):
 			rpc_id(id, "register_new_player", peer_id, players[peer_id])
 
 	# Add new player to your player list
-	players[id] = name
+	rpc("players[id]", name)
 
 	# Hardcoded spawns; could be done better by getting
 	# the number of spawns from the map and go from there.
@@ -193,10 +193,9 @@ func start_game():
 
 	# Tell each player 'p' with id 'spawn_points' to spawn at specified 'spawn_points[id]'
 	for p in players:
-		rpc_id(p, "spawn_player", spawn_points)
+		rpc_id(p, "spawn_players", spawn_points)
 
 	spawn_players(spawn_points)
-#	spawn_players()
 	pass
 
 
@@ -262,4 +261,4 @@ remote func spawn_players(spawn_points):
 		var name = nd_player.get_name()
 		nd_game_round.scorekeeper[name] = 0
 		nd_player.connect("player_killed", nd_game_round, "_add_points", [1])
-		print("Adding " + players[name] + " to the scorekeeper.")
+#		print("Adding " + players[name] + " to the scorekeeper.")
