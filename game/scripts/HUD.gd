@@ -3,8 +3,8 @@ extends CanvasLayer
 onready var nd_game_round = get_node("/root/GameRound")
 
 onready var nd_player = get_parent()
-onready var nd_points_label = get_node("Points")
-onready var nd_name_label = get_node("Name")
+onready var nd_points_label = get_node("Control/Points")
+onready var nd_name_label = get_node("Control/Name")
 
 
 func _update_score(killer_name, points):

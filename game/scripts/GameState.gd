@@ -251,8 +251,8 @@ remote func spawn_players(spawn_points):
             nd_player.add_child(scn_camera.instance())
             # Add a HUD for displaying name and score
             var nd_hud = load("res://gui/HUD.tscn").instance()
-            nd_hud.get_node("Name").set_text(nd_player.get_name())
-            nd_hud.get_node("Points").set_text("Score: 0")
+			nd_hud.get_node("Control/Name").set_text(nd_player.get_name())
+			nd_hud.get_node("Control/Points").set_text("Score: 0")
             nd_player.add_child(nd_hud)
         else:
             # Slavery is legal here.
