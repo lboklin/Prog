@@ -49,7 +49,6 @@ func _ready():
 
 # Client connected with you (can be both server or client)
 func _player_connected(id):
-	print(str(players.values()))
 	pass
 
 
@@ -75,7 +74,6 @@ remote func user_ready(id, player_name):
 		# If we are ingame, add player to session, else send to lobby
 		if(has_node("/root/GameRound")):
 			rpc_id(id, "register_in_game")
-			print(str(players.values()))
 		else:
 			rpc_id(id, "register_at_lobby")
 
@@ -255,8 +253,6 @@ remote func spawn_players(spawn_points):
 			nd_hud.get_node("Control/Points").set_text("Score: 0")
 			nd_player.add_child(nd_hud)
 		else:
-			# Slavery is legal here.
-			# No camera for you, slave! None!
 			nd_player.set_network_mode( NETWORK_MODE_SLAVE )
 			# Add nd_player name
 			# nd_player.get_node("HUD/Name").set_text(str(players[p]))
@@ -266,5 +262,4 @@ remote func spawn_players(spawn_points):
 		var name = nd_player.get_name()
 		nd_game_round.scorekeeper[name] = 0
 		nd_player.connect("player_killed", nd_game_round, "_add_points", [1])
-		print(str(players.values()))
-		# print("Adding " + players[name] + " to the scorekeeper.")
+		print("Adding " + players[name] + " to the scorekeeper.")
