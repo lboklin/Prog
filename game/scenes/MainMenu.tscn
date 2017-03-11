@@ -19,6 +19,8 @@ margin/top = 0.0
 margin/right = 0.0
 margin/bottom = 0.0
 script/script = ExtResource( 2 )
+is_in_editor = true
+no_main_menu = true
 
 [node name="Background" type="Sprite" parent="."]
 
@@ -559,7 +561,6 @@ flat = false
 
 [node name="LobbyContainer" type="Container" parent="."]
 
-editor/display_folded = true
 visibility/visible = false
 anchor/right = 1
 anchor/bottom = 1

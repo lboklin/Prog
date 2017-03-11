@@ -1,15 +1,17 @@
-[gd_scene load_steps=2 format=1]
+[gd_scene load_steps=3 format=1]
 
-[ext_resource path="res://tilesets/basetiles.tres" type="TileSet" id=1]
+[ext_resource path="res://scripts/GameRound.gd" type="Script" id=1]
+[ext_resource path="res://tilesets/basetiles.tres" type="TileSet" id=2]
 
 [node name="World" type="Node2D"]
 
+script/script = ExtResource( 1 )
 __meta__ = { "__editor_plugin_screen__":"2D" }
 
 [node name="BackgroundTiles" type="TileMap" parent="."]
 
 mode = 1
-tile_set = ExtResource( 1 )
+tile_set = ExtResource( 2 )
 cell/size = Vector2( 256, 128 )
 cell/quadrant_size = 64
 cell/custom_transform = Matrix32( 256, 0, 0, 256, 90, 0 )

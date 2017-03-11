@@ -15,6 +15,9 @@ onready var window_size = get_viewport().get_visible_rect().size
 const PLAYER_NAME_DEFAULT = "Player"
 const SERVER_NAME_DEFAULT = "Server"
 
+export var is_in_editor = false
+export var no_main_menu = true
+
 var light_pos = Vector2(0,0)
 var light_speed = 300
 
@@ -22,190 +25,205 @@ var light_speed = 300
 # Opens up the 'Connect to Server' window
 func _on_join_game_button_pressed():
 #	#menu_container.hide()
-	join_container.show()
+    join_container.show()
 
 
 # MAIN MENU - Host Game
 # Opens up the 'Choose a nickname' window
 func _on_host_game_button_pressed():
-	#menu_container.hide()
-	host_container.show()
-	var lineedit_nickname = host_container.find_node("LineEditNickname")
-	lineedit_nickname.select_all()
-	lineedit_nickname.grab_focus()
+    #menu_container.hide()
+    host_container.show()
+    var lineedit_nickname = host_container.find_node("LineEditNickname")
+    lineedit_nickname.select_all()
+    lineedit_nickname.grab_focus()
 
 
 # MAIN MENU - Quit Game
 func _on_quit_game_button_pressed():
-	get_tree().quit()
+    get_tree().quit()
 
 
 # JOIN CONTAINER - Connect
 # Attempts to connect to the server
 # If successful, continue to Lobby or jump in-game (if running)
 func _on_connect_button_pressed():
-	# Check entered IP address for errors
-	var ip_address = join_container.find_node("LineEditIPAddress").get_text()
-	if(!ip_address.is_valid_ip_address()):
-		join_container.find_node("LabelError").set_text("Invalid IP address")
-		return
+    # Check entered IP address for errors
+    var ip_address = join_container.find_node("LineEditIPAddress").get_text()
+    if(!ip_address.is_valid_ip_address()):
+        join_container.find_node("LabelError").set_text("Invalid IP address")
+        return
 
-	# Check nickname for errors
-	var player_name = join_container.find_node("LineEditNickname").get_text()
-	if(player_name == ""):
-		join_container.find_node("LabelError").set_text("Nickname cannot be empty")
-		return
+    # Check nickname for errors
+    var player_name = join_container.find_node("LineEditNickname").get_text()
+    if(player_name == ""):
+        join_container.find_node("LabelError").set_text("Nickname cannot be empty")
+        return
 
-	# Clear error (if any)
-	join_container.find_node("LabelError").set_text("")
+    # Clear error (if any)
+    join_container.find_node("LabelError").set_text("")
 
-	# Connect to server
-	GameState.join_game(player_name, ip_address)
+    # Connect to server
+    GameState.join_game(player_name, ip_address)
 
-	# While we are attempting to connect, disable button for 'continue'
-	join_container.find_node("ConnectButton").set_disabled(true)
+    # While we are attempting to connect, disable button for 'continue'
+    join_container.find_node("ConnectButton").set_disabled(true)
 
 
 # HOST CONTAINER - Continue (from choosing a nickname)
 # Opens the server for connectivity from clients
 func _on_continue_button_pressed():
-	# Check if nickname is valid
-	var player_name = host_container.find_node("LineEditNickname").get_text()
-	if(player_name == ""):
-		host_container.find_node("LabelError").set_text("Nickname cannot be empty")
-		return
+    # Check if nickname is valid
+    var player_name = host_container.find_node("LineEditNickname").get_text()
+    if(player_name == ""):
+        host_container.find_node("LabelError").set_text("Nickname cannot be empty")
+        return
 
-	# Clear error (if any)
-	host_container.find_node("LabelError").set_text("")
+    # Clear error (if any)
+    host_container.find_node("LabelError").set_text("")
 
-	# Establish network
-	GameState.host_game(player_name)
+    # Establish network
+    GameState.host_game(player_name)
 
-	# Refresh Player List (with your own name)
-	refresh_lobby()
+    # Refresh Player List (with your own name)
+    refresh_lobby()
 
-	# Toggle to Lobby
-	host_container.hide()
-	lobby_container.show()
-	lobby_container.find_node("StartGameButton").set_disabled(false)
+    # Toggle to Lobby
+    host_container.hide()
+    lobby_container.show()
+    lobby_container.find_node("StartGameButton").set_disabled(false)
 
 
 # LOBBY CONTAINER - Starts the Game
 func _on_start_game_button_pressed():
-	GameState.start_game()
+    GameState.start_game()
 
 
 # LOBBY CONTAINER - Cancel Lobby
 # (The only time you are already connected from main menu)
 func _on_cancel_lobby_button_pressed():
-	# Toggle containers
-	lobby_container.hide()
-	#menu_container.show()
+    # Toggle containers
+    lobby_container.hide()
+    #menu_container.show()
 
-	# Disconnect networking
-	GameState.quit_game()
+    # Disconnect networking
+    GameState.quit_game()
 
-	# Enable buttons
-	join_container.find_node("ConnectButton").set_disabled(false)
+    # Enable buttons
+    join_container.find_node("ConnectButton").set_disabled(false)
 
 
 # ALL - Cancel (from any container)
 func _on_cancel_button_pressed():
-	#menu_container.show()
-	join_container.hide()
-	join_container.find_node("LabelError").set_text("")
-	host_container.hide()
-	host_container.find_node("LabelError").set_text("")
+    #menu_container.show()
+    join_container.hide()
+    join_container.find_node("LabelError").set_text("")
+    host_container.hide()
+    host_container.find_node("LabelError").set_text("")
 
 # Refresh Lobby's player list
 # This is run after we have gotten updates from the server regarding new players
 func refresh_lobby():
-	# Get the latest list of players from gamestate
-	var player_list = GameState.get_player_list()
-	player_list.sort()
+    # Get the latest list of players from gamestate
+    var player_list = GameState.get_player_list()
+    player_list.sort()
 
-	# Add the updated player_list to the itemlist
-	var itemlist = lobby_container.find_node("ItemListPlayers")
-	itemlist.clear()
-	itemlist.add_item(GameState.get_player_name() + " (YOU)") # Add yourself to the top
+    # Add the updated player_list to the itemlist
+    var itemlist = lobby_container.find_node("ItemListPlayers")
+    itemlist.clear()
+    itemlist.add_item(GameState.get_player_name() + " (YOU)") # Add yourself to the top
 
-	# Add every other player to the list
-	for player in player_list:
-		itemlist.add_item(player)
+    # Add every other player to the list
+    for player in player_list:
+        itemlist.add_item(player)
 
-	# If you are not the server, we disable the 'start game' button
-	if(!get_tree().is_network_server()):
-		lobby_container.find_node("StartGameButton").set_disabled(true)
+    # If you are not the server, we disable the 'start game' button
+    if(!get_tree().is_network_server()):
+        lobby_container.find_node("StartGameButton").set_disabled(true)
 
 
 # Handles what to happen after server ends
 func _on_server_ended():
-	lobby_container.hide()
-	join_container.hide()
-	join_container.find_node("ConnectButton").set_disabled(false)
-	#menu_container.show()
+    lobby_container.hide()
+    join_container.hide()
+    join_container.find_node("ConnectButton").set_disabled(false)
+    #menu_container.show()
 
-	# If we are ingame, remove world from existence!
-	if(has_node("/root/World")):
-		get_node("/root/MainMenu").show() # Enable main menu
-		get_node("/root/World").queue_free() # Terminate world
+    # If we are ingame, remove world from existence!
+    if(has_node("/root/World")):
+        get_node("/root/MainMenu").show() # Enable main menu
+        get_node("/root/World").queue_free() # Terminate world
 
 
 func _on_server_error():
-	print("_ON_SERVER_ERROR: Unknown error")
+    print("_ON_SERVER_ERROR: Unknown error")
 
 
 func _on_connection_success():
-	join_container.hide()
-	lobby_container.show()
+    join_container.hide()
+    lobby_container.show()
 
 
 func _on_connection_fail():
-	# Display error telling the user that the server cannot be connected
-	join_container.find_node("LabelError").set_text("Cannot connect to server, try again or use another IP address")
+    # Display error telling the user that the server cannot be connected
+    join_container.find_node("LabelError").set_text("Cannot connect to server, try again or use another IP address")
 
-	# Enable continue button again
-	join_container.find_node("ConnectButton").set_disabled(false)
+    # Enable continue button again
+    join_container.find_node("ConnectButton").set_disabled(false)
 
 
 func _on_viewport_size_changed():
 
-	window_size = get_viewport().get_visible_rect().size
-	menu_container.set_size(window_size)
+    window_size = get_viewport().get_visible_rect().size
+    menu_container.set_size(window_size)
+# HOST CONTAINER - Continue (from choosing a nickname)
+# Opens the server for connectivity from clients
+
+func skip_main_menu():    ## TEMP FOR DEV
+    if get_tree().is_editor_hint():
+        menu_container.find_node("HostGameButton").emit_signal("pressed")
+        host_container.find_node("ContinueButton").emit_signal("pressed")
+        lobby_container.find_node("StartGameButton").emit_signal("pressed")
+    else:
+        menu_container.find_node("JoinGameButton").emit_signal("pressed")
+        join_container.find_node("ConnectButton").emit_signal("pressed")
+
 
 
 func _ready():
-	get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
-	# Set default nicknames on host/join
-	join_container.find_node("LineEditNickname").set_text(PLAYER_NAME_DEFAULT)
-	host_container.find_node("LineEditNickname").set_text(SERVER_NAME_DEFAULT)
+    get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
+    # Set default nicknames on host/join
+    join_container.find_node("LineEditNickname").set_text(PLAYER_NAME_DEFAULT)
+    host_container.find_node("LineEditNickname").set_text(SERVER_NAME_DEFAULT)
 
-	# Setup Network Signaling between Gamestate and Game UI
-	GameState.connect("refresh_lobby", self, "refresh_lobby")
-	GameState.connect("server_ended", self, "_on_server_ended")
-	GameState.connect("server_error", self, "_on_server_error")
-	GameState.connect("connection_success", self, "_on_connection_success")
-	GameState.connect("connection_fail", self, "_on_connection_fail")
+    # Setup Network Signaling between Gamestate and Game UI
+    GameState.connect("refresh_lobby", self, "refresh_lobby")
+    GameState.connect("server_ended", self, "_on_server_ended")
+    GameState.connect("server_error", self, "_on_server_error")
+    GameState.connect("connection_success", self, "_on_connection_success")
+    GameState.connect("connection_fail", self, "_on_connection_fail")
 
-	set_process(true)
+    ## TEMP FOR DEV:
+    if no_main_menu:
+        call_deferred("skip_main_menu")
+    set_process(true)
 
 
 func _process(delta):
 
-	var margin = 600
+    var margin = 600
 
-	light_pos.x += delta * light_speed
-	light_pos.y = -10
-	if light_pos.x > window_size.x + margin:
-		light_pos.x = -margin
-	light_1.set_pos(light_pos)
+    light_pos.x += delta * light_speed
+    light_pos.y = -10
+    if light_pos.x > window_size.x + margin:
+        light_pos.x = -margin
+    light_1.set_pos(light_pos)
 
-	var light_2_pos = Vector2()
-	light_2_pos.x = -light_pos.x + window_size.x
-	light_2_pos.y = window_size.y + 20
-	light_2.set_pos(light_2_pos)
+    var light_2_pos = Vector2()
+    light_2_pos.x = -light_pos.x + window_size.x
+    light_2_pos.y = window_size.y + 20
+    light_2.set_pos(light_2_pos)
 
 
 func _on_lineedit_nickname_text_entered( text ):
-	var continue_button = get_node("HostContainer").find_node("ContinueButton")
-	continue_button.emit_signal("pressed")
+    var continue_button = get_node("HostContainer").find_node("ContinueButton")
+    continue_button.emit_signal("pressed")
