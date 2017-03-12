@@ -175,6 +175,7 @@ func update_states(delta, state, ctimers):    ## PURE (but needs a more complete
 #			ctimers.erase(timer)
 #		elif state["condition"] != Condition
     ################################################
+    ## TODO: Decide if attacking counts as busy
 
     if ctimers.empty():
         state["condition"] = OK
@@ -343,31 +344,32 @@ func respawn():    ## IMPURE BD
 
 # Attack given location (not relative to prog)
 master func attack(loc):    ## IMPURE BD
-    return
+    var state = get_state()
+    var wep_st = get_weapon_state()
 
-#	var not_the_time_to_use_that = moving || busy
-#	var state = get_state()
-#	if state["action"] == Action.IDLE and get_weapon_state()["power"] == ON:
-#		state["action"] = Condition.BUSY
-#		set_state(state)
-#
-#		## PLACEHOLDER    ##########
-#		GameRound.points += 1    ##
-#		########################
-#
-#		# Spawn projectile
-#		var character_pos = get_pos()
-#		var projectile = preload("res://common/Projectile/Projectile.tscn").instance()
-#		var attack_dir = (gget_weapon_state()["aim_pos"] - character_pos)
-#		attack_dir.y *= 2
-#		attack_dir = attack_dir.normalized()
-#
-#		projectile.destination = gget_weapon_state()["aim_pos"]
-#		projectile.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
-#		get_parent().add_child(projectile)
-#
-#		get_weapon_state()["timer"] = weapon_cooldown
-#		self.state["timer"] = 0.2
+    if state["action"] == Action.IDLE and wep_st["power"] == ON:
+        state["action"] = Action.ATTACKING
+        rpc("set_state", state)
+
+        ## PLACEHOLDER    ##########
+        GameState.nd_game_round.add_points(get_name(), 1)  # Dirty. Should use signal?
+        ########################
+
+        # Spawn weapon_beam
+        var character_pos = get_pos()
+        var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
+        var attack_dir = (wep_st["aim_pos"] - character_pos)
+        attack_dir.y *= 2
+        attack_dir = attack_dir.normalized()
+
+        weapon_beam.destination = wep_st["aim_pos"]
+        weapon_beam.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
+        get_parent().add_child(weapon_beam)
+
+        wep_st["timer"] = WEP_CD
+
+        set_state(state)
+        set_weapon_state(wep_st)
 
 
 master func set_colors(primary, secondary):

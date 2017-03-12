@@ -16,6 +16,10 @@ signal server_error()
 signal connection_success()
 signal connection_fail()
 
+# A game_round without identity.
+# To be, or not to be.
+var nd_game_round
+
 
 # Join a server
 func join_game(name, ip_address):
@@ -141,7 +145,7 @@ remote func register_player(id, name):
 			rpc_id(id, "register_player", peer_id, players[peer_id]) # Send the new player info about others
 			rpc_id(peer_id, "register_player", id, name) # Send others info about the new player
 
-	players[id] = name # update player list
+	# players[id] = name # update player list
 
 	# Notify lobby (GUI) about changes
 	emit_signal("refresh_lobby")
@@ -208,10 +212,6 @@ func rand_loc(location, radius_min, radius_max):
 
 
 remote func spawn_players(spawn_points):
-	# A game_round without identity.
-	# To be, or not to be.
-	var nd_game_round
-
 	# If your game have already started, we get the current reference,
 	# else we create our instance and add it to root
 	if(has_node("/root/GameRound")):
@@ -260,5 +260,6 @@ remote func spawn_players(spawn_points):
 		nd_game_round.get_node("Players").add_child(nd_player)
 		var name = nd_player.get_name()
 		nd_game_round.scorekeeper[name] = 0
+		# Award points for kills
 		nd_player.connect("player_killed", nd_game_round, "_add_points", [1])
 #		print("Adding " + players[name] + " to the scorekeeper.")
