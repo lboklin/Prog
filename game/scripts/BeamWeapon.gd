@@ -10,8 +10,8 @@ onready var shape_explosion = self.get_node("CollisionShapeExplosion")
 
 var destination = Vector2()
 var direction = Vector2(1,0)
-var distance = 0
-var dist_traveled = 0
+# var distance = 0
+# var dist_traveled = 0
 
 var exploded = false
 var hit = false
@@ -30,23 +30,23 @@ func explode():
 
 func _fixed_process(delta):
 
-  if not self.exploded:
-    var current_pos = self.get_pos()
+#   if not self.exploded:
+#     var current_pos = self.get_pos()
 
-    var dist_to_target = self.destination - current_pos
-    dist_to_target.y *= 0.5
-    dist_to_target = dist_to_target.length()
-    var motion = self.direction * delta * self.ADVANCE_SPEED
-    motion.y *= 0.5
-    if motion.length() >= dist_to_target:
-      motion = self.destination - current_pos
-      self.set_pos(current_pos + motion)
-      self.explode()
-    else:
-#			self.move(motion)
-      self.set_pos(current_pos + motion)
-      motion.y *= 2
-      self.dist_traveled += motion.length()
+#     var dist_to_target = self.destination - current_pos
+#     dist_to_target.y *= 0.5
+#     dist_to_target = dist_to_target.length()
+#     var motion = self.direction * delta * self.ADVANCE_SPEED
+#     motion.y *= 0.5
+#     if motion.length() >= dist_to_target:
+#       motion = self.destination - current_pos
+#       self.set_pos(current_pos + motion)
+#       self.explode()
+#     else:
+# #			self.move(motion)
+#       self.set_pos(current_pos + motion)
+#       motion.y *= 2
+#       self.dist_traveled += motion.length()
 
   var colliders = self.get_overlapping_areas()
   if not hit and colliders.size() > 0 and self.dist_traveled > SAFE_RADIUS :
