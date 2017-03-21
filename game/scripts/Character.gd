@@ -43,8 +43,9 @@ onready var nd_shadow_opacity = nd_shadow.get_opacity()
 onready var nd_shadow_scale = nd_shadow.get_scale()
 
 # State enums
-enum Condition {OK, DEAD, RESPAWNING, STUNNED, BUSY}
-enum Action {IDLE, MOVING, ATTACKING}
+# enum Condition {OK, DEAD, RESPAWNING, STUNNED}
+# enum Action {IDLE, MOVING, ATTACKING, BUSY}
+enum State {GOOD, MOVING, ATTACKING, STUNNED, RESPAWNING, DEAD}
 enum Power {ON, OFF}
 
 var mouse_pos = Vector2()
@@ -62,20 +63,10 @@ var points = 0
 ## Dicts
 
 sync var p_state = {
-    "condition" : Condition.OK,
-    "action" : Action.IDLE,
-    "action_timer" : 0.0,
-    "motion" : Vector2(),    # Horizontal
-    "height" : 0    # Vertical
+    "timers" : {},
+    "motion" :  Vector2(), # Horizontal
+    "height" :  0          # Vertical
 } setget set_state, get_state
-
-# Add timers when applied and remove when they expire
-var p_condition_timers = {
-#	"stunned" : 0.0,
-#	"dead" : 0.0,
-#	"respawning" : 0.0,
-#	"busy" : 0.0,
-} setget set_condition_timers, get_condition_timers
 
 sync var p_path = {
     "position" : Vector2(),
@@ -103,27 +94,15 @@ var p_shield_state = {
 # General state
 
 sync func set_state(new_state):
-    # Explain myself here please.
-    #     re: Okay so it's probably that if the state disallows actions
-    #         we should just set current action to Action.IDLE.
-    if ( new_state["condition"] != Condition.OK ) and ( new_state["condition"] != Condition.BUSY ):
-        new_state["action"] = Action.IDLE
-
+    if new_state["timers"].has(State.STUNNED):
+        var t = new_state["timers"][State.STUNNED]
+        new_state["timers"].clear()
+        new_state["timers"][State.STUNNED] = t
     p_state = new_state
     return p_state
 
 func get_state():
     return p_state
-
-#-------------
-# General state
-
-func set_condition_timers(cts):
-    p_condition_timers = cts
-    return p_condition_timers
-
-func get_condition_timers():
-    return p_condition_timers
 
 #-------------
 #-------------
@@ -163,81 +142,30 @@ func get_shield_state():
 ##########################
 
 
-func update_states(delta, state, ctimers):    ## PURE (but needs a more complete solution)
+func update_states(delta, state):    ## PURE (but needs a more complete solution)
 
-#	var state = get_state()
-#	var ct = get_condition_timers()
-
-    ## TODO: generalize the if conditions below ##
-#	for timer in ctimers:
-#		timer -=delta
-#		if timer <= 0:
-#			ctimers.erase(timer)
-#		elif state["condition"] != Condition
-    ################################################
-    ## TODO: Decide if attacking counts as busy
-
-    if ctimers.empty():
-        state["condition"] = OK
-    else:
-        # Check if stunned
-        if ctimers.has("stunned"):
-            ctimers["stunned"] -= delta
-            if ctimers["stunned"] <= 0:
-                ctimers.erase("stunned")
-            elif state["condition"] != Condition.STUNNED:
-                state["condition"] = Condition.STUNNED
-                return [state, ctimers]
-        # We will adjust state next time around instead of rechecking
-        elif state["condition"] == Condition.STUNNED:
-            state["action"] = Action.IDLE
-            return [state, ctimers]
-
-        # Check if performing an action
-        if ctimers.has("busy"):
-            ctimers["busy"] -= delta
-            if ctimers["busy"] <= 0:
-                ctimers.erase("busy")
-            elif state["condition"] != Condition.BUSY:
-                state["condition"] = Condition.BUSY
-                return [state, ctimers]
-        # We will adjust state next time around instead of rechecking
-        elif state["condition"] == Condition.BUSY:
-            state["action"] = Action.IDLE
-            return [state, ctimers]
-
-        # Check if supposed to respawn (is dead)
-        if ctimers.has("respawn"):
-            ctimers["respawn"] -= delta
-            if ctimers["respawn"] <= 0:
-                ctimers.erase("respawn")
-                ctimers.erase("dead")
-                state["condition"] = Condition.RESPAWNING
-            elif state["condition"] != DEAD:
-                state["condition"] = Condition.DEAD
-                return [state, ctimers]
-        # We will adjust state next time around instead of rechecking
-        elif state["condition"] == DEAD:
-            state["condition"] = Condition.RESPAWNING
-            return [state, ctimers]
-
-    return[state, ctimers]
+    for timer in state["timers"]:
+        state["timers"][timer] -= delta
+        if (state["timers"][timer] <= 0):
+            state["timers"].erase(timer)
 
     ## TODO: Do something about this mess. It messes with my purity.
 
     # Check the state of the shield as necessary
-#	var shield = get_shield_state()
-#	shield["power"] = Power.ON if shield["timer"] > 0 else Power.OFF
-#	if shield["power"] == Power.ON:
-#		shield["timer"] -= delta
-#	set_shield_state(shield)
-#
-#	# Check the state of the weapon and update if necessary
-#	var weapon = get_weapon_state()
-#	weapon["power"] = Power.OFF if weapon["timer"] > 0 else Power.ON
-#	if weapon["power"] == Power.OFF:
-#		weapon["timer"] -= delta
-#	set_weapon_state(weapon)
+    var shield = get_shield_state()
+    shield["power"] = Power.ON if shield["timer"] > 0 else Power.OFF
+    if shield["power"] == Power.ON:
+        shield["timer"] -= delta
+    set_shield_state(shield)
+
+    # Check the state of the weapon and update if necessary
+    var weapon = get_weapon_state()
+    weapon["power"] = Power.OFF if weapon["timer"] > 0 else Power.ON
+    if weapon["power"] == Power.OFF:
+        weapon["timer"] -= delta
+    set_weapon_state(weapon)
+
+    return state
 
 
 # Produce a random point inside a circle of a given radius
@@ -344,31 +272,34 @@ func respawn():    ## IMPURE BD
 
 # Attack given location (not relative to prog)
 master func attack(loc):    ## IMPURE BD
+    # return
     var state = get_state()
     var wep_st = get_weapon_state()
 
-    if state["action"] == Action.IDLE and wep_st["power"] == ON:
-        state["action"] = Action.ATTACKING
-        rpc("set_state", state)
+    if state["timers"].empty() and wep_st["power"] == ON:
 
         ## PLACEHOLDER    ##########
         GameState.nd_game_round.add_points(get_name(), 1)  # Dirty. Should use signal?
         ########################
 
         # Spawn weapon_beam
-        var character_pos = get_pos()
         var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
-        var attack_dir = (wep_st["aim_pos"] - character_pos)
-        attack_dir.y *= 2
-        attack_dir = attack_dir.normalized()
+
+        var character_pos = get_pos()
+        # var attack_dir = (wep_st["aim_pos"] - character_pos)
+        # attack_dir.y *= 2
+        # attack_dir = attack_dir.normalized()
 
         weapon_beam.destination = wep_st["aim_pos"]
-        weapon_beam.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
+        # weapon_beam.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
+        weapon_beam.set_global_pos(character_pos)
+        GameState.spawn_click_indicator(loc, "move_to")
         get_parent().add_child(weapon_beam)
 
         wep_st["timer"] = WEP_CD
 
-        set_state(state)
+        rpc("set_state", state)
+        # set_condition_timers(state["timers"])
         set_weapon_state(wep_st)
 
 
@@ -394,15 +325,6 @@ sync func animate_jump(state, path):    ## IMPURE BD
         nd_sprite.set_pos(Vector2(0, 0))
         nd_shadow.set_opacity(nd_shadow_opacity)
         nd_shadow.set_scale(nd_shadow_scale)
-
-        if not state["motion"].length() > 0:
-            path["from"] = null
-            path["to"].pop_front()
-            set_path(path)
-
-            var cts = get_condition_timers()
-            cts["stunned"] = JUMP_CD
-            set_condition_timers(cts)
     else:
         # Set sprite vertical pos based on height and adjusted for the perspective
         var sprite_pos = Vector2(0, -1) * ( jump_height / 2 )
@@ -427,10 +349,12 @@ sync func animate_jump(state, path):    ## IMPURE BD
         nd_shadow.set_scale(shadow_scale)
         nd_shadow.set_opacity(shadow_opacity)
         set_z(jump_height + 1)    # +1 to render after everything below
+
+        state["timers"][State.MOVING] = 10.0
     return
 
 
-sync func set_motion_state(path, state, condition_timers):    ## IMPURE BD
+sync func set_motion_state(path, state):    ## IMPURE BD
 
     # Check if there are any jumps queued and
     # if so pop any that hold our current pos.
@@ -450,8 +374,9 @@ sync func set_motion_state(path, state, condition_timers):    ## IMPURE BD
 
         set_pos(path["position"] + state["motion"])
     # Stun on landing
-    elif state["action"] == Action.MOVING:
-        condition_timers["stunned"] += JUMP_CD
+    elif state["timers"].has(State.MOVING):
+        state["timers"][State.STUNNED] = JUMP_CD
+        set_state(state)
 
 
 # Update the state of motion to reflect what is desired
@@ -492,13 +417,12 @@ master func new_motion_state(delta, path, state):    ## PURE
 
 func _fixed_process(delta):
     # Update all states, timers and other statuses and end processing here if stunned
-    var tmp = update_states(delta, get_state(), get_condition_timers()) # Yes, temporary inelegancy
-    var state = tmp[0]
+    var state = update_states(delta, get_state())
+    if state["timers"].has(State.STUNNED):
+        return
     var path = get_path()
     path["position"] = get_pos()
 
-    if state["condition"] == STUNNED:
-        return
 
     var focus = Vector2()
 
@@ -509,12 +433,10 @@ func _fixed_process(delta):
             botbrain = ai_processing(delta, botbrain, state)
             path = botbrain["path"]
             rpc("set_botbrain", botbrain)
-#			set_botbrain(botbrain)
         else:
                         mouse_pos = get_global_mouse_pos()
 
 
-        var ctimers = tmp[1]
         var weapon = get_weapon_state()
 
         if path["to"].size() > 0:
@@ -523,12 +445,12 @@ func _fixed_process(delta):
             if path["from"] == null:
                 path["from"] = path["position"]
             set_path(path)
-            rpc("set_motion_state", path, new_motion_state(delta, path, state), ctimers)
+            rpc("set_motion_state", path, new_motion_state(delta, path, state))
 
         if weapon["aim_pos"] != null:
             attack(weapon["aim_pos"])
 
-        focus = weapon["aim_pos"] if ( state["action"] == BUSY ) else ( path["to"][0] if not path["to"].empty() else mouse_pos )
+        focus = weapon["aim_pos"] if state["timers"].has(State.ATTACKING) else ( path["to"][0] if not path["to"].empty() else mouse_pos )
         rset("slave_focus", focus)
         rpc("set_state", state)
         rpc("set_path", path)

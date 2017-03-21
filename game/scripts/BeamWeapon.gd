@@ -49,7 +49,8 @@ func _fixed_process(delta):
 #       self.dist_traveled += motion.length()
 
   var colliders = self.get_overlapping_areas()
-  if not hit and colliders.size() > 0 and self.dist_traveled > SAFE_RADIUS :
+  # if not hit and colliders.size() > 0 and self.dist_traveled > SAFE_RADIUS :
+  if not hit and colliders.size() > 0:
     for collider in colliders:
       if collider != null and collider.has_method("hit"):
         collider.hit()
@@ -61,13 +62,14 @@ func _fixed_process(delta):
 
 func _ready():
 
-  get_node("Animation").connect("finished", self, "_animation_finished")
+  var anim = get_node("Animation")
+  anim.connect("finished", self, "_animation_finished")
 
   var current_pos = self.get_global_pos()
 
   var dist = self.destination - current_pos
   dist.y *= 2
-  self.distance = dist.length()
+# self.distance = dist.length()
   var dir = self.destination - current_pos
   dir.y *= 2
   self.direction = dir.normalized()
@@ -82,6 +84,16 @@ func _ready():
   dir.y *= 0.5
   var rot_dir = dir.angle() - deg2rad(180)
 #	rot_dir = rot_dir - deg2rad(180)
-  self.get_node("Object/EnergyBall").set_rot(rot_dir)
+  set_rot(rot_dir)
 
-  set_fixed_process(true)
+  var anim = get_node("Animation")
+  anim.connect("finished", self, "_animation_finished")
+
+  anim.set_active(true)
+
+  get_node("Animation").play("Sparkle")
+  get_node("Animation").play("Explode")
+  self.exploded = true
+
+
+  # set_fixed_process(true)
