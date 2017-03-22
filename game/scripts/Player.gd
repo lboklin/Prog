@@ -1,14 +1,5 @@
 extends "res://scripts/Character.gd"
 
-# Spawn an NPC to play with
-sync func spawn_enemy(loc):
-#	return
-    ## Bot.gd needs serious cleanup before we can do this again
-    var enemy = preload("res://npc/Bot.tscn").instance()
-    enemy.set_pos(loc)
-    get_parent().add_child(enemy)
-
-
 #####################################################################
 #####################################################################
 #####################################################################
@@ -28,7 +19,7 @@ func _unhandled_input(ev):
         set_weapon_state(weapon)
         rset("slave_atk_loc", weapon["aim_pos"])
     if ev.is_action_pressed("spawn_enemy"):
-        rpc("spawn_enemy", rand_loc(mouse_pos, 200, 600))
+        GameState.rpc("spawn_enemy", GameState.rand_loc(mouse_pos, 0, 600))
     if ev.is_action_pressed("quit_game"):
         get_tree().quit()
 
@@ -41,4 +32,4 @@ func _unhandled_input(ev):
 func _ready():
 #	var nd_hud = load("res://gui/HUD.tscn").instance()
 #	add_child(nd_hud)
-	set_process_unhandled_input(is_network_master())
+    set_process_unhandled_input(is_network_master())

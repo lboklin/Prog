@@ -208,12 +208,15 @@ func start_game():
     pass
 
 
-func rand_loc(location, radius_min, radius_max):
-
+func rand_loc(location, radius_min, radius_max):    ## PURE (almost? what does rand_range() really do?)
     var new_radius = rand_range(radius_min, radius_max)
     var angle = deg2rad(rand_range(0, 360))
     var point_on_circ = Vector2(new_radius, 0).rotated(angle)
     return location + point_on_circ
+
+
+func get_round_timer():
+    return nd_game_round.timer_round
 
 
 # Display an indicator for where you clicked
@@ -222,6 +225,13 @@ func spawn_click_indicator(pos, anim):
     indicator.set_pos(pos)
     self.get_parent().add_child(indicator)
     indicator.get_node("AnimationPlayer").play(anim)
+
+
+# Spawn an NPC to play with
+sync func spawn_enemy(loc):
+    var enemy = preload("res://npc/Bot.tscn").instance()
+    enemy.set_pos(loc)
+    get_parent().add_child(enemy)
 
 
 remote func spawn_players(spawn_points):
@@ -249,7 +259,7 @@ remote func spawn_players(spawn_points):
         nd_player.set_name("Player" + str(p))
 
         # Set random spawn position for the nd_player
-        var spawn_pos = nd_player.rand_loc(Vector2(0,0), 0, 2000)
+        var spawn_pos = rand_loc(Vector2(0,0), 0, 2000)
         nd_player.set_pos(spawn_pos)
 
 

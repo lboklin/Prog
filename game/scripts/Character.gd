@@ -23,7 +23,7 @@ purifying it.
 
 extends Area2D
 
-signal hit()
+# signal hit()
 signal player_killed()
 
 # Your Prog's very own beautiful color scheme
@@ -48,6 +48,8 @@ onready var nd_shadow_scale = nd_shadow.get_scale()
 enum State {GOOD, MOVING, ATTACKING, STUNNED, RESPAWNING, DEAD}
 enum Power {ON, OFF}
 
+var my_name
+var my_id
 var mouse_pos = Vector2()
 
 #slave var slave_pos = Vector2()
@@ -94,6 +96,8 @@ var p_shield_state = {
 # General state
 
 sync func set_state(new_state):
+    # if new_state["timers"].has(State.DEAD):
+    #     queue_free()
     if new_state["timers"].has(State.STUNNED):
         var t = new_state["timers"][State.STUNNED]
         new_state["timers"].clear()
@@ -174,15 +178,6 @@ func update_states(delta, state):    ## PURE (but needs a more complete solution
     return state
 
 
-# Produce a random point inside a circle of a given radius
-func rand_loc(location, radius_min, radius_max):    ## PURE (almost? what does rand_range() really do?)
-
-    var new_radius = rand_range(radius_min, radius_max)
-    var angle = deg2rad(rand_range(0, 360))
-    var point_on_circ = Vector2(new_radius, 0).rotated(angle)
-    return location + point_on_circ
-
-
 ##################################################
 
 # For rotating the insignia sprite towards the given point (point is in global coords)
@@ -230,47 +225,64 @@ master func new_rot(delta, current_pos, current_rot, point):    ## PURE
 
 
 # Get hit (and die - at least until better implementation is implemented)
-func _hit(by):
-    # die() or be damaged()
-    # emit_signal("player_killed", by)
+sync func hit(by):
+    # print("Stop hitting myself")
+    if by == my_name:
+        print("Stop hitting myself")
+        return
+    else:
+        print(my_name, " hit ", by)
+
+    var shield = get_shield_state()
+    if shield["power"] == Power.ON:
+        # Fancy shield deflection animation?
+        return
+
+    var state = get_state()
+    state["timers"][State.DEAD] = GameState.get_round_timer() / 10
+
+    # if state["condition"] != dead:
+    #   state["condition"] = dead
+
+    #   ## reset all active timers and states    ##
+    #   var wep_st = get_weapon_state()
+    #   wep_state["timer"] = 0
+    #   wep_state["aim_pos"] = null
+    #   condition_timers.clear()
+    #   ## todo: fix line below
+    #   self.jump["active_jump_origin"] = null
+
+    #   set_monitorable(false)
+    #   set_hidden(true)
+    #   update_states()
+    #   #########################################
+
+    var nd_death_anim = preload("res://common/DeathEffect.tscn").instance()
+    nd_death_anim.set_pos(get_pos())
+    get_parent().add_child(nd_death_anim)
+
+    set_monitorable(false)
+    set_hidden(true)
+
+    var nd_death_anim = preload("res://common/DeathEffect.tscn").instance()
+    nd_death_anim.set_pos(get_pos())
+    get_parent().add_child(nd_death_anim)
+
+    emit_signal("player_killed", by)
+    print(get_name() + " was killed and will be back in ", state["timers"][State.DEAD])
+
+    if is_in_group("Bot"):
+        queue_free()
+    set_state(state)
+    update_states()
     return
-# func _hit(by, damage):    ## IMPURE (Could be purified?)
-#	var state = get_state()
-#	var condition_timers = get_condition_timers()
-#
-#	if state["condition"] != DEAD:
-#		state["condition"] = DEAD
-#
-#		## Reset all active timers and states    ##
-#		var wep_st = get_weapon_state()
-#		wep_state["timer"] = 0
-#		wep_state["aim_pos"] = null
-#		condition_timers.clear()
-#		## TODO: Fix line below
-#		self.jump["active_jump_origin"] = null
-#
-#		set_monitorable(false)
-#		set_hidden(true)
-#		update_states()
-#		#########################################
-#
-#		# Set respawn timer based on elapsed game round time
-#		self.time_of_death = GameRound.round_timer
-#		self.timer = self.time_of_death / 10
-#		print(self.timer)
-#
-#		var death_anim = preload("res://common/DeathEffect.tscn").instance()
-#		death_anim.set_pos(get_pos())
-#		get_parent().add_child(death_anim)
-#
-#		print(get_name() + " was killed and will be back in ", self.timer)
 
 
 # Well, this one makes you respawn
 func respawn():    ## IMPURE BD
 
-    set_monitorable(true)    # Enable detecondition_tion by other bodies and areas
-    set_pos(rand_loc(Vector2(0,0), 0, 1000))
+    set_monitorable(true)    # Enable detection by other bodies and areas
+    set_pos(GameState.rand_loc(Vector2(0,0), 0, 1000))
 
     set_shield_state(Power.ON, 2.0)
     rset("set_path", { "from" : null, "to" : [] })
@@ -278,6 +290,7 @@ func respawn():    ## IMPURE BD
 
 slave func slave_attack(loc):    ## IMPURE BD
     var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
+    weapon_beam.owner = my_name
     weapon_beam.destination = loc
     weapon_beam.set_global_pos(get_pos())
     get_parent().add_child(weapon_beam)
@@ -287,6 +300,7 @@ slave func slave_attack(loc):    ## IMPURE BD
 # Attack given location (not relative to prog)
 sync func attack(state, weapon):    ## IMPURE BD
     var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
+    weapon_beam.owner = my_name
     weapon_beam.destination = weapon["aim_pos"]
     weapon_beam.set_global_pos(get_pos())
     get_parent().add_child(weapon_beam)
@@ -425,8 +439,8 @@ func _fixed_process(delta):
 
     if is_network_master():
         if is_in_group("Bot"):
-            mouse_pos = rand_loc(path["position"], 0, 1) if ( (randi() % 100) <= (60 * delta) ) else mouse_pos
             var botbrain = get_botbrain()
+            mouse_pos = GameState.rand_loc(botbrain["path"]["position"], 0, 1) if ( (randi() % 100) <= (60 * delta) ) else mouse_pos
             botbrain = ai_processing(delta, botbrain, state)
             path = botbrain["path"]
             rpc("set_botbrain", botbrain)
@@ -478,7 +492,7 @@ func _ready():
 
     set_colors(primary_color, secondary_color)
 
-    var my_id = get_tree().get_network_unique_id()
-    var my_name = self.get_name()
+    my_id = get_tree().get_network_unique_id()
+    my_name = self.get_name()
 
     set_fixed_process(true)

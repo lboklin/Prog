@@ -7,6 +7,7 @@ const SAFE_RADIUS = 128
 onready var shape_projectile = self.get_node("CollisionShapeBeam")
 onready var shape_explosion = self.get_node("CollisionShapeExplosion")
 
+var owner = ""
 var destination = Vector2()
 var hit = false
 
@@ -19,8 +20,8 @@ func _fixed_process(delta):
   var colliders = self.get_overlapping_areas()
   if not hit and colliders.size() > 0:
     for collider in colliders:
-      if collider != null and collider.has_method("hit"):
-        collider.hit()
+      if collider.has_method("hit"):
+        collider.hit(self.owner)
         self.hit = true
 
 
