@@ -166,6 +166,11 @@ remote func unregister_player(id):
 
 
 # Returns a list of players (lobby)
+func get_participants():
+    return nd_game_round.get_participants()
+
+
+# Returns a list of players (lobby)
 func get_player_list():
     return players.values()
 
@@ -270,4 +275,3 @@ remote func spawn_players(spawn_points):
         nd_game_round.scorekeeper[name] = 0
         # Award points for kills
         nd_player.connect("player_killed", nd_game_round, "_add_points", [1])
-#		print("Adding " + players[name] + " to the scorekeeper.")
