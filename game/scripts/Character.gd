@@ -285,28 +285,20 @@ slave func slave_attack(loc):    ## IMPURE BD
 
 
 # Attack given location (not relative to prog)
-func attack(state, weapon):    ## IMPURE BD
-    if state["timers"].empty() and weapon["power"] == ON:
+sync func attack(state, weapon):    ## IMPURE BD
+    var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
+    weapon_beam.destination = weapon["aim_pos"]
+    weapon_beam.set_global_pos(get_pos())
+    get_parent().add_child(weapon_beam)
 
-        ## PLACEHOLDER    ##########
-        # GameState.nd_game_round.add_points(get_name(), 1)  # Dirty. Should use signal?
-        ########################
+    weapon["timer"] = WEP_CD
+    state["timers"][State.ATTACKING] = 0.2
 
-        # Spawn weapon_beam
-        var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
-
-        weapon_beam.destination = weapon["aim_pos"]
-        weapon_beam.set_global_pos(get_pos())
-        get_parent().add_child(weapon_beam)
-
-        weapon["timer"] = WEP_CD
-        state["timers"][State.ATTACKING] = 0.2
-
-        # rpc("set_weapon_state", weapon)
-        # rpc("set_state", state)
-        set_weapon_state(weapon)
-        set_state(state)
-        rset("slave_atk_loc", weapon["aim_pos"])
+    # rpc("set_weapon_state", weapon)
+    # rpc("set_state", state)
+    set_weapon_state(weapon)
+    set_state(state)
+    # rset("slave_atk_loc", weapon["aim_pos"])
 
 
 master func set_colors(primary, secondary):
@@ -454,9 +446,10 @@ func _fixed_process(delta):
             rpc("set_motion_state", path, new_motion_state(delta, path, state))
 
         # if not state["timers"].has(State.ATTACKING) and weapon["timer"] <= 0 and weapon["aim_pos"] != null:
-        if state["timers"].empty() and weapon["timer"] <= 0 and weapon["aim_pos"] != null:
-            attack(state, weapon)
-#            rpc("attack", state, weapon)
+        if state["timers"].empty() and weapon["power"] == ON and weapon["aim_pos"] != null:
+        # if state["timers"].empty() and weapon["timer"] <= 0 and weapon["aim_pos"] != null:
+            # attack(state, weapon)
+           rpc("attack", state, weapon)
 
         focus = weapon["aim_pos"] if (weapon["aim_pos"] != null) and state["timers"].has(State.ATTACKING) else ( path["to"][0] if not path["to"].empty() else mouse_pos )
         rset("slave_focus", focus)
@@ -464,8 +457,8 @@ func _fixed_process(delta):
         rpc("set_path", path)
     else:
         focus = slave_focus
-        if slave_atk_loc != null:
-            slave_attack(slave_atk_loc)
+        # if slave_atk_loc != null:
+        #     slave_attack(slave_atk_loc)
 
 
     nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))
@@ -488,8 +481,8 @@ func _ready():
 
     var my_id = get_tree().get_network_unique_id()
     var my_name = self.get_name()
-    GameState.players[my_id] = my_name
-    rset("GameState.players[my_id]", my_name)
-    print(GameState.players.values())
+    # GameState.players[my_id] = my_name
+    # rset("GameState.players[my_id]", my_name)
+    # print(GameState.players.values())
 
     set_fixed_process(true)
