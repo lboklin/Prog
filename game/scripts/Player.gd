@@ -39,4 +39,6 @@ func _unhandled_input(ev):
 
 
 func _ready():
-    set_process_unhandled_input(is_network_master())
+#	var nd_hud = load("res://gui/HUD.tscn").instance()
+#	add_child(nd_hud)
+	set_process_unhandled_input(is_network_master())

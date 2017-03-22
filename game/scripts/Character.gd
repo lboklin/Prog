@@ -119,7 +119,9 @@ func get_path():
 #-------------
 # Weapon state
 
-func set_weapon_state(new_state):
+sync func set_weapon_state(new_state):
+    if new_state["timer"] > 0:
+        new_state["power"] = Power.OFF
     p_weapon_state = new_state
     return p_weapon_state
 
@@ -130,7 +132,7 @@ func get_weapon_state():
 #-------------
 # Shield state
 
-func set_shield_state(new_state):
+sync func set_shield_state(new_state):
     p_shield_state = new_state
     return p_shield_state
 
@@ -148,6 +150,9 @@ func update_states(delta, state):    ## PURE (but needs a more complete solution
         state["timers"][timer] -= delta
         if (state["timers"][timer] <= 0):
             state["timers"].erase(timer)
+            # if timer == State.ATTACKING:
+            #     weapon["aim_pos"] = null
+
 
     ## TODO: Do something about this mess. It messes with my purity.
 
@@ -156,14 +161,15 @@ func update_states(delta, state):    ## PURE (but needs a more complete solution
     shield["power"] = Power.ON if shield["timer"] > 0 else Power.OFF
     if shield["power"] == Power.ON:
         shield["timer"] -= delta
-    set_shield_state(shield)
+    rset("set_shield_state", shield)
 
     # Check the state of the weapon and update if necessary
     var weapon = get_weapon_state()
     weapon["power"] = Power.OFF if weapon["timer"] > 0 else Power.ON
     if weapon["power"] == Power.OFF:
         weapon["timer"] -= delta
-    set_weapon_state(weapon)
+        if weapon["timer"] <= 0: weapon["aim_pos"] = null
+    rset("set_weapon_state", weapon)
 
     return state
 
@@ -267,40 +273,40 @@ func respawn():    ## IMPURE BD
     set_pos(rand_loc(Vector2(0,0), 0, 1000))
 
     set_shield_state(Power.ON, 2.0)
-    rpc("set_path", { "from" : null, "to" : [] })
+    rset("set_path", { "from" : null, "to" : [] })
+
+
+slave func slave_attack(loc):    ## IMPURE BD
+    var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
+    weapon_beam.destination = loc
+    weapon_beam.set_global_pos(get_pos())
+    get_parent().add_child(weapon_beam)
+    slave_atk_loc = null
 
 
 # Attack given location (not relative to prog)
-master func attack(loc):    ## IMPURE BD
-    # return
-    var state = get_state()
-    var wep_st = get_weapon_state()
-
-    if state["timers"].empty() and wep_st["power"] == ON:
+func attack(state, weapon):    ## IMPURE BD
+    if state["timers"].empty() and weapon["power"] == ON:
 
         ## PLACEHOLDER    ##########
-        GameState.nd_game_round.add_points(get_name(), 1)  # Dirty. Should use signal?
+        # GameState.nd_game_round.add_points(get_name(), 1)  # Dirty. Should use signal?
         ########################
 
         # Spawn weapon_beam
         var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
 
-        var character_pos = get_pos()
-        # var attack_dir = (wep_st["aim_pos"] - character_pos)
-        # attack_dir.y *= 2
-        # attack_dir = attack_dir.normalized()
-
-        weapon_beam.destination = wep_st["aim_pos"]
-        # weapon_beam.set_global_pos( character_pos + attack_dir * Vector2(60,20) )
-        weapon_beam.set_global_pos(character_pos)
-        GameState.spawn_click_indicator(loc, "move_to")
+        weapon_beam.destination = weapon["aim_pos"]
+        weapon_beam.set_global_pos(get_pos())
         get_parent().add_child(weapon_beam)
 
-        wep_st["timer"] = WEP_CD
+        weapon["timer"] = WEP_CD
+        state["timers"][State.ATTACKING] = 0.2
 
-        rpc("set_state", state)
-        # set_condition_timers(state["timers"])
-        set_weapon_state(wep_st)
+        # rpc("set_weapon_state", weapon)
+        # rpc("set_state", state)
+        set_weapon_state(weapon)
+        set_state(state)
+        rset("slave_atk_loc", weapon["aim_pos"])
 
 
 master func set_colors(primary, secondary):
@@ -434,7 +440,7 @@ func _fixed_process(delta):
             path = botbrain["path"]
             rpc("set_botbrain", botbrain)
         else:
-                        mouse_pos = get_global_mouse_pos()
+            mouse_pos = get_global_mouse_pos()
 
 
         var weapon = get_weapon_state()
@@ -444,18 +450,23 @@ func _fixed_process(delta):
                 path["to"].resize(JUMP_Q_LIM + 1)
             if path["from"] == null:
                 path["from"] = path["position"]
-            set_path(path)
+            rset("set_path", path)
             rpc("set_motion_state", path, new_motion_state(delta, path, state))
 
-        if weapon["aim_pos"] != null:
-            attack(weapon["aim_pos"])
+        # if not state["timers"].has(State.ATTACKING) and weapon["timer"] <= 0 and weapon["aim_pos"] != null:
+        if state["timers"].empty() and weapon["timer"] <= 0 and weapon["aim_pos"] != null:
+            attack(state, weapon)
+#            rpc("attack", state, weapon)
 
-        focus = weapon["aim_pos"] if state["timers"].has(State.ATTACKING) else ( path["to"][0] if not path["to"].empty() else mouse_pos )
+        focus = weapon["aim_pos"] if (weapon["aim_pos"] != null) and state["timers"].has(State.ATTACKING) else ( path["to"][0] if not path["to"].empty() else mouse_pos )
         rset("slave_focus", focus)
         rpc("set_state", state)
         rpc("set_path", path)
     else:
         focus = slave_focus
+        if slave_atk_loc != null:
+            slave_attack(slave_atk_loc)
+
 
     nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))
 
