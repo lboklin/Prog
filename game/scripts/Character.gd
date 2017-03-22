@@ -304,13 +304,12 @@ sync func attack(state, weapon):    ## IMPURE BD
 master func set_colors(primary, secondary):
 
     if primary_color != null:
-        nd_sprite.set_modulate(primary)
+        # nd_sprite.set_modulate(primary)
+        nd_sprite.rpc("set_modulate", primary_color)
     if secondary_color != null:
-        nd_insignia.set_modulate(secondary)
+        # nd_insignia.set_modulate(secondary)
+        nd_insignia.rpc("set_modulate", secondary_color)
     return
-#	nd_sprite.rpc("set_modulate", primary_color)
-#	nd_insignia.rpc("set_modulate", secondary_color)
-#	return
 
 
 sync func animate_jump(state, path):    ## IMPURE BD
@@ -481,8 +480,5 @@ func _ready():
 
     var my_id = get_tree().get_network_unique_id()
     var my_name = self.get_name()
-    # GameState.players[my_id] = my_name
-    # rset("GameState.players[my_id]", my_name)
-    # print(GameState.players.values())
 
     set_fixed_process(true)
