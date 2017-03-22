@@ -42,11 +42,11 @@ onready var nd_shadow = get_node("Shadow")
 onready var nd_shadow_opacity = nd_shadow.get_opacity()
 onready var nd_shadow_scale = nd_shadow.get_scale()
 
-# State enums
+# "enums"
 # enum Condition {OK, DEAD, RESPAWNING, STUNNED}
 # enum Action {IDLE, MOVING, ATTACKING, BUSY}
-enum State {GOOD, MOVING, ATTACKING, STUNNED, RESPAWNING, DEAD}
-enum Power {ON, OFF}
+# enum ""{GOOD, MOVING, ATTACKING, STUNNED, RESPAWNING, DEAD}
+# enum Power {ON, OFF}
 
 var my_name
 var my_id
@@ -67,6 +67,7 @@ var points = 0
 sync var p_state = {
     "timers" : {},
     "motion" :  Vector2(), # Horizontal
+    "target" :  null,
     "height" :  0          # Vertical
 } setget set_state, get_state
 
@@ -75,17 +76,6 @@ sync var p_path = {
     "from" : null,
     "to" : [],    # Take note that this is a jump queue array
 } setget set_path, get_path
-
-var p_weapon_state = {
-    "power" : Power.ON,
-    "aim_pos" : null,
-    "timer" : 0.0
-} setget set_weapon_state, get_weapon_state
-
-var p_shield_state = {
-    "power" : Power.ON,
-    "timer" : 2.0    # Spawn in with 2 sec protective shield
-} setget set_shield_state, get_shield_state
 
 
 ###########################
@@ -96,12 +86,12 @@ var p_shield_state = {
 # General state
 
 sync func set_state(new_state):
-    # if new_state["timers"].has(State.DEAD):
+    # if new_state["timers"].has("dead"):
     #     queue_free()
-    if new_state["timers"].has(State.STUNNED):
-        var t = new_state["timers"][State.STUNNED]
+    if new_state["timers"].has("stunned"):
+        var t = new_state["timers"]["stunned"]
         new_state["timers"].clear()
-        new_state["timers"][State.STUNNED] = t
+        new_state["timers"]["stunned"] = t
     p_state = new_state
     return p_state
 
@@ -120,30 +110,6 @@ func get_path():
     return p_path
 
 #-------------
-#-------------
-# Weapon state
-
-sync func set_weapon_state(new_state):
-    if new_state["timer"] > 0:
-        new_state["power"] = Power.OFF
-    p_weapon_state = new_state
-    return p_weapon_state
-
-func get_weapon_state():
-    return p_weapon_state
-
-#-------------
-#-------------
-# Shield state
-
-sync func set_shield_state(new_state):
-    p_shield_state = new_state
-    return p_shield_state
-
-func get_shield_state():
-    return p_shield_state
-
-#-------------
 
 ##########################
 
@@ -154,26 +120,8 @@ func update_states(delta, state):    ## PURE (but needs a more complete solution
         state["timers"][timer] -= delta
         if (state["timers"][timer] <= 0):
             state["timers"].erase(timer)
-            # if timer == State.ATTACKING:
-            #     weapon["aim_pos"] = null
-
-
-    ## TODO: Do something about this mess. It messes with my purity.
-
-    # Check the state of the shield as necessary
-    var shield = get_shield_state()
-    shield["power"] = Power.ON if shield["timer"] > 0 else Power.OFF
-    if shield["power"] == Power.ON:
-        shield["timer"] -= delta
-    rset("set_shield_state", shield)
-
-    # Check the state of the weapon and update if necessary
-    var weapon = get_weapon_state()
-    weapon["power"] = Power.OFF if weapon["timer"] > 0 else Power.ON
-    if weapon["power"] == Power.OFF:
-        weapon["timer"] -= delta
-        if weapon["timer"] <= 0: weapon["aim_pos"] = null
-    rset("set_weapon_state", weapon)
+            if timer == "attacking":
+                state["target"] = null
 
     return state
 
@@ -233,13 +181,13 @@ sync func hit(by):
     else:
         print(my_name, " hit ", by)
 
-    var shield = get_shield_state()
-    if shield["power"] == Power.ON:
+    var state = get_state()
+    if state["timers"].has("shield"):
         # Fancy shield deflection animation?
         return
 
     var state = get_state()
-    state["timers"][State.DEAD] = GameState.get_round_timer() / 10
+    state["timers"]["dead"] = GameState.get_round_timer() / 10
 
     # if state["condition"] != dead:
     #   state["condition"] = dead
@@ -269,12 +217,12 @@ sync func hit(by):
     get_parent().add_child(nd_death_anim)
 
     emit_signal("player_killed", by)
-    print(get_name() + " was killed and will be back in ", state["timers"][State.DEAD])
+    print(get_name() + " was killed and will be back in ", state["timers"]["dead"])
 
     if is_in_group("Bot"):
         queue_free()
     set_state(state)
-    update_states()
+    # update_states()
     return
 
 
@@ -284,7 +232,9 @@ func respawn():    ## IMPURE BD
     set_monitorable(true)    # Enable detection by other bodies and areas
     set_pos(GameState.rand_loc(Vector2(0,0), 0, 1000))
 
-    set_shield_state(Power.ON, 2.0)
+    var state = get_state()
+    state["timers"]["shield"] = 2.0
+    set_state(state)
     rset("set_path", { "from" : null, "to" : [] })
 
 
@@ -298,21 +248,18 @@ slave func slave_attack(loc):    ## IMPURE BD
 
 
 # Attack given location (not relative to prog)
-sync func attack(state, weapon):    ## IMPURE BD
+sync func attack(state):    ## IMPURE BD
     var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
     weapon_beam.owner = my_name
-    weapon_beam.destination = weapon["aim_pos"]
+    weapon_beam.destination = state["target"]
     weapon_beam.set_global_pos(get_pos())
     get_parent().add_child(weapon_beam)
 
-    weapon["timer"] = WEP_CD
-    state["timers"][State.ATTACKING] = 0.2
+    state["timers"]["attacking"] = 0.2
+    state["timers"]["weapon_cd"] = WEP_CD
 
-    # rpc("set_weapon_state", weapon)
-    # rpc("set_state", state)
-    set_weapon_state(weapon)
     set_state(state)
-    # rset("slave_atk_loc", weapon["aim_pos"])
+    # rset("slave_atk_loc")
 
 
 master func set_colors(primary, secondary):
@@ -361,7 +308,7 @@ sync func animate_jump(state, path):    ## IMPURE BD
         nd_shadow.set_opacity(shadow_opacity)
         set_z(jump_height + 1)    # +1 to render after everything below
 
-        state["timers"][State.MOVING] = 10.0
+        state["timers"]["moving"] = 10.0
     return
 
 
@@ -385,8 +332,8 @@ sync func set_motion_state(path, state):    ## IMPURE BD
 
         set_pos(path["position"] + state["motion"])
     # Stun on landing
-    elif state["timers"].has(State.MOVING):
-        state["timers"][State.STUNNED] = JUMP_CD
+    elif state["timers"].has("moving"):
+        state["timers"]["stunned"] = JUMP_CD
         set_state(state)
 
 
@@ -429,7 +376,7 @@ master func new_motion_state(delta, path, state):    ## PURE
 func _fixed_process(delta):
     # Update all states, timers and other statuses and end processing here if stunned
     var state = update_states(delta, get_state())
-    if state["timers"].has(State.STUNNED):
+    if state["timers"].has("stunned"):
         return
     var path = get_path()
     path["position"] = get_pos()
@@ -448,8 +395,6 @@ func _fixed_process(delta):
             mouse_pos = get_global_mouse_pos()
 
 
-        var weapon = get_weapon_state()
-
         if path["to"].size() > 0:
             if path["to"].size() > JUMP_Q_LIM:
                 path["to"].resize(JUMP_Q_LIM + 1)
@@ -458,13 +403,10 @@ func _fixed_process(delta):
             rset("set_path", path)
             rpc("set_motion_state", path, new_motion_state(delta, path, state))
 
-        # if not state["timers"].has(State.ATTACKING) and weapon["timer"] <= 0 and weapon["aim_pos"] != null:
-        if state["timers"].empty() and weapon["power"] == ON and weapon["aim_pos"] != null:
-        # if state["timers"].empty() and weapon["timer"] <= 0 and weapon["aim_pos"] != null:
-            # attack(state, weapon)
-           rpc("attack", state, weapon)
+        if state["timers"].empty() and not state["timers"].has("weapon_cd") and state["target"] != null:
+           rpc("attack", state)
 
-        focus = weapon["aim_pos"] if (weapon["aim_pos"] != null) and state["timers"].has(State.ATTACKING) else ( path["to"][0] if not path["to"].empty() else mouse_pos )
+        focus = state["target"] if (state["target"] != null) and state["timers"].has("attacking") else ( path["to"][0] if not path["to"].empty() else mouse_pos )
         rset("slave_focus", focus)
         rpc("set_state", state)
         rpc("set_path", path)

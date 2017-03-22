@@ -14,10 +14,10 @@ func _unhandled_input(ev):
             set_path(path)
             GameState.spawn_click_indicator(mouse_pos, "move_to")
     if Input.is_action_just_pressed("attack"):
-        var weapon = get_weapon_state()
-        weapon["aim_pos"] = mouse_pos
-        set_weapon_state(weapon)
-        rset("slave_atk_loc", weapon["aim_pos"])
+        var state = get_state()
+        state["target"] = mouse_pos
+        set_state(state)
+        rset("slave_atk_loc", state["target"])
     if ev.is_action_pressed("spawn_enemy"):
         GameState.rpc("spawn_enemy", GameState.rand_loc(mouse_pos, 0, 600))
     if ev.is_action_pressed("quit_game"):

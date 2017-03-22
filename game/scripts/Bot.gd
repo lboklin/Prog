@@ -63,7 +63,7 @@ func ai_processing(delta, botbrain, state):
             botbrain["target"] = null # Give up
     else:
         # Maybe jump
-        var moving = state["timers"].has(State.MOVING)
+        var moving = state["timers"].has("moving")
         var chance_of_jumping = ( 75 if moving else 85 ) * delta
         var roll = rand_range(0, 100)
         var want_to_jump = roll <= (chance_of_jumping)
@@ -71,9 +71,7 @@ func ai_processing(delta, botbrain, state):
             var from = botbrain["path"]["to"][0] if moving else botbrain["path"]["position"]
             var to = GameState.rand_loc(from, 50, MAX_JUMP_RANGE)
             if to.length() > from.length():
-                # var current_dir = (to - from).normalized()
                 var new_dir = from.normalized().rotated(PI)
-                # var new_to = from + (Vector2(1,0) * rand_range(50, MAX_JUMP_RANGE)).rotated(PI + from.angle_to(Vector2(0,0)))
                 var new_to = from + to.length() * new_dir
                 # print("Was going to go to       ", to,
                 #     "\nbut instead am going to  ", new_to)
