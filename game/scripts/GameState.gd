@@ -223,7 +223,7 @@ func get_round_timer():
 func spawn_click_indicator(pos, anim):
     var indicator = preload("res://gui/Indicator.tscn").instance()
     indicator.set_pos(pos)
-    self.get_parent().add_child(indicator)
+    nd_game_round.find_node("Players").add_child(indicator)
     indicator.get_node("AnimationPlayer").play(anim)
 
 
@@ -231,7 +231,7 @@ func spawn_click_indicator(pos, anim):
 sync func spawn_enemy(loc):
     var enemy = preload("res://npc/Bot.tscn").instance()
     enemy.set_pos(loc)
-    get_parent().add_child(enemy)
+    nd_game_round.find_node("Players").add_child(enemy)
 
 
 remote func spawn_players(spawn_points):
@@ -273,7 +273,7 @@ remote func spawn_players(spawn_points):
             var nd_hud = load("res://gui/HUD.tscn").instance()
             nd_hud.get_node("Control/Name").set_text(nd_player.get_name())
             nd_hud.get_node("Control/Points").set_text("Score: 0")
-            nd_player.add_child(nd_hud)
+            nd_game_round.add_child(nd_hud)
         else:
             nd_player.set_network_mode( NETWORK_MODE_SLAVE )
             # Add nd_player name

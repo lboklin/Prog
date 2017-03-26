@@ -2,7 +2,7 @@ extends CanvasLayer
 
 onready var nd_game_round = get_node("/root/GameRound")
 
-onready var nd_player = get_parent()
+#onready var nd_player = GameState.player_name
 onready var nd_points_label = get_node("Control/Points")
 onready var nd_name_label = get_node("Control/Name")
 
@@ -20,6 +20,6 @@ func _update_score(killer_name, score):
 
 func _ready():
     nd_game_round.connect("score_updated", self, "_update_score")
-    nd_name_label.set_text(nd_player.get_name())
+    nd_name_label.set_text(GameState.player_name)
     nd_points_label.set_text("Score: 0")
     set_process(true)

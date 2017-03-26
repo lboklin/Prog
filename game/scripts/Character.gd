@@ -165,9 +165,8 @@ master func new_rot(delta, current_pos, current_rot, point):
 
 
 func _area_enter(nd_area):
-  if nd_area.is_in_group("Damaging"):
-      self.call_deferred("damaged_by", nd_area.owner)
-      # self.damaged_by(nd_area.owner)
+    if nd_area.is_in_group("Damaging"):
+        self.call_deferred("damaged_by", nd_area.owner)
 
 
 # Well, this one makes you respawn
@@ -184,10 +183,10 @@ func respawn():
 
 # Get hit (and die - at least until better implementation is implemented)
 sync func damaged_by(meanie):
-    print(my_name, " was hit by ", meanie)
-
     if meanie == my_name:
         return
+
+    print(my_name, " was hit by ", meanie)
 
     var state = get_state()
     if state["timers"].has("shield"):
@@ -197,10 +196,6 @@ sync func damaged_by(meanie):
     var state = get_state()
     state["timers"]["dead"] = GameState.get_round_timer() / 10
 
-    var nd_death_anim = preload("res://common/DeathEffect.tscn").instance()
-    nd_death_anim.set_pos(get_pos())
-    get_parent().add_child(nd_death_anim)
-
     set_monitorable(false)
     set_hidden(true)
 
@@ -209,7 +204,7 @@ sync func damaged_by(meanie):
     get_parent().add_child(nd_death_anim)
 
     emit_signal("player_killed", meanie)
-    print(get_name() + " was killed by ", meanie, " and will be back in ", state["timers"]["dead"])
+    # print(get_name() + " was killed by ", meanie, " and will be back in ", state["timers"]["dead"])
 
     if is_in_group("Bot"):
         queue_free()
@@ -385,7 +380,7 @@ func _fixed_process(delta):
     if is_network_master():
         if is_in_group("Bot"):
             var botbrain = get_botbrain()
-            mouse_pos = GameState.rand_loc(botbrain["path"]["position"], 0, 1) if ( (randi() % 100) <= (60 * delta) ) else mouse_pos
+            mouse_pos = GameState.rand_loc(botbrain["path"]["position"], 0, 1) if ( (rand_range(0, 100)) <= (60 * delta) ) else mouse_pos
             botbrain = ai_processing(delta, botbrain, state)
             path = botbrain["path"]
             rpc("set_botbrain", botbrain)
