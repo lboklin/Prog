@@ -20,6 +20,7 @@ polygon = Vector2Array( -257, 13, -247, 43, -212, 78, -137, 113, -47, 128, 48, 1
 [node name="Player" type="Area2D" groups=[ "Prog" ]]
 
 z/z = 1
+z/relative = false
 input/pickable = false
 shapes/0/shape = SubResource( 1 )
 shapes/0/transform = Matrix32( 0.18, 0, 0, 0.18, -0.827984, -1.63799 )

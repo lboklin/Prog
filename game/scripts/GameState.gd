@@ -280,7 +280,7 @@ remote func spawn_players(spawn_points):
             # nd_player.get_node("HUD/Name").set_text(str(players[p]))
 
         # Add the nd_player (or you) to the nd_game_round!
-        nd_game_round.get_node("Players").add_child(nd_player)
+        nd_game_round.find_node("Players").add_child(nd_player)
         var name = nd_player.get_name()
         nd_game_round.scorekeeper[name] = 0
         # Award points for kills

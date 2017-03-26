@@ -12,18 +12,11 @@ the same value when the arguments provided have the
 same value. This makes it much easier to predict
 the results and also allows for easier syncing
 between clients over a network.
-
-In an effort to provide an overview of which funcs
-are pure and which are not, each one is tagged inline
-with either '## PURE' or '## IMPURE', and 'BD' appended
-if the function is impure "by design", and thus
-discourages looking through it again in hopes of
-purifying it.
 """
 
 extends Area2D
 
-# signal hit()
+# signal damaged_by()
 signal player_killed()
 
 # Your Prog's very own beautiful color scheme
@@ -114,22 +107,21 @@ func get_path():
 ##########################
 
 
-func update_states(delta, state):    ## PURE (but needs a more complete solution)
+# func update_states(delta, timers):
 
-    for timer in state["timers"]:
-        state["timers"][timer] -= delta
-        if (state["timers"][timer] <= 0):
-            state["timers"].erase(timer)
-            if timer == "attacking":
-                state["target"] = null
+#     if timers.size() > 0:
+#         for timer in timers:
+#             timers[timer] -= delta
+#             if (timers[timer] <= 0.0):
+#                 timers.erase(timer)
 
-    return state
+#     return timers
 
 
 ##################################################
 
 # For rotating the insignia sprite towards the given point (point is in global coords)
-master func new_rot(delta, current_pos, current_rot, point):    ## PURE
+master func new_rot(delta, current_pos, current_rot, point):
     var dir = point - current_pos
     dir.y *= 2
 
@@ -172,14 +164,30 @@ master func new_rot(delta, current_pos, current_rot, point):    ## PURE
     return new_rot
 
 
+func _area_enter(nd_area):
+  if nd_area.is_in_group("Damaging"):
+      self.call_deferred("damaged_by", nd_area.owner)
+      # self.damaged_by(nd_area.owner)
+
+
+# Well, this one makes you respawn
+func respawn():
+
+    set_monitorable(true)    # Enable detection by other bodies and areas
+    set_pos(GameState.rand_loc(Vector2(0,0), 0, 1000))
+
+    var state = get_state()
+    state["timers"]["shield"] = 2.0
+    set_state(state)
+    rset("set_path", { "from" : null, "to" : [] })
+
+
 # Get hit (and die - at least until better implementation is implemented)
-sync func hit(by):
-    # print("Stop hitting myself")
-    if by == my_name:
-        print("Stop hitting myself")
+sync func damaged_by(meanie):
+    print(my_name, " was hit by ", meanie)
+
+    if meanie == my_name:
         return
-    else:
-        print(my_name, " hit ", by)
 
     var state = get_state()
     if state["timers"].has("shield"):
@@ -188,22 +196,6 @@ sync func hit(by):
 
     var state = get_state()
     state["timers"]["dead"] = GameState.get_round_timer() / 10
-
-    # if state["condition"] != dead:
-    #   state["condition"] = dead
-
-    #   ## reset all active timers and states    ##
-    #   var wep_st = get_weapon_state()
-    #   wep_state["timer"] = 0
-    #   wep_state["aim_pos"] = null
-    #   condition_timers.clear()
-    #   ## todo: fix line below
-    #   self.jump["active_jump_origin"] = null
-
-    #   set_monitorable(false)
-    #   set_hidden(true)
-    #   update_states()
-    #   #########################################
 
     var nd_death_anim = preload("res://common/DeathEffect.tscn").instance()
     nd_death_anim.set_pos(get_pos())
@@ -216,50 +208,42 @@ sync func hit(by):
     nd_death_anim.set_pos(get_pos())
     get_parent().add_child(nd_death_anim)
 
-    emit_signal("player_killed", by)
-    print(get_name() + " was killed and will be back in ", state["timers"]["dead"])
+    emit_signal("player_killed", meanie)
+    print(get_name() + " was killed by ", meanie, " and will be back in ", state["timers"]["dead"])
 
     if is_in_group("Bot"):
         queue_free()
     set_state(state)
-    # update_states()
     return
 
 
-# Well, this one makes you respawn
-func respawn():    ## IMPURE BD
+sync func spawn_energy_beam(from, to):
+    var nd_energy_beam = preload("res://scenes/weapon/EnergyBeam.tscn").instance()
+    nd_energy_beam.owner = my_name
+    nd_energy_beam.destination = to
+    nd_energy_beam.set_global_pos(from)
+    get_parent().add_child(nd_energy_beam)
 
-    set_monitorable(true)    # Enable detection by other bodies and areas
-    set_pos(GameState.rand_loc(Vector2(0,0), 0, 1000))
-
-    var state = get_state()
-    state["timers"]["shield"] = 2.0
-    set_state(state)
-    rset("set_path", { "from" : null, "to" : [] })
+    var nd_beam_impact = preload("res://scenes/weapon/EnergyBeamImpact.tscn").instance()
+    nd_beam_impact.owner = my_name
+    nd_beam_impact.set_pos(to)
+    get_parent().add_child(nd_beam_impact)
 
 
-slave func slave_attack(loc):    ## IMPURE BD
-    var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
-    weapon_beam.owner = my_name
-    weapon_beam.destination = loc
-    weapon_beam.set_global_pos(get_pos())
-    get_parent().add_child(weapon_beam)
-    slave_atk_loc = null
+slave func slave_attack(loc):
+    spawn_energy_beam(get_pos(), loc)
+    self.slave_atk_loc = null
 
 
 # Attack given location (not relative to prog)
-sync func attack(state):    ## IMPURE BD
-    var weapon_beam = preload("res://scenes/weapon/BeamWeapon.tscn").instance()
-    weapon_beam.owner = my_name
-    weapon_beam.destination = state["target"]
-    weapon_beam.set_global_pos(get_pos())
-    get_parent().add_child(weapon_beam)
+sync func attack(state):
+    spawn_energy_beam(get_pos(), state["target"])
 
     state["timers"]["attacking"] = 0.2
     state["timers"]["weapon_cd"] = WEP_CD
+    state["target"] = null
 
     set_state(state)
-    # rset("slave_atk_loc")
 
 
 master func set_colors(primary, secondary):
@@ -273,12 +257,11 @@ master func set_colors(primary, secondary):
     return
 
 
-sync func animate_jump(state, path):    ## IMPURE BD
+sync func animate_jump(state, path):
     var jump_height = state["height"]
     # If we're not in the air, just set everything
     # accordingly and skip the calculations.
     if jump_height <= 0:
-        set_monitorable(true)    # Can be detected by other bodies and areas
         set_z(1)    # Back onto ground
         nd_sprite.set_pos(Vector2(0, 0))
         nd_shadow.set_opacity(nd_shadow_opacity)
@@ -312,7 +295,7 @@ sync func animate_jump(state, path):    ## IMPURE BD
     return
 
 
-sync func set_motion_state(path, state):    ## IMPURE BD
+sync func set_motion_state(path, state):
 
     # Check if there are any jumps queued and
     # if so pop any that hold our current pos.
@@ -329,16 +312,16 @@ sync func set_motion_state(path, state):    ## IMPURE BD
         # Disable detection by other bodies and areas.
         # This is to avoid hitting or being hit by anything while jumping.
         set_monitorable(false)
-
         set_pos(path["position"] + state["motion"])
     # Stun on landing
     elif state["timers"].has("moving"):
+        set_monitorable(true)
         state["timers"]["stunned"] = JUMP_CD
         set_state(state)
 
 
 # Update the state of motion to reflect what is desired
-master func new_motion_state(delta, path, state):    ## PURE
+master func new_motion_state(delta, path, state):
 
     var dist_covered = path["position"] - path["from"]
     dist_covered.y *= 2
@@ -374,10 +357,25 @@ master func new_motion_state(delta, path, state):    ## PURE
 
 
 func _fixed_process(delta):
-    # Update all states, timers and other statuses and end processing here if stunned
-    var state = update_states(delta, get_state())
-    if state["timers"].has("stunned"):
+
+    var state = get_state()
+
+    var incapacitated = false
+    # Update all state timers.
+    # If we don't create a new dict and copy over the ones we want, non-fatal
+    # errors about invalid keys sprouts for some reason. [Rant about mutable states].
+    var timers = {}
+    for timer in state["timers"]:
+        state["timers"][timer] -= delta
+        if (state["timers"][timer] > 0.0):
+            timers[timer] = state["timers"][timer]
+        elif timer == "stunned" or timer == "dead":
+            incapacitated = true
+    state["timers"] = timers
+
+    if incapacitated:
         return
+
     var path = get_path()
     path["position"] = get_pos()
 
@@ -431,6 +429,8 @@ func _ready():
         if is_in_group("Bot"):
             rset("primary_color", Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1)))
             rset("secondary_color", Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1)))
+
+    self.connect("area_enter", self, "_area_enter")
 
     set_colors(primary_color, secondary_color)
 
