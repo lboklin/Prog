@@ -34,6 +34,7 @@ onready var nd_insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSpr
 onready var nd_shadow = get_node("Shadow")
 onready var nd_shadow_opacity = nd_shadow.get_opacity()
 onready var nd_shadow_scale = nd_shadow.get_scale()
+onready var nd_hud = GameState.nd_game_round.get_node("HUD")
 
 # "enums"
 # enum Condition {OK, DEAD, RESPAWNING, STUNNED}
@@ -164,16 +165,12 @@ master func new_rot(delta, current_pos, current_rot, point):
     return new_rot
 
 
-func _area_enter(nd_area):
-    if nd_area.is_in_group("Damaging"):
-        self.call_deferred("damaged_by", nd_area.owner)
-
-
 # Well, this one makes you respawn
-func respawn():
+func respawn(pos = GameState.rand_loc(Vector2(0,0),0,1000)):
 
     set_monitorable(true)    # Enable detection by other bodies and areas
-    set_pos(GameState.rand_loc(Vector2(0,0), 0, 1000))
+    set_hidden(false)
+    set_pos(pos)
 
     var state = get_state()
     state["timers"]["shield"] = 2.0
@@ -181,20 +178,14 @@ func respawn():
     rset("set_path", { "from" : null, "to" : [] })
 
 
-# Get hit (and die - at least until better implementation is implemented)
-sync func damaged_by(meanie):
-    if meanie == my_name:
-        return
+func _area_enter(nd_area):
+    if nd_area.is_in_group("Damaging"):
+        if not nd_area.owner == my_name:
+            self.call_deferred("damaged_by", nd_area.owner)
 
-    print(my_name, " was hit by ", meanie)
-
+func die(state, killer):
     var state = get_state()
-    if state["timers"].has("shield"):
-        # Fancy shield deflection animation?
-        return
-
-    var state = get_state()
-    state["timers"]["dead"] = GameState.get_round_timer() / 10
+    state["timers"]["dead"] = GameState.get_round_timer() / 2
 
     set_monitorable(false)
     set_hidden(true)
@@ -203,12 +194,27 @@ sync func damaged_by(meanie):
     nd_death_anim.set_pos(get_pos())
     get_parent().add_child(nd_death_anim)
 
-    emit_signal("player_killed", meanie)
+    emit_signal("player_killed", killer)
     # print(get_name() + " was killed by ", meanie, " and will be back in ", state["timers"]["dead"])
 
-    if is_in_group("Bot"):
-        queue_free()
-    set_state(state)
+    # if is_in_group("Bot"):
+    #     queue_free()
+
+    return state
+
+
+# Get hit (and die - at least until better implementation is implemented)
+sync func damaged_by(meanie):
+    print(my_name, " was hit by ", meanie)
+
+    var state = get_state()
+    if state["timers"].has("shield"):
+        # Fancy shield deflection animation?
+        return
+    elif state["timers"].has("dead"):
+        return
+
+    set_state(die(state, meanie))
     return
 
 
@@ -364,8 +370,12 @@ func _fixed_process(delta):
         state["timers"][timer] -= delta
         if (state["timers"][timer] > 0.0):
             timers[timer] = state["timers"][timer]
-        elif timer == "stunned" or timer == "dead":
-            incapacitated = true
+            if timer == "stunned" or timer == "dead":
+                incapacitated = true
+        elif timer == "dead":
+            respawn()
+            timers = {}
+            continue
     state["timers"] = timers
 
     if incapacitated:
@@ -383,6 +393,7 @@ func _fixed_process(delta):
             mouse_pos = GameState.rand_loc(botbrain["path"]["position"], 0, 1) if ( (rand_range(0, 100)) <= (60 * delta) ) else mouse_pos
             botbrain = ai_processing(delta, botbrain, state)
             path = botbrain["path"]
+            state["target"] = botbrain["attack_location"]
             rpc("set_botbrain", botbrain)
         else:
             mouse_pos = get_global_mouse_pos()

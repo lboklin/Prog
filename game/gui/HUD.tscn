@@ -67,4 +67,48 @@ percent_visible = 1.0
 lines_skipped = 0
 max_lines_visible = -1
 
+[node name="RoundTimer" type="Label" parent="Control"]
+
+anchor/left = 1
+anchor/right = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 150.0
+margin/top = 0.0
+margin/right = 0.0
+margin/bottom = 32.0
+custom_colors/font_color = Color( 1, 0.535156, 0.535156, 1 )
+custom_colors/font_color_shadow = Color( 0.369113, 0.234894, 0.699219, 1 )
+text = "Round Time"
+align = 1
+valign = 1
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="RespawnTimer" type="Label" parent="Control"]
+
+anchor/left = 3
+anchor/top = 3
+anchor/right = 3
+anchor/bottom = 1
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 80.0
+margin/top = -467.0
+margin/right = -80.0
+margin/bottom = 41.0
+custom_colors/font_color = Color( 0.160156, 0.74411, 1, 1 )
+custom_colors/font_color_shadow = Color( 0.499704, 0.234894, 0.699219, 1 )
+text = "Respawn Timer"
+align = 1
+valign = 1
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
 

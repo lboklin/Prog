@@ -1,21 +1,31 @@
 extends CanvasLayer
 
 onready var nd_game_round = get_node("/root/GameRound")
-
 #onready var nd_player = GameState.player_name
 onready var nd_points_label = get_node("Control/Points")
 onready var nd_name_label = get_node("Control/Name")
+onready var nd_timer_label = get_node("Control/RoundTimer")
+onready var nd_respawn_label = get_node("Control/RespawnTimer")
+
+var respawn_timer = 0
 
 
 func _update_score(killer_name, score):
     nd_points_label.set_text("Score: " + str(score))
 
 
-# func _process(delta):
-#     # var name = nd_player.get_name()
-#     var id = get_tree().get_network_unique_id()
-#     var score = str(nd_game_round.score[id])
-#     nd_points_label.set_text("Score: " + score)
+func show_respawn_timer(timer):
+    nd_respawn_label.set_hidden(true)
+
+
+func _process(delta):
+    nd_timer_label.set_text("Round Time: " + str(floor(GameState.get_round_timer())))
+    if respawn_timer > 0:
+        respawn_timer -= delta
+        nd_respawn_label.set_text("Respawning in: " + str(floor(respawn_timer)))
+    else:
+        nd_respawn_label.set_hidden(false)
+
 
 
 func _ready():

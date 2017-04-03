@@ -41,6 +41,8 @@ func host_game(name):
     host.create_server(SERVER_PORT, 6) # Max 6 players can be connected
     get_tree().set_network_peer(host)
 
+    players[1] = name
+
 
 func _ready():
     # Networking signals (high level networking)
@@ -156,8 +158,9 @@ remote func unregister_player(id):
     # If the game is running
     if(has_node("/root/GameRound")):
         # Remove player from game
-        if(has_node("/root/GameRound/Players/" + str(id))):
-            get_node("/root/GameRound/Players/" + str(id)).queue_free()
+        var nd_p = nd_game_round.find_node("Players")
+        if(nd_p.has_node(str(id))):
+            nd_p.get_node(str(id)).queue_free()
         players.erase(id)
     else:
         # Remove from lobby
@@ -202,7 +205,8 @@ func start_game():
 
     # Tell each player 'p' with id 'spawn_points' to spawn at specified 'spawn_points[id]'
     for p in players:
-        rpc_id(p, "spawn_players", spawn_points)
+        if players[p] != player_name:
+            rpc_id(p, "spawn_players", spawn_points)
 
     spawn_players(spawn_points)
     pass
@@ -261,10 +265,12 @@ remote func spawn_players(spawn_points):
         # Set random spawn position for the nd_player
         var spawn_pos = rand_loc(Vector2(0,0), 0, 2000)
         nd_player.set_pos(spawn_pos)
+        # nd_player.connect("player_killed", nd_game_round, "_add_points", [1])
 
 
         # If the new nd_player is you
         if (p == get_tree().get_network_unique_id()):
+            nd_player.set_name(player_name)
             # Set as master on yourself
             nd_player.set_network_mode( NETWORK_MODE_MASTER )
             # Add camera to your nd_player
