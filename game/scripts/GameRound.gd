@@ -3,11 +3,18 @@ extends Node
 
 const REWARD_TIMER = 1
 
+# onready var nd_hud = get_node("HUD")
 var timer_round = 0
 var timer_point_reward = 0
 var scorekeeper = {}
 
 signal score_updated()
+
+
+func add_participant(ppt):
+    scorekeeper[ppt] = 0
+    get_node("HUD").add_to_scoreboard(ppt, 0)
+    return
 
 
 func get_participants():
@@ -22,8 +29,9 @@ func _add_points(name, points):
     else:
         scorekeeper[name] = scorekeeper[name] + points if scorekeeper.has(name) else points
         emit_signal("score_updated", name, scorekeeper[name])
-    # if is_network_master():
-    #     get_tree().find_node(name).get_node("HUD/Points").set_text("Score: " + str(scorekeeper[name]))
+    print("Scores: ")
+    for p in scorekeeper:
+        print(p, " has ", scorekeeper[p], " points.")
 
 
 func _process(delta):

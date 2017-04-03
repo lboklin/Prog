@@ -52,7 +52,7 @@ func ai_processing(delta, botbrain, state):
     # Maybe attack
     var attack_chance = 45 * delta
     if rand_range(0, 100) <= attack_chance :
-        print(get_name(), ": Pew")
+        # print(get_name(), ": Pew")
         var aim_pos
         var no_target = botbrain["target"] == null
         if no_target:
@@ -81,7 +81,7 @@ func ai_processing(delta, botbrain, state):
 
             botbrain["path"]["to"].append(to)
             # print(get_name(), ": Hopping ", (to-from).length(), " pixels.")
-            print(get_name(), ": Hop")
+            # print(get_name(), ": Hop")
 
     return botbrain
 

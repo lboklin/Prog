@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=1]
+[gd_scene load_steps=4 format=1]
 
 [ext_resource path="res://scripts/HUD.gd" type="Script" id=1]
 [ext_resource path="res://gui/purple_theme.tres" type="Theme" id=2]
+[ext_resource path="res://gui/Scoreboard.tscn" type="PackedScene" id=3]
 
 [node name="HUD" type="CanvasLayer"]
 
@@ -17,55 +18,13 @@ anchor/right = 1
 anchor/bottom = 1
 focus/ignore_mouse = true
 focus/stop_mouse = false
-size_flags/horizontal = 3
-size_flags/vertical = 3
+size_flags/horizontal = 2
+size_flags/vertical = 2
 theme/theme = ExtResource( 2 )
 margin/left = 0.0
 margin/top = 0.0
 margin/right = 0.0
 margin/bottom = 0.0
-
-[node name="Points" type="Label" parent="Control"]
-
-anchor/left = 3
-anchor/top = 1
-anchor/right = 3
-anchor/bottom = 1
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 3
-size_flags/vertical = 3
-margin/left = 80.0
-margin/top = 18.0
-margin/right = -80.0
-margin/bottom = 0.0
-custom_colors/font_color = Color( 1, 1, 1, 1 )
-custom_colors/font_color_shadow = Color( 0.357513, 0.509507, 0.832031, 1 )
-text = "POINTS"
-align = 1
-valign = 1
-percent_visible = 1.0
-lines_skipped = 0
-max_lines_visible = -1
-
-[node name="Name" type="Label" parent="Control"]
-
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 0
-margin/left = 0.0
-margin/top = 0.0
-margin/right = 80.0
-margin/bottom = 24.0
-custom_colors/font_color = Color( 1, 0.535156, 0.535156, 1 )
-custom_colors/font_color_shadow = Color( 0.369113, 0.234894, 0.699219, 1 )
-text = "NAME"
-align = 1
-valign = 1
-percent_visible = 1.0
-lines_skipped = 0
-max_lines_visible = -1
 
 [node name="RoundTimer" type="Label" parent="Control"]
 
@@ -78,7 +37,7 @@ size_flags/vertical = 0
 margin/left = 150.0
 margin/top = 0.0
 margin/right = 0.0
-margin/bottom = 32.0
+margin/bottom = 64.0
 custom_colors/font_color = Color( 1, 0.535156, 0.535156, 1 )
 custom_colors/font_color_shadow = Color( 0.369113, 0.234894, 0.699219, 1 )
 text = "Round Time"
@@ -110,5 +69,7 @@ valign = 1
 percent_visible = 1.0
 lines_skipped = 0
 max_lines_visible = -1
+
+[node name="Scoreboard" parent="Control" instance=ExtResource( 3 )]
 
 

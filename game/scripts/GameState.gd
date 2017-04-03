@@ -236,6 +236,8 @@ sync func spawn_enemy(loc):
     var enemy = preload("res://npc/Bot.tscn").instance()
     enemy.set_pos(loc)
     nd_game_round.find_node("Players").add_child(enemy)
+    nd_game_round.add_participant(enemy.get_name())
+    print(nd_game_round.get_participants())
 
 
 remote func spawn_players(spawn_points):
@@ -277,8 +279,8 @@ remote func spawn_players(spawn_points):
             nd_player.add_child(scn_camera.instance())
             # Add a HUD for displaying name and score
             var nd_hud = load("res://gui/HUD.tscn").instance()
-            nd_hud.get_node("Control/Name").set_text(nd_player.get_name())
-            nd_hud.get_node("Control/Points").set_text("Score: 0")
+            # nd_hud.get_node("Control/ScoresContainer/Names").set_text(nd_player.get_name())
+            # nd_hud.get_node("Control/Points").set_text("Score: 0")
             nd_game_round.add_child(nd_hud)
         else:
             nd_player.set_network_mode( NETWORK_MODE_SLAVE )

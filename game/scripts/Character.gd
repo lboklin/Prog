@@ -180,7 +180,7 @@ func respawn(pos = GameState.rand_loc(Vector2(0,0),0,1000)):
 
 func _area_enter(nd_area):
     if nd_area.is_in_group("Damaging"):
-        if not nd_area.owner == my_name:
+        if not nd_area.owner == my_name and is_monitorable():
             self.call_deferred("damaged_by", nd_area.owner)
 
 func die(state, killer):
