@@ -73,7 +73,7 @@ func ai_processing(delta, botbrain, state):
         if want_to_jump:
             var from = botbrain["path"]["to"][0] if moving else botbrain["path"]["position"]
             var to = GameState.rand_loc(from, 50, MAX_JUMP_RANGE)
-            if to.length() > from.length():
+            if to.length() > from.length(): # This is a hack to make sure bots don't stray from world origin
                 var new_dir = from.normalized().rotated(PI)
                 var new_to = from + to.length() * new_dir
                 # print("Was going to go to       ", to,

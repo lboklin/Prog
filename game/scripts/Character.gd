@@ -25,7 +25,7 @@ export(Color) sync var secondary_color
 const WEP_CD = 1.0    # Weapon cooldown
 const JUMP_CD = 0.1    # Jump cooldown after landing
 const MAX_SPEED = 1500    # Max horizontal (ground) speed
-const MAX_JUMP_RANGE = 1000    # How far you can jump from any given starting pos
+const MAX_JUMP_RANGE = 500    # How far you can jump from any given starting pos
 const JUMP_Q_LIM = 2    # Jump queue limit
 const RST2RT = 3  # Respawn timer to elapsed round time ratio
 
