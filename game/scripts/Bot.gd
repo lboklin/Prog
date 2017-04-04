@@ -60,7 +60,7 @@ func ai_processing(delta, botbrain, state):
                 botbrain["target"] = null # Give up
                 botbrain["attack_location"] = null
             else:
-                var target_p = botbrain["target"].get_path()
+                var target_p = botbrain["target"].get_state()["path"]
                 botbrain["attack_location"] = take_aim(target_p)
         else:
             botbrain["target"] = acquire_target(awareness_area.get_overlapping_areas())

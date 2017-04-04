@@ -62,16 +62,15 @@ var points = 0
 
 sync var p_state = {
     "timers" : {},
-    "motion" :  Vector2(), # Horizontal
-    "target" :  null,
-    "height" :  0          # Vertical
+    "target" : null,
+    "motion" : Vector2(), # Horizontal
+    "height" : 0,          # Vertical
+    "path"   : {
+        "position" : Vector2(),
+        "from"     : null,
+        "to"       : [],    # Take note that this is a jump queue array
+        }
 } setget set_state, get_state
-
-sync var p_path = {
-    "position" : Vector2(),
-    "from" : null,
-    "to" : [],    # Take note that this is a jump queue array
-} setget set_path, get_path
 
 
 ###########################
@@ -93,15 +92,6 @@ sync func set_state(new_state):
 func get_state():
     return p_state
 
-#-------------
-#-------------
-# Jump state
-
-sync func set_path(new_path):
-    p_path = new_path
-
-func get_path():
-    return p_path
 
 #-------------
 
@@ -174,7 +164,7 @@ func respawn(pos = GameState.rand_loc(Vector2(0,0),0,1000)):
 
     var state = get_state()
     state["timers"]["shield"] = 2.0
-    rpc("set_path", { "from" : null, "to" : [] })
+    state["path"] = { "position" : pos, "from" : null, "to" : [] }
     rpc("set_state", state)
 
 
@@ -189,8 +179,6 @@ func get_respawn_time():
     return time
 
 func die(state, killer):
-    state["timers"]["dead"] = get_respawn_time()
-
     set_monitorable(false)
     set_hidden(true)
 
@@ -198,22 +186,29 @@ func die(state, killer):
     nd_death_anim.set_pos(get_pos())
     get_parent().add_child(nd_death_anim)
 
+    state["timers"]["dead"] = get_respawn_time()
+
     emit_signal("player_killed", get_name(), killer)
 
     return state
 
 
+func shield_deflect(state):
+    # Fancy shield deflection animation
+    return state
+
+
 # Get hit (and die - at least until better implementation is implemented)
-func take_damage(meanie, state):
+func take_damage(state, meanie):
     print(my_name, " was hit by ", meanie)
 
-    if state["timers"].has("shield"):
-        # Fancy shield deflection animation?
-        return
-    elif state["timers"].has("dead"):
-        return
+    var timers = state["timers"]
+    var shielded = timers.has("shield")
+    var dead = timers.has("dead")
 
-    state = die(state, meanie)
+    if not dead:
+        state = shield_deflect(state) if shielded else die(state, meanie)
+
     return state
 
 
@@ -258,7 +253,7 @@ sync func set_colors(primary, secondary):
     return
 
 
-sync func animate_jump(state, path):
+sync func animate_jump(state):
     var jump_height = state["height"]
     # If we're not in the air, just set everything
     # accordingly and skip the calculations.
@@ -296,17 +291,17 @@ sync func animate_jump(state, path):
     return
 
 
-sync func set_motion_state(path, state):
+sync func set_motion_state(state):
 
+    var path = state["path"]
     # Check if there are any jumps queued and
     # if so pop any that hold our current pos.
     # Use while loop to catch any duplicates.
     while path["to"].size() > 0 and path["position"] == path["to"][0]:
         path["to"].pop_front()
         path["from"] = path["position"] if path["to"].size() > 0 else null
-        set_path(path)
 
-    animate_jump(state, path)
+    animate_jump(state)
 
     # Check if (supposed to be) moving and apply motion
     if (state["motion"].length() > 0 or path["to"].size() > 0):
@@ -320,10 +315,14 @@ sync func set_motion_state(path, state):
         state["timers"]["stunned"] = JUMP_CD
         set_state(state)
 
+    state["path"] = path
+    return state
+
 
 # Update the state of motion to reflect what is desired
-master func new_motion_state(delta, path, state):
+master func new_motion_state(delta, state):
 
+    var path = state["path"]
     var dist_covered = path["position"] - path["from"]
     dist_covered.y *= 2
     dist_covered = dist_covered.length()
@@ -349,6 +348,7 @@ master func new_motion_state(delta, path, state):
     var jump_completion = dist_covered / dist_total if dist_total > 0 else 1
     state["height"] = sin(PI*jump_completion) * dist_total * 0.4
 
+    state["path"] = path
     return state
 
 
@@ -363,7 +363,9 @@ func _fixed_process(delta):
 
     if damaged_by != null:
         if state["height"] < 10:
-            state = take_damage(damaged_by, state)
+            state = take_damage(state, damaged_by)
+            print("take_damage's output assigned: ", state)
+            if state == null: print("state is null, see: ", state)
         damaged_by = null
 
     var incapacitated = false
@@ -391,10 +393,7 @@ func _fixed_process(delta):
     if incapacitated:
         return
 
-    if is_hidden():
-        breakpoint
-
-    var path = get_path()
+    var path = state["path"]
     path["position"] = get_pos()
 
 
@@ -418,16 +417,17 @@ func _fixed_process(delta):
                 path["to"].resize(JUMP_Q_LIM + 1)
             if path["from"] == null:
                 path["from"] = path["position"]
-            rpc("set_path", path)
-            rpc("set_motion_state", path, new_motion_state(delta, path, state))
+            state["path"] = path
+            rpc("set_motion_state", new_motion_state(delta, state))
 
         if state["timers"].empty() and not state["timers"].has("weapon_cd") and state["target"] != null:
            state = attack(state)
 
         focus = state["target"] if (state["target"] != null) and state["timers"].has("attacking") else ( path["to"][0] if not path["to"].empty() else mouse_pos )
+
+        state["path"] = path
         rset("slave_focus", focus)
         rpc("set_state", state)
-        rpc("set_path", path)
     else:
         focus = slave_focus
         # if slave_atk_loc != null:

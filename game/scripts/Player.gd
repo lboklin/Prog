@@ -15,11 +15,13 @@ func _unhandled_input(ev):
         return
 
     if Input.is_action_just_pressed("move_to"):
-        var path = get_path()
+        var state = get_state()
+        var path = state["path"]
         if not (( path["to"].size() > 0 ) and ( mouse_pos == path["to"].back() )):
             path["from"] = path["from"] if path["to"].size() > 0 else get_pos()
             path["to"].append(mouse_pos)
-            set_path(path)
+            state["path"] = path
+            set_state(state)
             GameState.spawn_click_indicator(mouse_pos, "move_to")
     if Input.is_action_just_pressed("attack"):
         var state = get_state()
