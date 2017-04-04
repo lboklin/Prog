@@ -4,7 +4,6 @@ extends Area2D
 const MAX_RANGE = 700
 const SAFE_RADIUS = 128
 
-onready var nd_anim = get_node("Animation")
 
 var owner = ""
 var destination = Vector2()
@@ -34,6 +33,7 @@ func _ready():
     var len = (destination - pos).length() / MAX_RANGE
     set_scale(Vector2(len, 1))
 
+    var nd_anim = get_node("Animation")
     nd_anim.play("Beam")
     nd_anim.connect("finished", self, "_animation_finished")
 
