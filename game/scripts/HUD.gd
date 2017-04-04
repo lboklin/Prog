@@ -11,10 +11,9 @@ onready var nd_respawn_label = get_node("Control/RespawnTimer")
 var respawn_timer = 0
 
 
-func _update_score(name, score):
+func update_score(name, score):
     # nd_names_label.set_text(nd_names_label.get_text() + name + "\n")
     # nd_points_label.set_text(nd_points_label.get_text() + str(score) + "\n")
-    name = name.replace("@", "")
     if nd_vbox_container.has_node(name):
         nd_vbox_container.get_node(name).set_name_score(name, score)
     return
@@ -23,9 +22,8 @@ func _update_score(name, score):
 func add_to_scoreboard(name, score):
     var nd_name_score = preload("res://gui/NameScore.tscn").instance()
 
-    name = name.replace("@", "")
     nd_name_score.set_name_score(name, score)
-    nd_name_score.set_name(name)  # Set node name so we can later update existing entries
+    nd_name_score.set_name(name.replace("@", ""))  # Set node name so we can later update existing entries
 
     # This is kind of a weird solution, but this is a way to put the elements in rows
     # instead of on top of each other.
@@ -36,7 +34,13 @@ func add_to_scoreboard(name, score):
 
 
 func _process(delta):
+    # Round timer
     nd_timer_label.set_text("Elapsed Round Time: " + str(floor(GameState.get_round_timer())))
+
+    for p in nd_game_round.get_participants():
+        update_score(p, nd_game_round.scorekeeper[p])
+
+    # Respawn timer
     if respawn_timer > 0:
         respawn_timer -= delta
         nd_respawn_label.set_text("Seconds until respawn: " + str(respawn_timer).pad_decimals(2))
@@ -47,7 +51,7 @@ func _process(delta):
 
 
 func _ready():
-    nd_game_round.connect("score_updated", self, "_update_score")
+    # nd_game_round.connect("score_updated", self, "_update_score")
 
     # nd_names_label.set_text("")
     # nd_points_label.set_text("")

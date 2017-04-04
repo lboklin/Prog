@@ -6,7 +6,8 @@ extends HSplitContainer
 
 func set_name_score(name, score):
     get_node("Name").set_text(name)
-    get_node("Score").set_text(str(score))
+    score = str(floor(score))
+    get_node("Score").set_text(score)
 
 
 func _ready():

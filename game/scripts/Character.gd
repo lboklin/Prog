@@ -17,6 +17,7 @@ between clients over a network.
 extends Area2D
 
 signal player_killed()
+signal player_respawned()
 
 # Your Prog's very own beautiful color scheme
 export(Color) sync var primary_color
@@ -27,7 +28,6 @@ const JUMP_CD = 0.1    # Jump cooldown after landing
 const MAX_SPEED = 1500    # Max horizontal (ground) speed
 const MAX_JUMP_RANGE = 1000    # How far you can jump from any given starting pos
 const JUMP_Q_LIM = 2    # Jump queue limit
-const RESPAWNS_PER_ERT = 3  # Respawn timer to elapsed round time ratio
 
 onready var nd_sprite = get_node("Sprite")
 onready var nd_insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
@@ -166,6 +166,7 @@ func respawn(pos = GameState.rand_loc(Vector2(0,0),0,1000)):
     state["timers"]["shield"] = 2.0
     state["path"] = { "position" : pos, "from" : null, "to" : [] }
     rpc("set_state", state)
+    emit_signal("player_respawned", my_name)
 
 
 func _area_enter(nd_area):
@@ -173,10 +174,6 @@ func _area_enter(nd_area):
         if not nd_area.owner == my_name:
             rset("damaged_by", nd_area.owner)
 
-func get_respawn_time():
-    var time = GameState.get_round_timer() / RESPAWNS_PER_ERT
-    time = clamp(time, 5, 60)
-    return time
 
 func die(state, killer):
     set_monitorable(false)
@@ -186,7 +183,7 @@ func die(state, killer):
     nd_death_anim.set_pos(get_pos())
     get_parent().add_child(nd_death_anim)
 
-    state["timers"]["dead"] = get_respawn_time()
+    state["timers"]["dead"] = GameState.nd_game_round.get_respawn_time()
 
     emit_signal("player_killed", my_name, killer)
 
