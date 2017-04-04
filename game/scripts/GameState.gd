@@ -237,7 +237,6 @@ sync func spawn_enemy(loc):
     enemy.set_pos(loc)
     nd_game_round.find_node("Players").add_child(enemy)
     nd_game_round.add_participant(enemy.get_name())
-    print(nd_game_round.get_participants())
 
 
 remote func spawn_players(spawn_points):

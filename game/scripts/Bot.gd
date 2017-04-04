@@ -51,7 +51,6 @@ func ai_processing(delta, botbrain, state):
     # Maybe attack
     var attack_chance = 150 * delta
     if rand_range(0, 100) <= attack_chance :
-        # print(get_name(), ": Pew")
         var has_target = botbrain["target"] != null
         if has_target:
             var target_dead = botbrain["target"].get_state()["timers"].has("dead")
@@ -76,15 +75,12 @@ func ai_processing(delta, botbrain, state):
             if to.length() > from.length(): # This is a hack to make sure bots don't stray from world origin
                 var new_dir = from.normalized().rotated(PI)
                 var new_to = from + to.length() * new_dir
-                # print("Was going to go to       ", to,
                 #     "\nbut instead am going to  ", new_to)
                 to = new_to
             while botbrain["path"]["to"].size() > 1:
                 botbrain["path"]["to"].pop_back()
 
             botbrain["path"]["to"].append(to)
-            # print(get_name(), ": Hopping ", (to-from).length(), " pixels.")
-            # print(get_name(), ": Hop")
 
     return botbrain
 

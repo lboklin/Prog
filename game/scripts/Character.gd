@@ -197,7 +197,6 @@ func shield_deflect(state):
 
 # Get hit (and die - at least until better implementation is implemented)
 func take_damage(state, meanie):
-    print(my_name, " was hit by ", meanie)
 
     var timers = state["timers"]
     var shielded = timers.has("shield")
@@ -242,11 +241,11 @@ func attack(state):
 sync func set_colors(primary, secondary):
 
     if primary_color != null:
-        # nd_sprite.set_modulate(primary)
-        nd_sprite.rpc("set_modulate", primary_color)
+        nd_sprite.set_modulate(primary)
+        # nd_sprite.rpc("set_modulate", primary_color)
     if secondary_color != null:
-        # nd_insignia.set_modulate(secondary)
-        nd_insignia.rpc("set_modulate", secondary_color)
+        nd_insignia.set_modulate(secondary)
+        # nd_insignia.rpc("set_modulate", secondary_color)
     return
 
 
@@ -271,8 +270,6 @@ sync func animate_jump(state):
         var no_shadow_h = 1200
         var shadow_opacity = 1 - max(0, min(1, ( jump_height / no_shadow_h )))
         shadow_opacity *= nd_shadow_opacity
-        if shadow_opacity > nd_shadow_opacity:
-            print("That's not right...")
 
         var shadow_shrink_ratio = Vector2(0.8, 0.5) * max(0, min(1, ( jump_height / (no_shadow_h*4) )))
         var shadow_scale = Vector2(1, 1) - shadow_shrink_ratio
@@ -361,8 +358,6 @@ func _fixed_process(delta):
     if damaged_by != null:
         if state["height"] < 10:
             state = take_damage(state, damaged_by)
-            print("take_damage's output assigned: ", state)
-            if state == null: print("state is null, see: ", state)
         damaged_by = null
 
     var incapacitated = false
@@ -444,11 +439,11 @@ func _fixed_process(delta):
 func _ready():
     if is_network_master():
         self.connect("area_enter", self, "_area_enter")
-        if is_in_group("Bot"):
-            rset("primary_color", Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1)))
-            rset("secondary_color", Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1)))
+        # if is_in_group("Bot"):
+        if true:
+            rset("primary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
+            rset("secondary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
         rpc("set_colors", primary_color, secondary_color)
-
 
     my_id = get_tree().get_network_unique_id()
     my_name = self.get_name()

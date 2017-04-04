@@ -62,9 +62,6 @@ sync func add_points(name, points):
     else:
         scorekeeper[name] = scorekeeper[name] + points if scorekeeper.has(name) else points
         emit_signal("score_updated", name, scorekeeper[name])
-    print("Scores: ")
-    for p in scorekeeper:
-        print(p, " has ", scorekeeper[p], " points.")
 
 
 func _process(delta):
