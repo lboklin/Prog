@@ -27,7 +27,7 @@ const JUMP_CD = 0.1    # Jump cooldown after landing
 const MAX_SPEED = 1500    # Max horizontal (ground) speed
 const MAX_JUMP_RANGE = 1000    # How far you can jump from any given starting pos
 const JUMP_Q_LIM = 2    # Jump queue limit
-const RST2RT = 3  # Respawn timer to elapsed round time ratio
+const RESPAWNS_PER_ERT = 3  # Respawn timer to elapsed round time ratio
 
 onready var nd_sprite = get_node("Sprite")
 onready var nd_insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
@@ -174,7 +174,7 @@ func _area_enter(nd_area):
             rset("damaged_by", nd_area.owner)
 
 func get_respawn_time():
-    var time = GameState.get_round_timer() / RST2RT
+    var time = GameState.get_round_timer() / RESPAWNS_PER_ERT
     time = clamp(time, 5, 60)
     return time
 
@@ -188,7 +188,7 @@ func die(state, killer):
 
     state["timers"]["dead"] = get_respawn_time()
 
-    emit_signal("player_killed", get_name(), killer)
+    emit_signal("player_killed", my_name, killer)
 
     return state
 
