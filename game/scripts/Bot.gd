@@ -1,14 +1,14 @@
 extends "res://scripts/Character.gd"
 
 
-export var accuracy_percentage = 80 # Better than a stormtrooper
+export var accuracy = 0.8 # Better than a stormtrooper
 
 onready var awareness_area = get_node("AwarenessArea")
 
 # Holds the active target to attack and pursue
 sync var p_botbrain = {
     "target" : null,
-    "attack_location" : Vector2(),
+    "attack_location" : null,
     "path" : {
         "position" : Vector2(),
         "from" : null,
@@ -18,7 +18,6 @@ sync var p_botbrain = {
 
 sync func set_botbrain(botbrain):
     p_botbrain = botbrain
-    return botbrain
 
 func get_botbrain():
     return p_botbrain
@@ -38,7 +37,7 @@ func acquire_target(possible_targets):
 
 func take_aim(target_path):
     # How much bot could miss - diameter of a prog is ~90
-    var radius = 90 * 100 / accuracy_percentage
+    var radius = 90 / accuracy
     # Take aim, and if target is moving, aim towards where it's going
     var aim_pos = target_path["position"] if target_path["to"].empty() else target_path["to"][0]
     var attack_pos = GameState.rand_loc(aim_pos, 0, radius) # Generate where we (bot) accidentally/actually aimed
@@ -50,17 +49,21 @@ func ai_processing(delta, botbrain, state):
 #	var botbrain = get_botbrain()
 
     # Maybe attack
-    var attack_chance = 45 * delta
+    var attack_chance = 150 * delta
     if rand_range(0, 100) <= attack_chance :
         # print(get_name(), ": Pew")
-        var aim_pos
-        var no_target = botbrain["target"] == null
-        if no_target:
+        var has_target = botbrain["target"] != null
+        if has_target:
+            var target_dead = botbrain["target"].get_state()["timers"].has("dead")
+            var can_see_target = awareness_area.overlaps_area(botbrain["target"])
+            if target_dead or not can_see_target:
+                botbrain["target"] = null # Give up
+                botbrain["attack_location"] = null
+            else:
+                var target_p = botbrain["target"].get_path()
+                botbrain["attack_location"] = take_aim(target_p)
+        else:
             botbrain["target"] = acquire_target(awareness_area.get_overlapping_areas())
-        elif awareness_area.overlaps_area(botbrain["target"]):
-            botbrain["attack_location"] = take_aim(botbrain["target"].get_path())
-        else: # If target is lost
-            botbrain["target"] = null # Give up
     else:
         # Maybe jump
         var moving = state["timers"].has("moving")

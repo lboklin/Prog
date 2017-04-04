@@ -28,6 +28,7 @@ const JUMP_CD = 0.1    # Jump cooldown after landing
 const MAX_SPEED = 1500    # Max horizontal (ground) speed
 const MAX_JUMP_RANGE = 1000    # How far you can jump from any given starting pos
 const JUMP_Q_LIM = 2    # Jump queue limit
+const RST2RT = 3  # Respawn timer to elapsed round time ratio
 
 onready var nd_sprite = get_node("Sprite")
 onready var nd_insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
@@ -87,7 +88,6 @@ sync func set_state(new_state):
         new_state["timers"].clear()
         new_state["timers"]["stunned"] = t
     p_state = new_state
-    return p_state
 
 func get_state():
     return p_state
@@ -98,7 +98,6 @@ func get_state():
 
 sync func set_path(new_path):
     p_path = new_path
-    return p_path
 
 func get_path():
     return p_path
@@ -185,7 +184,7 @@ func _area_enter(nd_area):
 
 func die(state, killer):
     var state = get_state()
-    state["timers"]["dead"] = GameState.get_round_timer() / 2
+    state["timers"]["dead"] = GameState.get_round_timer() / RST2RT
 
     set_monitorable(false)
     set_hidden(true)
@@ -237,14 +236,15 @@ slave func slave_attack(loc):
 
 
 # Attack given location (not relative to prog)
-sync func attack(state):
+func attack(state):
+    rpc("spawn_energy_beam", get_pos(), state["target"])
     spawn_energy_beam(get_pos(), state["target"])
 
     state["timers"]["attacking"] = 0.2
     state["timers"]["weapon_cd"] = WEP_CD
     state["target"] = null
 
-    set_state(state)
+    return state
 
 
 master func set_colors(primary, secondary):
@@ -365,18 +365,18 @@ func _fixed_process(delta):
     # Update all state timers.
     # If we don't create a new dict and copy over the ones we want, non-fatal
     # errors about invalid keys sprouts for some reason. [Rant about mutable states].
-    var timers = {}
+    var new_timers = {}
     for timer in state["timers"]:
         state["timers"][timer] -= delta
         if (state["timers"][timer] > 0.0):
-            timers[timer] = state["timers"][timer]
+            new_timers[timer] = state["timers"][timer]
             if timer == "stunned" or timer == "dead":
                 incapacitated = true
         elif timer == "dead":
             respawn()
-            timers = {}
-            continue
-    state["timers"] = timers
+            new_timers = {}
+            break
+    state["timers"] = new_timers
 
     if incapacitated:
         return
@@ -394,6 +394,7 @@ func _fixed_process(delta):
             botbrain = ai_processing(delta, botbrain, state)
             path = botbrain["path"]
             state["target"] = botbrain["attack_location"]
+            botbrain["attack_location"] = null
             rpc("set_botbrain", botbrain)
         else:
             mouse_pos = get_global_mouse_pos()
@@ -404,11 +405,11 @@ func _fixed_process(delta):
                 path["to"].resize(JUMP_Q_LIM + 1)
             if path["from"] == null:
                 path["from"] = path["position"]
-            rset("set_path", path)
+            rpc("set_path", path)
             rpc("set_motion_state", path, new_motion_state(delta, path, state))
 
         if state["timers"].empty() and not state["timers"].has("weapon_cd") and state["target"] != null:
-           rpc("attack", state)
+           state = attack(state)
 
         focus = state["target"] if (state["target"] != null) and state["timers"].has("attacking") else ( path["to"][0] if not path["to"].empty() else mouse_pos )
         rset("slave_focus", focus)

@@ -6,6 +6,14 @@ extends "res://scripts/Character.gd"
 
 
 func _unhandled_input(ev):
+    if ev.is_action_pressed("spawn_enemy"):
+        GameState.rpc("spawn_enemy", GameState.rand_loc(mouse_pos, 0, 600))
+    if ev.is_action_pressed("quit_game"):
+        get_tree().quit()
+
+    if get_state()["timers"].has("dead"):
+        return
+
     if Input.is_action_just_pressed("move_to"):
         var path = get_path()
         if not (( path["to"].size() > 0 ) and ( mouse_pos == path["to"].back() )):
@@ -19,10 +27,6 @@ func _unhandled_input(ev):
         set_state(state)
         rset("slave_atk_loc", state["target"])
         GameState.spawn_click_indicator(mouse_pos, "attack")
-    if ev.is_action_pressed("spawn_enemy"):
-        GameState.rpc("spawn_enemy", GameState.rand_loc(mouse_pos, 0, 600))
-    if ev.is_action_pressed("quit_game"):
-        get_tree().quit()
 
 
 ######################
