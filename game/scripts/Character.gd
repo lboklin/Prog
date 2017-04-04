@@ -193,8 +193,8 @@ func die(state, killer):
     nd_death_anim.set_pos(get_pos())
     get_parent().add_child(nd_death_anim)
 
-    emit_signal("player_killed", killer)
-    # print(get_name() + " was killed by ", meanie, " and will be back in ", state["timers"]["dead"])
+    emit_signal("player_killed", get_name(), killer)
+    # print(get_name() + " was killed by ", killer, " and will be back in ", state["timers"]["dead"])
 
     # if is_in_group("Bot"):
     #     queue_free()

@@ -33,17 +33,14 @@ func add_to_scoreboard(name, score):
     nd_vbox_container.add_child(nd_name_score)
 
 
-func show_respawn_timer(timer):
-    nd_respawn_label.set_hidden(true)
-
-
 func _process(delta):
-    nd_timer_label.set_text("Round Time: " + str(floor(GameState.get_round_timer())))
+    nd_timer_label.set_text("Elapsed Round Time: " + str(floor(GameState.get_round_timer())))
     if respawn_timer > 0:
         respawn_timer -= delta
-        nd_respawn_label.set_text("Respawning in: " + str(floor(respawn_timer)))
-    else:
+        nd_respawn_label.set_text("Seconds until respawn: " + str(respawn_timer).pad_decimals(2))
         nd_respawn_label.set_hidden(false)
+    else:
+        nd_respawn_label.set_hidden(true)
 
 
 
