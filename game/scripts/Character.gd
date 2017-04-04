@@ -182,9 +182,14 @@ func _area_enter(nd_area):
         if not nd_area.owner == my_name and is_monitorable():
             self.call_deferred("damaged_by", nd_area.owner)
 
+func get_respawn_time():
+    var time = GameState.get_round_timer() / RST2RT
+    time = clamp(time, 5, 60)
+    return time
+
 func die(state, killer):
     var state = get_state()
-    state["timers"]["dead"] = GameState.get_round_timer() / RST2RT
+    state["timers"]["dead"] = get_respawn_time()
 
     set_monitorable(false)
     set_hidden(true)
