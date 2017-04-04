@@ -16,32 +16,32 @@ tracks/0/interp = 1
 tracks/0/imported = false
 tracks/0/keys = { "times":FloatArray( 0, 0.1 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ true, false ] }
 tracks/1/type = "value"
-tracks/1/path = NodePath("CollisionShapeExplosion/Glow:visibility/self_opacity")
+tracks/1/path = NodePath("CollisionShapeExplosion/Glow:config/emitting")
 tracks/1/interp = 1
 tracks/1/imported = false
-tracks/1/keys = { "times":FloatArray( 0, 2 ), "transitions":FloatArray( -4, 0 ), "update":0, "values":[ 0.6, 0.0 ] }
+tracks/1/keys = { "times":FloatArray( 0, 0.1 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ true, false ] }
 tracks/2/type = "value"
-tracks/2/path = NodePath("CollisionShapeExplosion/Glow:config/emitting")
+tracks/2/path = NodePath("CollisionShapeExplosion/Glow:visibility/self_opacity")
 tracks/2/interp = 1
 tracks/2/imported = false
-tracks/2/keys = { "times":FloatArray( 0, 0.1 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ true, false ] }
+tracks/2/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( -4, 0 ), "update":0, "values":[ 0.6, 0.0 ] }
 tracks/3/type = "value"
-tracks/3/path = NodePath("CollisionShapeExplosion/Slag:config/emitting")
+tracks/3/path = NodePath("CollisionShapeExplosion/Slag:color/color")
 tracks/3/interp = 1
 tracks/3/imported = false
-tracks/3/keys = { "times":FloatArray( 0, 0.1 ), "transitions":FloatArray( 1, 0 ), "update":0, "values":[ true, false ] }
+tracks/3/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Color( 0.847351, 1, 0.761719, 1 ), Color( 0.108075, 0.234375, 0.0860596, 1 ) ] }
 tracks/4/type = "value"
-tracks/4/path = NodePath("CollisionShapeExplosion/Slag:color/color")
+tracks/4/path = NodePath("CollisionShapeExplosion/Slag:config/emitting")
 tracks/4/interp = 1
 tracks/4/imported = false
-tracks/4/keys = { "times":FloatArray( 0, 2 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Color( 0.847351, 1, 0.761719, 1 ), Color( 0.108075, 0.234375, 0.0860596, 1 ) ] }
+tracks/4/keys = { "times":FloatArray( 0, 0.1 ), "transitions":FloatArray( 1, 0 ), "update":0, "values":[ true, false ] }
 
-[sub_resource type="CircleShape2D" id=3]
+[sub_resource type="CircleShape2D" id=2]
 
 custom_solver_bias = 0.0
 radius = 10.0
 
-[sub_resource type="ColorRamp" id=2]
+[sub_resource type="ColorRamp" id=3]
 
 offsets = FloatArray( 0, 1 )
 colors = ColorArray( 0, 0, 0, 1, 0.152344, 0.0737915, 0.0940433, 1 )
@@ -73,7 +73,7 @@ autoplay = ""
 
 visibility/self_opacity = 0.0
 transform/scale = Vector2( 6, 3 )
-shape = SubResource( 3 )
+shape = SubResource( 2 )
 trigger = true
 _update_shape_index = 0
 
@@ -83,12 +83,11 @@ visibility/blend_mode = 1
 transform/pos = Vector2( 1.16666, -1.33333 )
 transform/scale = Vector2( 0.166667, 0.166667 )
 z/z = 1
-config/amount = 500
+config/amount = 200
 config/lifetime = 1.0
 config/time_scale = 1.5
 config/preprocess = 0.1
-config/emitting = false
-config/half_extents = Vector2( 32, 8 )
+config/half_extents = Vector2( 16, 8 )
 config/local_space = false
 config/explosiveness = 0.1
 config/texture = ExtResource( 2 )
@@ -122,10 +121,9 @@ visibility/blend_mode = 1
 transform/pos = Vector2( 1.16666, -1.33333 )
 transform/scale = Vector2( 0.166667, 0.166667 )
 z/z = 1
-config/amount = 1024
+config/amount = 500
 config/lifetime = 3.5
 config/preprocess = 0.1
-config/emitting = false
 config/half_extents = Vector2( 10, 5 )
 config/local_space = false
 config/explosiveness = 0.1
@@ -150,11 +148,11 @@ randomness/damping = 0.85
 randomness/initial_size = 0.5
 randomness/final_size = -1.0
 randomness/hue_variation = 0.05
-color/color = Color( 0.108075, 0.234375, 0.0860596, 1 )
+color/color = Color( 0.847351, 1, 0.761719, 1 )
 
 [node name="Glow" type="Particles2D" parent="CollisionShapeExplosion"]
 
-visibility/self_opacity = 0.0
+visibility/self_opacity = 0.6
 visibility/blend_mode = 1
 transform/pos = Vector2( 1.16666, 0.333333 )
 transform/scale = Vector2( 0.233333, 0.233333 )
@@ -163,7 +161,6 @@ config/amount = 25
 config/lifetime = 2.0
 config/time_scale = 2.0
 config/preprocess = 0.1
-config/emitting = false
 config/half_extents = Vector2( 20, 10 )
 config/local_space = false
 config/texture = ExtResource( 2 )
@@ -188,7 +185,7 @@ randomness/initial_angle = 1.0
 randomness/initial_size = 1.0
 randomness/final_size = 1.0
 color/color = Color( 0, 0, 0, 0 )
-color/color_ramp = SubResource( 2 )
+color/color_ramp = SubResource( 3 )
 
 [node name="EditingBg" type="Sprite" parent="."]
 
