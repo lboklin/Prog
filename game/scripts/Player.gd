@@ -18,12 +18,15 @@ func _unhandled_input(ev):
         var state = get_state()
         var is_empty_q = state["path"]["to"].empty()
         var is_duplicate_input = false if is_empty_q else mouse_pos == state["path"]["to"].back()
-        if not is_duplicate_input:
+        var out_of_range = state["path"]["position"].distance_to(mouse_pos) > MAX_JUMP_RANGE
+        if not is_duplicate_input and not out_of_range:
             if is_empty_q:
-                state["path"]["from"] = get_pos()
+                state["path"]["from"] = state["path"]["position"]
             state["path"]["to"].append(mouse_pos)
             set_state(state)
             GameState.spawn_click_indicator(mouse_pos, "move_to")
+        elif out_of_range:
+            GameState.spawn_click_indicator(mouse_pos, "no_can_do")
     if Input.is_action_just_pressed("attack"):
         var state = get_state()
         state["target"] = mouse_pos
