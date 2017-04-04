@@ -179,7 +179,8 @@ func _on_viewport_size_changed():
 # Opens the server for connectivity from clients
 
 func skip_main_menu():    ## TEMP FOR DEV
-    if get_tree().is_editor_hint():
+    # if get_tree().is_editor_hint():
+    if is_in_editor:
         menu_container.find_node("HostGameButton").emit_signal("pressed")
         host_container.find_node("ContinueButton").emit_signal("pressed")
         lobby_container.find_node("StartGameButton").emit_signal("pressed")

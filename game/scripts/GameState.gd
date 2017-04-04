@@ -267,7 +267,7 @@ remote func spawn_players(spawn_points):
         # Set random spawn position for the nd_player
         var spawn_pos = rand_loc(Vector2(0,0), 0, 2000)
         nd_player.set_pos(spawn_pos)
-        # nd_player.connect("player_killed", nd_game_round, "_add_points", [1])
+        # nd_player.connect("player_killed", nd_game_round, "_add_points")
 
 
         # If the new nd_player is you
@@ -291,5 +291,3 @@ remote func spawn_players(spawn_points):
         nd_game_round.find_node("Players").add_child(nd_player)
         var name = nd_player.get_name()
         nd_game_round.scorekeeper[name] = 0
-        # Award points for kills
-        nd_player.connect("player_killed", nd_game_round, "_add_points", [1])

@@ -14,6 +14,10 @@ signal score_updated()
 func add_participant(ppt):
     scorekeeper[ppt] = 0
     get_node("HUD").add_to_scoreboard(ppt, 0)
+
+    # Award points to the killer upon the death of their target
+    var p = get_node("BackgroundTiles/Players/" + ppt)
+    p.connect("player_killed", self, "_add_points")
     return
 
 

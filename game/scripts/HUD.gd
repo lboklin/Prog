@@ -12,32 +12,21 @@ var respawn_timer = 0
 
 
 func _update_score(name, score):
-    return
     # nd_names_label.set_text(nd_names_label.get_text() + name + "\n")
     # nd_points_label.set_text(nd_points_label.get_text() + str(score) + "\n")
+    if nd_vbox_container.has_node(name):
+        nd_vbox_container.get_node(name).set_name_score(name, score)
+    return
 
-
-# func add_to_scoreboard(name, score):
-#     var nd_cont = HSplitContainer.new()
-#     var nd_ns_l = Label.new()
-#     var nd_pts_l = Label.new()
-
-#     nd_ns_l.set_text(name)
-
-#     nd_pts_l.set_text(str(score))
-#     nd_pts_l.set_anchor_and_margin(nd_pts_l.get_constant("MARGIN_RIGHT"), nd_pts_l.get_constant("ANCHOR_END"), 20)
-
-#     nd_cont.set_pos(get
-#     nd_vbox_container.add_child(nd_cont)
-
-#     nd_cont.add_child(nd_ns_l)
-#     nd_cont.add_child(nd_pts_l)
 
 func add_to_scoreboard(name, score):
     var nd_name_score = preload("res://gui/NameScore.tscn").instance()
 
     nd_name_score.set_name_score(name, score)
+    nd_name_score.set_name(name)  # Set node name so we can later update existing entries
 
+    # This is kind of a weird solution, but this is a way to put the elements in rows
+    # instead of on top of each other.
     var c_children = get_parent().get_child_count()
     nd_name_score.set_pos(Vector2(0, c_children * 20))
 
