@@ -52,5 +52,5 @@ func _ready():
 
     # nd_names_label.set_text("")
     # nd_points_label.set_text("")
-    add_to_scoreboard(GameState.player_name, 0)
+#    add_to_scoreboard(GameState.player_name, 0)
     set_process(true)
