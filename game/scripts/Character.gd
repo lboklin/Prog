@@ -16,7 +16,6 @@ between clients over a network.
 
 extends Area2D
 
-# signal damaged_by()
 signal player_killed()
 
 # Your Prog's very own beautiful color scheme
@@ -46,6 +45,8 @@ onready var nd_hud = GameState.nd_game_round.get_node("HUD")
 var my_name
 var my_id
 var mouse_pos = Vector2()
+
+sync var damaged_by = null
 
 #slave var slave_pos = Vector2()
 slave var slave_atk_loc = Vector2()
@@ -173,14 +174,14 @@ func respawn(pos = GameState.rand_loc(Vector2(0,0),0,1000)):
 
     var state = get_state()
     state["timers"]["shield"] = 2.0
-    set_state(state)
-    rset("set_path", { "from" : null, "to" : [] })
+    rpc("set_path", { "from" : null, "to" : [] })
+    rpc("set_state", state)
 
 
 func _area_enter(nd_area):
     if nd_area.is_in_group("Damaging"):
-        if not nd_area.owner == my_name and is_monitorable():
-            self.call_deferred("damaged_by", nd_area.owner)
+        if not nd_area.owner == my_name:
+            rset("damaged_by", nd_area.owner)
 
 func get_respawn_time():
     var time = GameState.get_round_timer() / RST2RT
@@ -188,7 +189,6 @@ func get_respawn_time():
     return time
 
 func die(state, killer):
-    var state = get_state()
     state["timers"]["dead"] = get_respawn_time()
 
     set_monitorable(false)
@@ -199,27 +199,22 @@ func die(state, killer):
     get_parent().add_child(nd_death_anim)
 
     emit_signal("player_killed", get_name(), killer)
-    # print(get_name() + " was killed by ", killer, " and will be back in ", state["timers"]["dead"])
-
-    # if is_in_group("Bot"):
-    #     queue_free()
 
     return state
 
 
 # Get hit (and die - at least until better implementation is implemented)
-sync func damaged_by(meanie):
+func take_damage(meanie, state):
     print(my_name, " was hit by ", meanie)
 
-    var state = get_state()
     if state["timers"].has("shield"):
         # Fancy shield deflection animation?
         return
     elif state["timers"].has("dead"):
         return
 
-    set_state(die(state, meanie))
-    return
+    state = die(state, meanie)
+    return state
 
 
 sync func spawn_energy_beam(from, to):
@@ -252,7 +247,7 @@ func attack(state):
     return state
 
 
-master func set_colors(primary, secondary):
+sync func set_colors(primary, secondary):
 
     if primary_color != null:
         # nd_sprite.set_modulate(primary)
@@ -366,6 +361,11 @@ func _fixed_process(delta):
 
     var state = get_state()
 
+    if damaged_by != null:
+        if state["height"] < 10:
+            state = take_damage(damaged_by, state)
+        damaged_by = null
+
     var incapacitated = false
     # Update all state timers.
     # If we don't create a new dict and copy over the ones we want, non-fatal
@@ -375,16 +375,24 @@ func _fixed_process(delta):
         state["timers"][timer] -= delta
         if (state["timers"][timer] > 0.0):
             new_timers[timer] = state["timers"][timer]
-            if timer == "stunned" or timer == "dead":
+            if timer == "stunned":
                 incapacitated = true
+            elif timer == "dead":
+                new_timers = { "dead" : state["timers"]["dead"] }
+                incapacitated = true
+                break
         elif timer == "dead":
             respawn()
             new_timers = {}
+            incapacitated = false
             break
     state["timers"] = new_timers
 
     if incapacitated:
         return
+
+    if is_hidden():
+        breakpoint
 
     var path = get_path()
     path["position"] = get_pos()
@@ -438,13 +446,12 @@ func _fixed_process(delta):
 
 func _ready():
     if is_network_master():
+        self.connect("area_enter", self, "_area_enter")
         if is_in_group("Bot"):
             rset("primary_color", Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1)))
             rset("secondary_color", Color(rand_range(0, 1), rand_range(0, 1), rand_range(0, 1), rand_range(0.5, 1)))
+        rpc("set_colors", primary_color, secondary_color)
 
-    self.connect("area_enter", self, "_area_enter")
-
-    set_colors(primary_color, secondary_color)
 
     my_id = get_tree().get_network_unique_id()
     my_name = self.get_name()
