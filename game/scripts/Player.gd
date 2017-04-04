@@ -16,11 +16,12 @@ func _unhandled_input(ev):
 
     if Input.is_action_just_pressed("move_to"):
         var state = get_state()
-        var path = state["path"]
-        if not (( path["to"].size() > 0 ) and ( mouse_pos == path["to"].back() )):
-            path["from"] = path["from"] if path["to"].size() > 0 else get_pos()
-            path["to"].append(mouse_pos)
-            state["path"] = path
+        var is_empty_q = state["path"]["to"].empty()
+        var is_duplicate_input = false if is_empty_q else mouse_pos == state["path"]["to"].back()
+        if not is_duplicate_input:
+            if is_empty_q:
+                state["path"]["from"] = get_pos()
+            state["path"]["to"].append(mouse_pos)
             set_state(state)
             GameState.spawn_click_indicator(mouse_pos, "move_to")
     if Input.is_action_just_pressed("attack"):
