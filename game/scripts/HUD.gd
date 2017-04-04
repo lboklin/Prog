@@ -14,6 +14,7 @@ var respawn_timer = 0
 func _update_score(name, score):
     # nd_names_label.set_text(nd_names_label.get_text() + name + "\n")
     # nd_points_label.set_text(nd_points_label.get_text() + str(score) + "\n")
+    name = name.replace("@", "")
     if nd_vbox_container.has_node(name):
         nd_vbox_container.get_node(name).set_name_score(name, score)
     return
@@ -22,6 +23,7 @@ func _update_score(name, score):
 func add_to_scoreboard(name, score):
     var nd_name_score = preload("res://gui/NameScore.tscn").instance()
 
+    name = name.replace("@", "")
     nd_name_score.set_name_score(name, score)
     nd_name_score.set_name(name)  # Set node name so we can later update existing entries
 
