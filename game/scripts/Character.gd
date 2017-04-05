@@ -42,8 +42,6 @@ onready var nd_hud = GameState.nd_game_round.get_node("HUD")
 # enum ""{GOOD, MOVING, ATTACKING, STUNNED, RESPAWNING, DEAD}
 # enum Power {ON, OFF}
 
-var my_name
-var my_id
 var mouse_pos = Vector2()
 
 sync var damaged_by = null
@@ -166,12 +164,14 @@ func respawn(pos = GameState.rand_loc(Vector2(0,0),0,1000)):
     state["timers"]["shield"] = 2.0
     state["path"] = { "position" : pos, "from" : null, "to" : [] }
     rpc("set_state", state)
-    emit_signal("player_respawned", my_name)
+    emit_signal("player_respawned", get_name())
 
 
 func _area_enter(nd_area):
     if nd_area.is_in_group("Damaging"):
-        if not nd_area.owner == my_name:
+        var owner = nd_area.owner
+        var my_name = get_name()
+        if not owner == my_name:
             rset("damaged_by", nd_area.owner)
 
 
@@ -185,7 +185,7 @@ func die(state, killer):
 
     state["timers"]["dead"] = GameState.nd_game_round.get_respawn_time()
 
-    emit_signal("player_killed", my_name, killer)
+    emit_signal("player_killed", get_name(), killer)
 
     return state
 
@@ -197,7 +197,6 @@ func shield_deflect(state):
 
 # Get hit (and die - at least until better implementation is implemented)
 func take_damage(state, meanie):
-
     var timers = state["timers"]
     var shielded = timers.has("shield")
     var dead = timers.has("dead")
@@ -210,13 +209,13 @@ func take_damage(state, meanie):
 
 sync func spawn_energy_beam(from, to):
     var nd_energy_beam = preload("res://scenes/weapon/EnergyBeam.tscn").instance()
-    nd_energy_beam.owner = my_name
+    nd_energy_beam.owner = get_name()
     nd_energy_beam.destination = to
     nd_energy_beam.set_global_pos(from)
     get_parent().add_child(nd_energy_beam)
 
     var nd_beam_impact = preload("res://scenes/weapon/EnergyBeamImpact.tscn").instance()
-    nd_beam_impact.owner = my_name
+    nd_beam_impact.owner = nd_energy_beam.owner
     nd_beam_impact.set_pos(to)
     get_parent().add_child(nd_beam_impact)
 
@@ -382,51 +381,45 @@ func _fixed_process(delta):
             break
     state["timers"] = new_timers
 
-    if incapacitated:
-        return
+    if not incapacitated:
+        var path = state["path"]
+        path["position"] = get_pos()
 
-    var path = state["path"]
-    path["position"] = get_pos()
+        var focus = Vector2()
 
-
-    var focus = Vector2()
-
-    if is_network_master():
-        if is_in_group("Bot"):
-            var botbrain = get_botbrain()
-            mouse_pos = GameState.rand_loc(botbrain["path"]["position"], 0, 1) if ( (rand_range(0, 100)) <= (60 * delta) ) else mouse_pos
-            botbrain = ai_processing(delta, botbrain, state)
-            path = botbrain["path"]
-            state["target"] = botbrain["attack_location"]
-            botbrain["attack_location"] = null
-            rpc("set_botbrain", botbrain)
-        else:
-            mouse_pos = get_global_mouse_pos()
+        if is_network_master():
+            if is_in_group("Bot"):
+                var botbrain = get_botbrain()
+                mouse_pos = GameState.rand_loc(botbrain["path"]["position"], 0, 1) if ( (rand_range(0, 100)) <= (60 * delta) ) else mouse_pos
+                botbrain = ai_processing(delta, botbrain, state)
+                path = botbrain["path"]
+                state["target"] = botbrain["attack_location"]
+                botbrain["attack_location"] = null
+                rpc("set_botbrain", botbrain)
+            else:
+                mouse_pos = get_global_mouse_pos()
 
 
-        if path["to"].size() > 0:
-            if path["to"].size() > JUMP_Q_LIM:
-                path["to"].resize(JUMP_Q_LIM + 1)
-            if path["from"] == null:
-                path["from"] = path["position"]
+            if path["to"].size() > 0:
+                if path["to"].size() > JUMP_Q_LIM:
+                    path["to"].resize(JUMP_Q_LIM + 1)
+                if path["from"] == null:
+                    path["from"] = path["position"]
+                state["path"] = path
+                rpc("set_motion_state", new_motion_state(delta, state))
+
+            if state["timers"].empty() and not state["timers"].has("weapon_cd") and state["target"] != null:
+              state = attack(state)
+
+            focus = state["target"] if (state["target"] != null) and state["timers"].has("attacking") else ( path["to"][0] if not path["to"].empty() else mouse_pos )
+
             state["path"] = path
-            rpc("set_motion_state", new_motion_state(delta, state))
+            rset("slave_focus", focus)
+            rpc("set_state", state)
+        else:
+            focus = slave_focus
 
-        if state["timers"].empty() and not state["timers"].has("weapon_cd") and state["target"] != null:
-           state = attack(state)
-
-        focus = state["target"] if (state["target"] != null) and state["timers"].has("attacking") else ( path["to"][0] if not path["to"].empty() else mouse_pos )
-
-        state["path"] = path
-        rset("slave_focus", focus)
-        rpc("set_state", state)
-    else:
-        focus = slave_focus
-        # if slave_atk_loc != null:
-        #     slave_attack(slave_atk_loc)
-
-
-    nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))
+        nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))
 
     return
 
@@ -444,8 +437,5 @@ func _ready():
             rset("primary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
             rset("secondary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
         rpc("set_colors", primary_color, secondary_color)
-
-    my_id = get_tree().get_network_unique_id()
-    my_name = self.get_name()
 
     set_fixed_process(true)

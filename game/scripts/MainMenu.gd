@@ -124,13 +124,13 @@ func _on_cancel_button_pressed():
 # This is run after we have gotten updates from the server regarding new players
 func refresh_lobby():
     # Get the latest list of players from gamestate
-    var player_list = GameState.get_player_list()
+    var player_list = GameState.get_players().values()
     player_list.sort()
 
     # Add the updated player_list to the itemlist
     var itemlist = lobby_container.find_node("ItemListPlayers")
     itemlist.clear()
-    itemlist.add_item(GameState.get_player_name() + " (YOU)") # Add yourself to the top
+    itemlist.add_item(GameState.my_name + " (YOU)") # Add yourself to the top
 
     # Add every other player to the list
     for player in player_list:

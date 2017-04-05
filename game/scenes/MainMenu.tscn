@@ -19,7 +19,7 @@ margin/top = 0.0
 margin/right = 0.0
 margin/bottom = 0.0
 script/script = ExtResource( 2 )
-is_in_editor = true
+is_in_editor = false
 no_main_menu = true
 
 [node name="Background" type="Sprite" parent="."]

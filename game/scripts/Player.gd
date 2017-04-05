@@ -9,7 +9,7 @@ func _unhandled_input(ev):
     if ev.is_action_pressed("spawn_enemy"):
         GameState.rpc("spawn_enemy", GameState.rand_loc(mouse_pos, 0, 600))
     if ev.is_action_pressed("quit_game"):
-        get_tree().quit()
+        GameState.quit_game()
 
     if get_state()["timers"].has("dead"):
         return

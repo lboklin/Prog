@@ -8,25 +8,10 @@ var timer_round = 0
 var timer_point_reward = 0
 var scorekeeper = {}
 var statuskeeper = {}
-# var nd_participants = {}
 
 enum Status { ALIVE, DEAD }
 
 signal score_updated()
-
-
-func add_participant(participant):
-    var p = get_node("BackgroundTiles/Players/" + participant)
-    # nd_participants[participant] = p
-    # Award points to the killer upon the death of their target
-    p.connect("player_killed", self, "_player_killed")
-    p.connect("player_respawned", self, "_player_respawned")
-
-    participant = participant.replace("@", "")
-    statuskeeper[participant] = Status.ALIVE
-    scorekeeper[participant] = 0
-    get_node("HUD").add_to_scoreboard(participant, 0)
-    return
 
 
 func get_participants():
@@ -34,9 +19,30 @@ func get_participants():
 
 
 func get_respawn_time():
-    var time = GameState.get_round_timer() / RESPAWNS_PER_ERT
+    var time = timer_round / RESPAWNS_PER_ERT
     time = clamp(time, 5, 60)
     return time
+
+
+func add_to_keepers(id, name):
+    var nd_players = get_node("BackgroundTiles/Players")
+    # var node_name = name if name == "Server" else name + str(id)
+    var node_name = name
+    var nd_participant = nd_players.get_node(node_name)
+    print("Adding ", node_name)
+    print("Player nodes: ")
+    for node in nd_players.get_children():
+        print(node.get_name())
+
+    # Award points to the killer upon the death of their target
+    nd_participant.connect("player_killed", self, "_player_killed")
+    nd_participant.connect("player_respawned", self, "_player_respawned")
+
+    var display_name = node_name.replace("@", "")
+    statuskeeper[display_name] = Status.ALIVE
+    scorekeeper[display_name] = 0
+    get_node("HUD").add_to_scoreboard(display_name, 0)
+    return
 
 
 func _player_respawned(player):
@@ -46,11 +52,10 @@ func _player_respawned(player):
 
 func _player_killed(player, killer):
     statuskeeper[player] = Status.DEAD
-    if player == GameState.player_name:
+    if player == GameState.my_name:
         var nd_player = get_node("BackgroundTiles/Players/" + player)
         get_node("HUD").respawn_timer = nd_player.get_state()["timers"]["dead"]
     return
-    # rpc("add_points", killer, 1)
 
 
 sync func add_points(name, points):
@@ -58,7 +63,6 @@ sync func add_points(name, points):
         for p in get_participants():
             if statuskeeper[p] == Status.ALIVE:
                 scorekeeper[p] += points
-                # emit_signal("score_updated", p, scorekeeper[p])
     else:
         scorekeeper[name] = scorekeeper[name] + points if scorekeeper.has(name) else points
         emit_signal("score_updated", name, scorekeeper[name])
@@ -76,10 +80,7 @@ func _process(delta):
 
 
 func _ready():
-    for player in GameState.players.values():
-        call_deferred("add_participant", player)
-        # Add 1 point per kill
-        # GameState.nd_game_round.find_node(player).connect("player_killed", self, "add_points", 1)
-        # self.connect("add_points", self, "add_points")
+    for player in GameState.get_players().values():
+        call_deferred("add_to_keepers", player)
 
     set_process(true)

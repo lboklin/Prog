@@ -12,41 +12,41 @@ extents = Vector2( 400, 10 )
 [sub_resource type="Animation" id=2]
 
 resource/name = "Beam"
-length = 0.2
+length = 0.1
 loop = false
 step = 0.1
 tracks/0/type = "value"
 tracks/0/path = NodePath("CollisionShape/GlowLight:enabled")
 tracks/0/interp = 1
 tracks/0/imported = false
-tracks/0/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
+tracks/0/keys = { "times":FloatArray( 0, 0.1 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
 tracks/1/type = "value"
 tracks/1/path = NodePath("CollisionShape/Beam:config/emitting")
 tracks/1/interp = 1
 tracks/1/imported = false
-tracks/1/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
+tracks/1/keys = { "times":FloatArray( 0, 0.1 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
 tracks/2/type = "value"
 tracks/2/path = NodePath("CollisionShape/Beam2:config/emitting")
 tracks/2/interp = 1
 tracks/2/imported = false
-tracks/2/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
+tracks/2/keys = { "times":FloatArray( 0, 0.1 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
 tracks/3/type = "value"
 tracks/3/path = NodePath("CollisionShape/Beam3:config/emitting")
 tracks/3/interp = 1
 tracks/3/imported = false
-tracks/3/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
+tracks/3/keys = { "times":FloatArray( 0, 0.1 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
 tracks/4/type = "value"
 tracks/4/path = NodePath("CollisionShape/Beam4:config/emitting")
 tracks/4/interp = 1
 tracks/4/imported = false
-tracks/4/keys = { "times":FloatArray( 0, 0.2 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
+tracks/4/keys = { "times":FloatArray( 0, 0.1 ), "transitions":FloatArray( 1, 1 ), "update":1, "values":[ true, false ] }
 
 [node name="EnergyBeam" type="Area2D" groups=[ "Damaging" ]]
 
 visibility/behind_parent = true
 input/pickable = false
 shapes/0/shape = SubResource( 1 )
-shapes/0/transform = Matrix32( 1, 0, 0, 1, 398, 0 )
+shapes/0/transform = Matrix32( 1, 0, 0, 0.5, 398, 0 )
 shapes/0/trigger = true
 gravity_vec = Vector2( 0, 1 )
 gravity = 98.0
@@ -69,7 +69,9 @@ autoplay = ""
 [node name="CollisionShape" type="CollisionShape2D" parent="."]
 
 visibility/self_opacity = 0.0
+visibility/blend_mode = 1
 transform/pos = Vector2( 398, 0 )
+transform/scale = Vector2( 1, 0.5 )
 shape = SubResource( 1 )
 trigger = true
 _update_shape_index = 0
@@ -78,13 +80,13 @@ __meta__ = { "_edit_lock_":true }
 [node name="Beam" type="Particles2D" parent="CollisionShape"]
 
 visibility/blend_mode = 1
+material/use_parent = true
 transform/pos = Vector2( -398, 0 )
 transform/scale = Vector2( 0.15, 0.15 )
 z/z = 1
 config/amount = 59
 config/lifetime = 0.01
 config/preprocess = 0.1
-config/emitting = false
 config/offset = Vector2( 400, 0 )
 config/texture = ExtResource( 2 )
 params/direction = 90.0
@@ -110,13 +112,13 @@ color/color = Color( 0.0373993, 0.0750295, 0.222656, 1 )
 [node name="Beam2" type="Particles2D" parent="CollisionShape"]
 
 visibility/blend_mode = 1
+material/use_parent = true
 transform/pos = Vector2( -398, 0 )
 transform/scale = Vector2( 0.4, 0.25 )
 z/z = 1
 config/amount = 59
 config/lifetime = 0.01
 config/preprocess = 0.1
-config/emitting = false
 config/offset = Vector2( 400, 0 )
 config/texture = ExtResource( 2 )
 params/direction = 90.0
@@ -142,13 +144,13 @@ color/color = Color( 0.0373993, 0.0750295, 0.222656, 1 )
 [node name="Beam3" type="Particles2D" parent="CollisionShape"]
 
 visibility/blend_mode = 1
+material/use_parent = true
 transform/pos = Vector2( -307.4, 0 )
 transform/scale = Vector2( 0.8, 0.3 )
 z/z = 1
 config/amount = 59
 config/lifetime = 0.01
 config/preprocess = 0.1
-config/emitting = false
 config/offset = Vector2( 400, 0 )
 config/texture = ExtResource( 2 )
 params/direction = 90.0
@@ -174,13 +176,13 @@ color/color = Color( 0.0373993, 0.0750295, 0.222656, 1 )
 [node name="Beam4" type="Particles2D" parent="CollisionShape"]
 
 visibility/blend_mode = 1
+material/use_parent = true
 transform/pos = Vector2( 140, 0 )
 transform/scale = Vector2( 0.25, 0.25 )
 z/z = 1
 config/amount = 59
 config/lifetime = 0.01
 config/preprocess = 0.1
-config/emitting = false
 config/offset = Vector2( 400, 0 )
 config/texture = ExtResource( 2 )
 params/direction = 90.0
@@ -206,8 +208,9 @@ color/color = Color( 0.0373993, 0.0750295, 0.222656, 1 )
 [node name="GlowLight" type="Light2D" parent="CollisionShape"]
 
 visibility/blend_mode = 1
-transform/scale = Vector2( 1.2, 0.85 )
-enabled = false
+material/use_parent = true
+transform/scale = Vector2( 0.9, 0.85 )
+enabled = true
 editor_only = false
 texture = ExtResource( 2 )
 offset = Vector2( 0, 0 )
