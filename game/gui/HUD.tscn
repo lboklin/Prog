@@ -28,20 +28,17 @@ margin/bottom = 0.0
 
 [node name="RoundTimer" type="Label" parent="Control"]
 
-anchor/left = 1
-anchor/right = 1
 focus/ignore_mouse = true
 focus/stop_mouse = true
 size_flags/horizontal = 2
 size_flags/vertical = 0
-margin/left = 150.0
-margin/top = 0.0
-margin/right = 0.0
-margin/bottom = 64.0
-custom_colors/font_color = Color( 1, 0.535156, 0.535156, 1 )
-custom_colors/font_color_shadow = Color( 0.369113, 0.234894, 0.699219, 1 )
+margin/left = 10.0
+margin/top = 10.0
+margin/right = 200.0
+margin/bottom = 42.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0.277344, 0.339447, 1, 1 )
 text = "Round Time"
-align = 1
 valign = 1
 percent_visible = 1.0
 lines_skipped = 0
@@ -71,5 +68,8 @@ lines_skipped = 0
 max_lines_visible = -1
 
 [node name="Scoreboard" parent="Control" instance=ExtResource( 3 )]
+
+margin/top = 50.0
+margin/bottom = 500.0
 
 
