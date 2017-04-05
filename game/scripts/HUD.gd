@@ -33,6 +33,14 @@ func add_to_scoreboard(name, score):
     nd_vbox_container.add_child(nd_name_score)
 
 
+func _player_killed(player, killer, respawn_time):
+    respawn_timer = respawn_time
+
+
+func _player_respawned(player):
+    return
+
+
 func _process(delta):
     # Round timer
     nd_timer_label.set_text("Elapsed Round Time: " + str(floor(GameState.get_round_timer())))
@@ -51,7 +59,10 @@ func _process(delta):
 
 
 func _ready():
-    # nd_game_round.connect("score_updated", self, "_update_score")
+    nd_game_round.connect("score_updated", self, "_update_score")
+    for player in GameState.nd_game_round.find_node("Players").get_children():
+        player.connect("player_killed", self, "_player_killed")
+        player.connect("player_respawned", self, "_player_respawned")
 
     # nd_names_label.set_text("")
     # nd_points_label.set_text("")

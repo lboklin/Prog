@@ -50,11 +50,8 @@ func _player_respawned(player):
     return
 
 
-func _player_killed(player, killer):
+func _player_killed(player, killer, respawn_time):
     statuskeeper[player] = Status.DEAD
-    if player == GameState.my_name:
-        var nd_player = get_node("BackgroundTiles/Players/" + player)
-        get_node("HUD").respawn_timer = nd_player.get_state()["timers"]["dead"]
     return
 
 

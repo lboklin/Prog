@@ -185,7 +185,7 @@ func die(state, killer):
 
     state["timers"]["dead"] = GameState.nd_game_round.get_respawn_time()
 
-    emit_signal("player_killed", get_name(), killer)
+    emit_signal("player_killed", get_name(), killer, state["timers"]["dead"])
 
     return state
 

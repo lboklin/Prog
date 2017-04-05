@@ -31,14 +31,14 @@ func get_players():
     return p_players
 
 
-func add_player(id, name):
+sync func add_player(id, name):
     while get_players().values().has(name):
         name = name + "'"
     p_players[id] = name
-    return name
+    return p_players
 
 
-sync func remove_player(id):
+func remove_player(id):
     p_players.erase(id)
     return
 
@@ -97,18 +97,18 @@ func _server_disconnected():
 
 
 # Register a player who just connected to the lobby
-sync func register_new_player(id, name):
+remote func register_new_player(new_id, new_name):
     # If I am the server (not run on clients)
     if(get_tree().is_network_server()):
-        rpc_id(id, "register_new_player", 1, my_name) # Send info about server to new player
+        var players = add_player(new_id, new_name) # update player list
+        rpc("set_players", players)
+
+        rpc_id(new_id, "register_new_player", 1, my_name) # Send info about server to new player
 
         # For each player, send the new guy info of all players (from server)
-        var players = get_players()
         for peer_id in players:
-            rpc_id(id, "register_new_player", peer_id, players[peer_id]) # Send the new player info about others
-            rpc_id(peer_id, "register_new_player", id, name) # Send others info about the new player
-
-    add_player(id, name) # update player list
+            rpc_id(new_id, "register_new_player", peer_id, players[peer_id]) # Send info about others to new player
+            rpc_id(peer_id, "register_new_player", new_id, new_name) # Send info about the new player to the others
 
     # If we are in lobby
     if not has_node("/root/GameRound"):
@@ -135,7 +135,11 @@ remote func unregister_player(id):
 
 # Quits the game, will automatically tell the server you disconnected; neat.
 func quit_game():
-    var nd_player = nd_game_round.find_node("Players").get_node(my_name).emit_signal("player_killed", my_name, "Self")
+    if has_node("/root/GameRound"):
+        var nd_player = nd_game_round.find_node("Players").get_node(my_name)
+        nd_player.emit_signal("player_killed", my_name, "Self", -1)
+        nd_game_round.queue_free()
+        yield(nd_game_round, "exit_tree")
     get_tree().set_network_peer(null)
     get_tree().quit()
 
@@ -178,7 +182,7 @@ sync func spawn_enemy(loc):
         randomize()
 
     var name = "Bot"
-    name = add_player(id, name)
+    name = add_player(id, name)[id]
     enemy.set_name(name)
 
     nd_game_round.find_node("Players").add_child(enemy)

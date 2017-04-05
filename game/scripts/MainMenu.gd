@@ -106,7 +106,7 @@ func _on_cancel_lobby_button_pressed():
     #menu_container.show()
 
     # Disconnect networking
-    GameState.quit_game()
+    get_tree().set_network_peer(null)
 
     # Enable buttons
     join_container.find_node("ConnectButton").set_disabled(false)
@@ -130,7 +130,7 @@ func refresh_lobby():
     # Add the updated player_list to the itemlist
     var itemlist = lobby_container.find_node("ItemListPlayers")
     itemlist.clear()
-    itemlist.add_item(GameState.my_name + " (YOU)") # Add yourself to the top
+    # itemlist.add_item(GameState.my_name + " (YOU)") # Add yourself to the top
 
     # Add every other player to the list
     for player in player_list:
