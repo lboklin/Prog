@@ -191,7 +191,7 @@ sync func spawn_players():
     else:
         nd_game_round = load("res://scenes/GameRound.tscn").instance()
         get_tree().get_root().add_child(nd_game_round)
-        get_tree().get_root().get_node("MainMenu").hide()
+        get_tree().get_root().get_node("MainMenu").queue_free()
 
     # Create Scenes to instance (further down)
     var scn_player = load("res://player/Player.tscn")
