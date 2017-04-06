@@ -2,11 +2,7 @@
 
 Minimalistic arena-style PvP-game with a click-to-move control scheme and an emphasis on mouse-aim precision and predicting the movements of your opponent(s).
 
-The main goals of this project are to:
-
-* **Try and fill the void of isometric combat in a style similar to that in _Conquer Online 2.0_** as I knew it before the addition of the 131+ levels and additional classes (Ninjas and Pirates and whatever else) which happened around 2008.
-* **Offer first-class support for the GNU/Linux PC and SteamOS platform.**
-    _Note: Support for Mac and Windows is trivially provided, but I will leave that up to the community._
+The main goal of this project is to try and fill the void of isometric combat in a style similar to that in _Conquer Online 2.0_ as I knew it before the addition of the 131+ levels and additional classes (Ninjas and Pirates and whatever else) which happened around 2008.
 
 The project is Open Source under the AGPLv3 for the ultimate end-user freedom experience. Contribute or fork to your hearts desire for the benefit of those who wants to see this reach its full potential.
 
