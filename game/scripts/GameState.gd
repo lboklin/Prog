@@ -166,7 +166,7 @@ func get_round_timer():
 # Display an indicator for where you clicked
 func spawn_click_indicator(pos, anim):
     var indicator = preload("res://gui/Indicator.tscn").instance()
-    indicator.set_pos(pos)
+    indicator.position = pos
     nd_game_round.find_node("Players").add_child(indicator)
     indicator.get_node("AnimationPlayer").play(anim)
 
@@ -174,7 +174,7 @@ func spawn_click_indicator(pos, anim):
 # Spawn an NPC to play with
 sync func spawn_enemy(loc):
     var enemy = preload("res://npc/Bot.tscn").instance()
-    enemy.set_pos(loc)
+    enemy.position = (loc)
 
     var id = int(rand_range(0,9))
     while get_players().has(id):
@@ -212,19 +212,19 @@ sync func spawn_players():
 
         # Spawn at origin
         var spawn_pos = Vector2(0,0)
-        nd_player.set_pos(spawn_pos)
+        nd_player.position = spawn_pos
 
         # If the new nd_player is you
         if (p == get_tree().get_network_unique_id()):
             # Set as master on yourself
-            nd_player.set_network_mode( NETWORK_MODE_MASTER )
+            nd_player.set_network_master( 0 )
             # Add camera to your nd_player
             nd_player.add_child(scn_camera.instance())
             # Add a HUD for displaying name and score
             var nd_hud = load("res://gui/HUD.tscn").instance()
             nd_game_round.add_child(nd_hud)
         else:
-            nd_player.set_network_mode( NETWORK_MODE_SLAVE )
+            nd_player.set_network_mode( RPC_MODE_SLAVE )
 
         nd_game_round.find_node("Players").add_child(nd_player)
         nd_game_round.add_to_keepers(p, name)

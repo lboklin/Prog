@@ -1,142 +1,132 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://gui/purple_theme.tres" type="Theme" id=1]
-[ext_resource path="res://scripts/MainMenu.gd" type="Script" id=2]
-[ext_resource path="res://gui/main_menu_shader.tres" type="CanvasItemMaterial" id=3]
-[ext_resource path="res://gui/background_tile.png" type="Texture" id=4]
-[ext_resource path="res://gui/light-hard.png" type="Texture" id=5]
-[ext_resource path="res://gui/background_ambient_occlusion.png" type="Texture" id=6]
-
+[ext_resource path="res://scripts/MainMenu.gd" type="Script" id=1]
+[ext_resource path="res://gui/main_menu_background.png" type="Texture" id=2]
+[ext_resource path="res://gui/light-hard.png" type="Texture" id=3]
+[ext_resource path="res://gui/background_ambient_occlusion.png" type="Texture" id=4]
+[ext_resource path="res://gui/purple_theme.tres" type="Theme" id=5]
 
 [node name="MainMenu" type="Control"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-theme/theme = ExtResource( 1 )
-margin/left = 0.0
-margin/top = 0.0
-margin/right = 0.0
-margin/bottom = 0.0
-script/script = ExtResource( 2 )
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+script = ExtResource( 1 )
 is_in_editor = false
 no_main_menu = true
 
 [node name="Background" type="Sprite" parent="."]
 
-visibility/behind_parent = true
-material/material = ExtResource( 3 )
-z/z = -1
-z/relative = false
-texture = ExtResource( 4 )
+editor/display_folded = true
+visible = false
+texture = ExtResource( 2 )
 centered = false
-region = true
+region_enabled = true
 region_rect = Rect2( 0, 0, 1920, 1080 )
+_sections_unfolded = [ "Material", "Offset", "Region", "Visibility" ]
 
 [node name="Light1" type="Light2D" parent="Background"]
 
-visibility/blend_mode = 1
-transform/pos = Vector2( 638.993, 288.737 )
+visible = false
+scale = 12.0
 enabled = true
 editor_only = false
-texture = ExtResource( 5 )
+texture = ExtResource( 3 )
 offset = Vector2( 0, 0 )
 scale = 12.0
 color = Color( 1, 0.431335, 0.0546875, 1 )
 energy = 8.0
 mode = 0
-range/height = 20.0
-range/z_min = -1024
-range/z_max = -1
-range/layer_min = 0
-range/layer_max = 0
-range/item_mask = 1
-shadow/enabled = false
-shadow/color = Color( 1, 1, 1, 1 )
-shadow/buffer_size = 2048
-shadow/esm_multiplier = 80.0
-shadow/item_mask = 1
+range_height = 0.0
+range_z_min = -1024
+range_z_max = 1024
+range_layer_min = 0
+range_layer_max = 0
+range_item_cull_mask = 1
+shadow_enabled = false
+shadow_color = Color( 0, 0, 0, 0 )
+shadow_buffer_size = 2048
+shadow_gradient_length = 0.0
+shadow_filter = 0
+shadow_filter_smooth = 0.0
+shadow_item_cull_mask = 1
 
 [node name="Light2" type="Light2D" parent="Background"]
 
-visibility/blend_mode = 1
-transform/pos = Vector2( 1402.7, 571.715 )
+visible = false
+scale = 12.0
 enabled = true
 editor_only = false
-texture = ExtResource( 5 )
+texture = ExtResource( 3 )
 offset = Vector2( 0, 0 )
 scale = 12.0
 color = Color( 0.292969, 1, 0.701721, 1 )
 energy = 8.0
 mode = 0
-range/height = 20.0
-range/z_min = -1024
-range/z_max = -1
-range/layer_min = 0
-range/layer_max = 0
-range/item_mask = 1
-shadow/enabled = false
-shadow/color = Color( 1, 1, 1, 1 )
-shadow/buffer_size = 2048
-shadow/esm_multiplier = 80.0
-shadow/item_mask = 1
+range_height = 0.0
+range_z_min = -1024
+range_z_max = 1024
+range_layer_min = 0
+range_layer_max = 0
+range_item_cull_mask = 1
+shadow_enabled = false
+shadow_color = Color( 0, 0, 0, 0 )
+shadow_buffer_size = 2048
+shadow_gradient_length = 0.0
+shadow_filter = 0
+shadow_filter_smooth = 0.0
+shadow_item_cull_mask = 1
 
 [node name="AmbientOcclusion" type="Sprite" parent="Background"]
 
-texture = ExtResource( 6 )
+texture = ExtResource( 4 )
 centered = false
-region = true
 region_rect = Rect2( 0, 0, 1920, 1080 )
 
 [node name="MenuContainer" type="Container" parent="."]
 
-anchor/right = 1
-anchor/bottom = 1
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 3
-size_flags/vertical = 3
-margin/left = 0.0
-margin/top = 0.0
-margin/right = -1856.0
-margin/bottom = -1016.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+theme = ExtResource( 5 )
+_sections_unfolded = [ "Theme" ]
 
 [node name="PanelContainer" type="PanelContainer" parent="MenuContainer"]
 
-anchor/bottom = 1
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 3
-size_flags/vertical = 3
-margin/left = -18.0
-margin/top = -18.0
-margin/right = 152.0
-margin/bottom = -87.0
+margin_right = 148.0
+margin_bottom = 208.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MenuContainer/PanelContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 3
-size_flags/vertical = 3
-margin/left = 32.0
-margin/top = 32.0
-margin/right = 154.0
-margin/bottom = 1089.0
+margin_left = 22.0
+margin_top = 22.0
+margin_right = 126.0
+margin_bottom = 186.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 alignment = 1
 
 [node name="GameTitle" type="Label" parent="MenuContainer/PanelContainer/VBoxContainer"]
 
-visibility/blend_mode = 1
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 0
-size_flags/vertical = 2
-margin/left = 18.0
-margin/top = 414.0
-margin/right = 103.0
-margin/bottom = 438.0
+margin_right = 104.0
+margin_bottom = 14.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+size_flags_horizontal = 1
+size_flags_vertical = 4
 text = "Main Menu"
 align = 1
 valign = 1
@@ -147,99 +137,102 @@ max_lines_visible = -1
 
 [node name="JoinGameButton" type="Button" parent="MenuContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 442.0
-margin/right = 122.0
-margin/bottom = 506.0
+margin_top = 18.0
+margin_right = 104.0
+margin_bottom = 64.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 toggle_mode = false
 enabled_focus_mode = 2
 shortcut = null
+group = null
 text = "Join Game"
 flat = false
 
 [node name="HostGameButton" type="Button" parent="MenuContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 510.0
-margin/right = 122.0
-margin/bottom = 574.0
+margin_top = 68.0
+margin_right = 104.0
+margin_bottom = 114.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 toggle_mode = false
 enabled_focus_mode = 2
 shortcut = null
+group = null
 text = "Host Game"
 flat = false
 
 [node name="QuitGameButton" type="Button" parent="MenuContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 578.0
-margin/right = 122.0
-margin/bottom = 642.0
+margin_top = 118.0
+margin_right = 104.0
+margin_bottom = 164.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 toggle_mode = false
 enabled_focus_mode = 2
 shortcut = null
+group = null
 text = "Quit Game"
 flat = false
 
 [node name="JoinContainer" type="Container" parent="."]
 
-visibility/visible = false
-anchor/right = 1
-anchor/bottom = 1
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 1.0
-margin/top = 0.0
-margin/right = -1.0
-margin/bottom = 0.0
+editor/display_folded = true
+visible = false
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+theme = ExtResource( 5 )
+_sections_unfolded = [ "Theme" ]
 
 [node name="PanelContainer" type="PanelContainer" parent="JoinContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 378.0
-margin/top = 236.0
-margin/right = 755.0
-margin/bottom = 458.0
+visible = false
+margin_left = 352.0
+margin_top = 96.0
+margin_right = 658.0
+margin_bottom = 266.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="JoinContainer/PanelContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 32.0
-margin/top = 32.0
-margin/right = 345.0
-margin/bottom = 190.0
+margin_left = 22.0
+margin_top = 22.0
+margin_right = 284.0
+margin_bottom = 148.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 alignment = 0
 
 [node name="LabelTitle" type="Label" parent="JoinContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 0
-margin/left = 0.0
-margin/top = 0.0
-margin/right = 313.0
-margin/bottom = 18.0
+margin_right = 262.0
+margin_bottom = 14.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+size_flags_horizontal = 1
+size_flags_vertical = 4
 text = "Connect to Server"
 align = 1
 valign = 1
@@ -249,27 +242,27 @@ max_lines_visible = -1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="JoinContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 22.0
-margin/right = 313.0
-margin/bottom = 46.0
+margin_top = 18.0
+margin_right = 262.0
+margin_bottom = 36.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 custom_constants/separation = 30
 alignment = 0
 
 [node name="LabelNickname" type="Label" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer"]
 
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 0
-margin/left = 0.0
-margin/top = 3.0
-margin/right = 77.0
-margin/bottom = 21.0
+margin_top = 2.0
+margin_right = 68.0
+margin_bottom = 16.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+size_flags_horizontal = 1
+size_flags_vertical = 4
 text = "Nickname:"
 percent_visible = 1.0
 lines_skipped = 0
@@ -277,44 +270,44 @@ max_lines_visible = -1
 
 [node name="LineEditNickname" type="LineEdit" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 107.0
-margin/top = 0.0
-margin/right = 313.0
-margin/bottom = 24.0
+margin_left = 98.0
+margin_right = 262.0
+margin_bottom = 18.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 custom_constants/minimum_spaces = 40
-placeholder/alpha = 0.6
 expand_to_len = false
 focus_mode = 2
-caret/caret_blink = true
-caret/caret_blink_speed = 0.65
+placeholder_alpha = 0.6
+caret_blink = false
+caret_blink_speed = 0.65
 
 [node name="HBoxContainer1" type="HBoxContainer" parent="JoinContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 50.0
-margin/right = 313.0
-margin/bottom = 74.0
+margin_top = 40.0
+margin_right = 262.0
+margin_bottom = 58.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 custom_constants/separation = 25
 alignment = 0
 
 [node name="LabelIPAddress" type="Label" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer1"]
 
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 0
-margin/left = 0.0
-margin/top = 3.0
-margin/right = 82.0
-margin/bottom = 21.0
+margin_top = 2.0
+margin_right = 73.0
+margin_bottom = 16.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+size_flags_horizontal = 1
+size_flags_vertical = 4
 text = "IP Address:"
 percent_visible = 1.0
 lines_skipped = 0
@@ -322,32 +315,32 @@ max_lines_visible = -1
 
 [node name="LineEditIPAddress" type="LineEdit" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer1"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 107.0
-margin/top = 0.0
-margin/right = 313.0
-margin/bottom = 24.0
+margin_left = 98.0
+margin_right = 262.0
+margin_bottom = 18.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 custom_constants/minimum_spaces = 40
 text = "127.0.0.1"
-placeholder/alpha = 0.6
 expand_to_len = false
 focus_mode = 2
-caret/caret_blink = true
-caret/caret_blink_speed = 0.65
+placeholder_alpha = 0.6
+caret_blink = false
+caret_blink_speed = 0.65
 
 [node name="LabelError" type="Label" parent="JoinContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 0
-margin/left = 0.0
-margin/top = 78.0
-margin/right = 313.0
-margin/bottom = 96.0
+margin_top = 62.0
+margin_right = 262.0
+margin_bottom = 76.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+size_flags_horizontal = 1
+size_flags_vertical = 4
 custom_colors/font_color = Color( 1, 0.410156, 0.410156, 1 )
 align = 1
 valign = 1
@@ -357,95 +350,98 @@ max_lines_visible = -1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="JoinContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 100.0
-margin/right = 313.0
-margin/bottom = 158.0
+margin_top = 80.0
+margin_right = 262.0
+margin_bottom = 126.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 alignment = 1
 
 [node name="CancelButton" type="Button" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer2"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 60.0
-margin/top = 0.0
-margin/right = 149.0
-margin/bottom = 58.0
+margin_left = 50.0
+margin_right = 124.0
+margin_bottom = 46.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 toggle_mode = false
 enabled_focus_mode = 2
 shortcut = null
+group = null
 text = "Cancel"
 flat = false
 
 [node name="ConnectButton" type="Button" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer2"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 153.0
-margin/top = 0.0
-margin/right = 253.0
-margin/bottom = 58.0
+margin_left = 128.0
+margin_right = 212.0
+margin_bottom = 46.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 toggle_mode = false
 enabled_focus_mode = 2
 shortcut = null
+group = null
 text = "Connect"
 flat = false
 
 [node name="HostContainer" type="Container" parent="."]
 
-visibility/visible = false
-anchor/right = 1
-anchor/bottom = 1
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 1.0
-margin/top = 0.0
-margin/right = -1.0
-margin/bottom = 0.0
+editor/display_folded = true
+visible = false
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+theme = ExtResource( 5 )
+_sections_unfolded = [ "Theme" ]
 
 [node name="PanelContainer" type="PanelContainer" parent="HostContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 378.0
-margin/top = 249.0
-margin/right = 660.0
-margin/bottom = 329.0
+margin_left = 384.0
+margin_top = 64.0
+margin_right = 690.0
+margin_bottom = 212.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+theme = ExtResource( 5 )
+_sections_unfolded = [ "Theme" ]
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HostContainer/PanelContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 32.0
-margin/top = 32.0
-margin/right = 345.0
-margin/bottom = 162.0
+margin_left = 22.0
+margin_top = 22.0
+margin_right = 284.0
+margin_bottom = 126.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 alignment = 0
 
 [node name="ContainerTitle" type="Label" parent="HostContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 0
-margin/left = 0.0
-margin/top = 0.0
-margin/right = 313.0
-margin/bottom = 18.0
+margin_right = 262.0
+margin_bottom = 14.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+size_flags_horizontal = 1
+size_flags_vertical = 4
 text = "Choose your Nickname"
 align = 1
 valign = 1
@@ -455,27 +451,27 @@ max_lines_visible = -1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HostContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 22.0
-margin/right = 313.0
-margin/bottom = 46.0
+margin_top = 18.0
+margin_right = 262.0
+margin_bottom = 36.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 custom_constants/separation = 30
 alignment = 0
 
 [node name="LabelNickname" type="Label" parent="HostContainer/PanelContainer/VBoxContainer/HBoxContainer"]
 
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 0
-margin/left = 0.0
-margin/top = 3.0
-margin/right = 77.0
-margin/bottom = 21.0
+margin_top = 2.0
+margin_right = 68.0
+margin_bottom = 16.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+size_flags_horizontal = 1
+size_flags_vertical = 4
 text = "Nickname:"
 percent_visible = 1.0
 lines_skipped = 0
@@ -483,32 +479,31 @@ max_lines_visible = -1
 
 [node name="LineEditNickname" type="LineEdit" parent="HostContainer/PanelContainer/VBoxContainer/HBoxContainer"]
 
-focus_neighbour/right = NodePath("../../HBoxContainer2/ContinueButton")
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 107.0
-margin/top = 0.0
-margin/right = 313.0
-margin/bottom = 24.0
+margin_left = 98.0
+margin_right = 262.0
+margin_bottom = 18.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 custom_constants/minimum_spaces = 40
-placeholder/alpha = 0.6
 expand_to_len = false
 focus_mode = 2
-caret/caret_blink = true
-caret/caret_blink_speed = 0.65
+placeholder_alpha = 0.6
+caret_blink = false
+caret_blink_speed = 0.65
 
 [node name="LabelError" type="Label" parent="HostContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 0
-margin/left = 0.0
-margin/top = 50.0
-margin/right = 313.0
-margin/bottom = 68.0
+margin_top = 40.0
+margin_right = 262.0
+margin_bottom = 54.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+size_flags_horizontal = 1
+size_flags_vertical = 4
 custom_colors/font_color = Color( 1, 0.410156, 0.410156, 1 )
 align = 1
 valign = 1
@@ -518,107 +513,107 @@ max_lines_visible = -1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="HostContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 72.0
-margin/right = 313.0
-margin/bottom = 130.0
+margin_top = 58.0
+margin_right = 262.0
+margin_bottom = 104.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 alignment = 1
 
 [node name="CancelButton" type="Button" parent="HostContainer/PanelContainer/VBoxContainer/HBoxContainer2"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 57.0
-margin/top = 0.0
-margin/right = 146.0
-margin/bottom = 58.0
+margin_left = 47.0
+margin_right = 121.0
+margin_bottom = 46.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 toggle_mode = false
 enabled_focus_mode = 2
 shortcut = null
+group = null
 text = "Cancel"
 flat = false
 
 [node name="ContinueButton" type="Button" parent="HostContainer/PanelContainer/VBoxContainer/HBoxContainer2"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 150.0
-margin/top = 0.0
-margin/right = 255.0
-margin/bottom = 58.0
+margin_left = 125.0
+margin_right = 214.0
+margin_bottom = 46.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 toggle_mode = false
 enabled_focus_mode = 2
 shortcut = null
+group = null
 text = "Continue"
 flat = false
 
 [node name="LobbyContainer" type="Container" parent="."]
 
-visibility/visible = false
-anchor/right = 1
-anchor/bottom = 1
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 2.0
-margin/top = 0.0
-margin/right = -2.0
-margin/bottom = 0.0
+editor/display_folded = true
+visible = false
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+theme = ExtResource( 5 )
+_sections_unfolded = [ "Theme" ]
 
 [node name="PanelContainer" type="PanelContainer" parent="LobbyContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 378.0
-margin/top = 236.0
-margin/right = 660.0
-margin/bottom = 392.0
+margin_left = 320.0
+margin_top = 64.0
+margin_right = 545.0
+margin_bottom = 176.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LobbyContainer/PanelContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 32.0
-margin/top = 32.0
-margin/right = 250.0
-margin/bottom = 216.0
+margin_left = 22.0
+margin_top = 22.0
+margin_right = 203.0
+margin_bottom = 90.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 alignment = 0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LobbyContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 0.0
-margin/right = 218.0
-margin/bottom = 122.0
+margin_right = 181.0
+margin_bottom = 18.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 alignment = 0
 
 [node name="ContainerTitle" type="Label" parent="LobbyContainer/PanelContainer/VBoxContainer/VBoxContainer"]
 
-focus/ignore_mouse = true
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 0
-margin/left = 0.0
-margin/top = 0.0
-margin/right = 218.0
-margin/bottom = 18.0
+margin_right = 181.0
+margin_bottom = 14.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+size_flags_horizontal = 1
+size_flags_vertical = 4
 text = "Waiting for Players"
 align = 1
 valign = 1
@@ -628,57 +623,59 @@ max_lines_visible = -1
 
 [node name="ItemListPlayers" type="ItemList" parent="LobbyContainer/PanelContainer/VBoxContainer/VBoxContainer"]
 
-rect/min_size = Vector2( 0, 100 )
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 22.0
-margin/right = 218.0
-margin/bottom = 122.0
+margin_top = 18.0
+margin_right = 181.0
+margin_bottom = 18.0
+rect_pivot_offset = Vector2( 0, 0 )
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+items = [  ]
+select_mode = 0
+icon_mode = 1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="LobbyContainer/PanelContainer/VBoxContainer"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = false
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 126.0
-margin/right = 218.0
-margin/bottom = 184.0
+margin_top = 22.0
+margin_right = 181.0
+margin_bottom = 68.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+size_flags_horizontal = 1
+size_flags_vertical = 1
 alignment = 1
 
 [node name="CancelButton" type="Button" parent="LobbyContainer/PanelContainer/VBoxContainer/HBoxContainer2"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 0.0
-margin/top = 0.0
-margin/right = 89.0
-margin/bottom = 58.0
+margin_right = 74.0
+margin_bottom = 46.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 toggle_mode = false
 enabled_focus_mode = 2
 shortcut = null
+group = null
 text = "Cancel"
 flat = false
 
 [node name="StartGameButton" type="Button" parent="LobbyContainer/PanelContainer/VBoxContainer/HBoxContainer2"]
 
-focus/ignore_mouse = false
-focus/stop_mouse = true
-size_flags/horizontal = 2
-size_flags/vertical = 2
-margin/left = 93.0
-margin/top = 0.0
-margin/right = 217.0
-margin/bottom = 58.0
+margin_left = 78.0
+margin_right = 181.0
+margin_bottom = 46.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
 toggle_mode = false
 enabled_focus_mode = 2
 shortcut = null
+group = null
 text = "Start Game"
 flat = false
 

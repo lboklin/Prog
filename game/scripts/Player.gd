@@ -5,7 +5,7 @@ extends "res://scripts/Character.gd"
 #####################################################################
 
 
-func _unhandled_input(ev):
+func _input(ev):
     if ev.is_action_pressed("spawn_enemy"):
         GameState.rpc("spawn_enemy", GameState.rand_loc(mouse_pos, 0, 600))
     if ev.is_action_pressed("quit_game"):

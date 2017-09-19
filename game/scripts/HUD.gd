@@ -28,7 +28,7 @@ func add_to_scoreboard(name, score):
     # This is kind of a weird solution, but this is a way to put the elements in rows
     # instead of on top of each other.
     var c_children = get_parent().get_child_count()
-    nd_name_score.set_pos(Vector2(0, c_children * 20))
+    nd_name_score.rect_position = Vector2(0, 20 + c_children * 20)
 
     nd_vbox_container.add_child(nd_name_score)
 
@@ -52,9 +52,11 @@ func _process(delta):
     if respawn_timer > 0:
         respawn_timer -= delta
         nd_respawn_label.set_text("Seconds until respawn: " + str(respawn_timer).pad_decimals(2))
-        nd_respawn_label.set_hidden(false)
+#        nd_respawn_label.set_hidden(false)
+        nd_respawn_label.visible = true
     else:
-        nd_respawn_label.set_hidden(true)
+        nd_respawn_label.visible = false
+#        nd_respawn_label.set_hidden(true)
 
 
 

@@ -217,12 +217,12 @@ func _process(delta):
     light_pos.y = -10
     if light_pos.x > window_size.x + margin:
         light_pos.x = -margin
-    light_1.set_pos(light_pos)
+    light_1.position = light_pos
 
     var light_2_pos = Vector2()
     light_2_pos.x = -light_pos.x + window_size.x
     light_2_pos.y = window_size.y + 20
-    light_2.set_pos(light_2_pos)
+    light_2.position = light_2_pos
 
 
 func _on_lineedit_nickname_text_entered( text ):

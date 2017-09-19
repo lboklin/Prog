@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=15 format=1]
+[gd_resource type="Theme" load_steps=14 format=2]
 
 [ext_resource path="res://gui/theme/button_disabled.tres" type="StyleBox" id=1]
 [ext_resource path="res://gui/theme/button_focus.tres" type="StyleBox" id=2]
@@ -13,11 +13,9 @@
 [ext_resource path="res://gui/theme/line_edit.tres" type="StyleBox" id=11]
 [ext_resource path="res://gui/theme/line_edit_readonly.tres" type="StyleBox" id=12]
 [ext_resource path="res://gui/theme/panel_container.tres" type="StyleBox" id=13]
-[ext_resource path="res://gui/fonts/DejaVuSansCondensed.fnt" type="BitmapFont" id=14]
 
 [resource]
 
-default_font = ExtResource( 14 )
 Button/colors/font_color = Color( 0.597656, 0.641663, 1, 1 )
 Button/colors/font_color_disabled = Color( 0.268204, 0.279125, 0.316406, 1 )
 Button/colors/font_color_hover = Color( 0.714844, 0.792816, 1, 1 )
@@ -60,4 +58,5 @@ LineEdit/styles/focus = ExtResource( 10 )
 LineEdit/styles/normal = ExtResource( 11 )
 LineEdit/styles/read_only = ExtResource( 12 )
 PanelContainer/styles/panel = ExtResource( 13 )
+_sections_unfolded = [ "PanelContainer", "PanelContainer/styles" ]
 

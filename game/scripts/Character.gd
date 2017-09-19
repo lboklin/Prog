@@ -30,9 +30,9 @@ const MAX_JUMP_RANGE = 1000    # How far you can jump from any given starting po
 const JUMP_Q_LIM = 2    # Jump queue limit
 
 onready var nd_sprite = get_node("Sprite")
-onready var nd_insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
+#onready var nd_insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
 onready var nd_shadow = get_node("Shadow")
-onready var nd_shadow_opacity = nd_shadow.get_opacity()
+onready var nd_shadow_opacity = nd_shadow.modulate.a
 onready var nd_shadow_scale = nd_shadow.get_scale()
 onready var nd_hud = GameState.nd_game_round.get_node("HUD")
 
@@ -127,7 +127,7 @@ master func new_rot(delta, current_pos, current_rot, point):
     var d_angle_deg = new_rot_deg - current_rot_deg
 
     var s = sign(d_angle_deg)
-    var d_angle_deg = abs(d_angle_deg)
+    d_angle_deg = abs(d_angle_deg)
 
     # Don't go the long way around, it's stupid
     if d_angle_deg > 180:
@@ -179,9 +179,9 @@ func die(state, killer):
     set_monitorable(false)
     set_hidden(true)
 
-    var nd_death_anim = preload("res://common/DeathEffect.tscn").instance()
-    nd_death_anim.set_pos(get_pos())
-    get_parent().add_child(nd_death_anim)
+#    var nd_death_anim = preload("res://common/DeathEffect.tscn").instance()
+#    nd_death_anim.set_pos(get_pos())
+#    get_parent().add_child(nd_death_anim)
 
     state["timers"]["dead"] = GameState.nd_game_round.get_respawn_time()
 
@@ -214,10 +214,10 @@ sync func spawn_energy_beam(from, to):
     nd_energy_beam.set_global_pos(from)
     get_parent().add_child(nd_energy_beam)
 
-    var nd_beam_impact = preload("res://scenes/weapon/EnergyBeamImpact.tscn").instance()
-    nd_beam_impact.owner = nd_energy_beam.owner
-    nd_beam_impact.set_pos(to)
-    get_parent().add_child(nd_beam_impact)
+#    var nd_beam_impact = preload("res://scenes/weapon/EnergyBeamImpact.tscn").instance()
+#    nd_beam_impact.owner = nd_energy_beam.owner
+#    nd_beam_impact.set_pos(to)
+#    get_parent().add_child(nd_beam_impact)
 
 
 slave func slave_attack(loc):
@@ -242,8 +242,8 @@ sync func set_colors(primary, secondary):
     if primary_color != null:
         nd_sprite.set_modulate(primary)
         # nd_sprite.rpc("set_modulate", primary_color)
-    if secondary_color != null:
-        nd_insignia.set_modulate(secondary)
+#    if secondary_color != null:
+#        nd_insignia.set_modulate(secondary)
         # nd_insignia.rpc("set_modulate", secondary_color)
     return
 
@@ -383,7 +383,7 @@ func _fixed_process(delta):
 
     if not incapacitated:
         var path = state["path"]
-        path["position"] = get_pos()
+        path["position"] = self.position
 
         var focus = Vector2()
 
@@ -419,7 +419,7 @@ func _fixed_process(delta):
         else:
             focus = slave_focus
 
-        nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))
+#        nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))
 
     return
 
@@ -433,9 +433,8 @@ func _ready():
     if is_network_master():
         self.connect("area_enter", self, "_area_enter")
         # if is_in_group("Bot"):
-        if true:
-            rset("primary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
-            rset("secondary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
+        rset("primary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
+        rset("secondary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
         rpc("set_colors", primary_color, secondary_color)
 
     set_fixed_process(true)
