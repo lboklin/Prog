@@ -6,13 +6,4 @@ The main goal of this project is to try and fill the void of isometric combat in
 
 The project is Open Source under the AGPLv3 for the ultimate end-user freedom experience. Contribute or fork to your hearts desire for the benefit of those who wants to see this reach its full potential.
 
-The project is in heavy flux and core code is being rewritten all the time (well.. when I _have_ time). As such, changes will break things and the game will go through several iterations to see what works and what doesn't.
-
-Don't hesitate to contribute with ideas or code. Contributing code is a little awkward at the moment because the project uses an unstable build of the Godot Engine because the multiplayer rewrite demands some very recently implemented features which have not yet been added to the stable version (and likely won't until 3.0), and the master branch of Godot is right now in an even more unstable state, so I would recommend finding a dev-build from november last year.
-
-**Roadmap:**
-
-Mainly, what's being worked on now is getting a functional multiplayer mode working, with bots included. The entire code base, more or less, is being rewritten to accomodate this and other goals.
-
-See the project's Taiga.io page where issues and tasks are being used for ideas and work in progress:
-https://tree.taiga.io/project/sudoreboot-prog/
+**Update 2017-09-19:** The project has all but stalled for the time being. A revival is planned, but for now there is no time estimation of when. This is in part because my life situation has changed and also because the game uses the high-level networking API only featured in unstable builds of Godot Engine while also using the scripting API from the stable 2.x versions (as such was the situation of the unstable builds of Godot back in ca November 2016), meaning it's incompatible with the current 3.0 alpha version of the engine - thus you would have to compile the engine yourself in order to run it from the editor. Any further efforts on the game will be focused on porting it over to Godot Engine 3.x (currently alpha 1 of 3.0).
