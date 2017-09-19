@@ -158,7 +158,7 @@ func respawn(pos = GameState.rand_loc(Vector2(0,0),0,1000)):
 
     set_monitorable(true)    # Enable detection by other bodies and areas
     set_hidden(false)
-    set_pos(pos)
+    position = (pos)
 
     var state = get_state()
     state["timers"]["shield"] = 2.0
@@ -180,7 +180,7 @@ func die(state, killer):
     set_hidden(true)
 
 #    var nd_death_anim = preload("res://common/DeathEffect.tscn").instance()
-#    nd_death_anim.set_pos(get_pos())
+#    nd_death_anim.position = (self.position)
 #    get_parent().add_child(nd_death_anim)
 
     state["timers"]["dead"] = GameState.nd_game_round.get_respawn_time()
@@ -195,40 +195,28 @@ func shield_deflect(state):
     return state
 
 
-# Get hit (and die - at least until better implementation is implemented)
-func take_damage(state, meanie):
-    var timers = state["timers"]
-    var shielded = timers.has("shield")
-    var dead = timers.has("dead")
-
-    if not dead:
-        state = shield_deflect(state) if shielded else die(state, meanie)
-
-    return state
-
-
 sync func spawn_energy_beam(from, to):
     var nd_energy_beam = preload("res://scenes/weapon/EnergyBeam.tscn").instance()
     nd_energy_beam.owner = get_name()
     nd_energy_beam.destination = to
-    nd_energy_beam.set_global_pos(from)
+    nd_energy_beam.global_position = (from)
     get_parent().add_child(nd_energy_beam)
 
 #    var nd_beam_impact = preload("res://scenes/weapon/EnergyBeamImpact.tscn").instance()
 #    nd_beam_impact.owner = nd_energy_beam.owner
-#    nd_beam_impact.set_pos(to)
+#    nd_beam_impact.position = (to)
 #    get_parent().add_child(nd_beam_impact)
 
 
 slave func slave_attack(loc):
-    spawn_energy_beam(get_pos(), loc)
+    spawn_energy_beam(self.position, loc)
     self.slave_atk_loc = null
 
 
 # Attack given location (not relative to prog)
 func attack(state):
-    rpc("spawn_energy_beam", get_pos(), state["target"])
-    spawn_energy_beam(get_pos(), state["target"])
+    rpc("spawn_energy_beam", self.position, state["target"])
+    spawn_energy_beam(self.position, state["target"])
 
     state["timers"]["attacking"] = 0.2
     state["timers"]["weapon_cd"] = WEP_CD
@@ -254,8 +242,8 @@ sync func animate_jump(state):
     # accordingly and skip the calculations.
     if jump_height <= 0:
         set_z(1)    # Back onto ground
-        nd_sprite.set_pos(Vector2(0, 0))
-        nd_shadow.set_opacity(nd_shadow_opacity)
+        nd_sprite.position = (Vector2(0, 0))
+        nd_shadow.modulate.a = nd_shadow_opacity
         nd_shadow.set_scale(nd_shadow_scale)
     else:
         # Set sprite vertical pos based on height and adjusted for the perspective
@@ -274,10 +262,10 @@ sync func animate_jump(state):
         var shadow_scale = Vector2(1, 1) - shadow_shrink_ratio
         shadow_scale *= nd_shadow_scale
 
-        nd_sprite.set_pos(sprite_pos)
-        nd_shadow.set_pos(shadow_pos)
+        nd_sprite.position = sprite_pos
+        nd_shadow.position = (shadow_pos)
         nd_shadow.set_scale(shadow_scale)
-        nd_shadow.set_opacity(shadow_opacity)
+        nd_shadow.modulate.a = (shadow_opacity)
         set_z(jump_height + 1)    # +1 to render after everything below
 
         state["timers"]["moving"] = 10.0
@@ -301,7 +289,7 @@ sync func set_motion_state(state):
         # Disable detection by other bodies and areas.
         # This is to avoid hitting or being hit by anything while jumping.
         set_monitorable(false)
-        set_pos(path["position"] + state["motion"])
+        self.position = (path["position"] + state["motion"])
     # Stun on landing
     elif state["timers"].has("moving"):
         set_monitorable(true)
@@ -313,7 +301,7 @@ sync func set_motion_state(state):
 
 
 # Update the state of motion to reflect what is desired
-master func new_motion_state(delta, state):
+static func new_motion_state(delta, state):
 
     var path = state["path"]
     var dist_covered = path["position"] - path["from"]
@@ -343,83 +331,89 @@ master func new_motion_state(delta, state):
 
     state["path"] = path
     return state
+    
 
-
-#####################################################################
-#####################################################################
-#####################################################################
+static func fake_mouse_move(bot_pos, mouse_pos, chance):
+    var move_fake_mouse = rand_range(0, 100) <= chance
+    return GameState.rand_loc(bot_pos, 0, 1) if move_fake_mouse else mouse_pos
 
 
 func _fixed_process(delta):
 
     var state = get_state()
 
+    var incapacitated = false
+    
+    # Update all state timers.
+    var updated_timers = {}
+    for timer in state["timers"]:
+        var time = state["timers"][timer] - delta
+        var expired = time <= 0
+        match timer:
+            { "stunned": _, .. }:
+                incapacitated = !expired
+            { "dead": var t, .. }:
+                if expired: 
+                    respawn()
+                    state["timers"] = {}
+                    return
+                else:
+                    state["timers"] = { "dead": t }
+                    return
+        if not expired:
+            updated_timers[timer] = time
+            
+    state["timers"] = updated_timers
+
+    if incapacitated: 
+        return 
+
     if damaged_by != null:
         if state["height"] < 10:
-            state = take_damage(state, damaged_by)
+            var shielded = state["timers"].has("shield")
+            state = shield_deflect(state) if shielded else die(state, damaged_by)
         damaged_by = null
+    
+#    if not self.is_network_master():
+#        return
+    
+    print("Am network master")
+    state["path"]["position"] = self.position
 
-    var incapacitated = false
-    # Update all state timers.
-    # If we don't create a new dict and copy over the ones we want, non-fatal
-    # errors about invalid keys sprouts for some reason. [Rant about mutable states].
-    var new_timers = {}
-    for timer in state["timers"]:
-        state["timers"][timer] -= delta
-        if (state["timers"][timer] > 0.0):
-            new_timers[timer] = state["timers"][timer]
-            if timer == "stunned":
-                incapacitated = true
-            elif timer == "dead":
-                new_timers = { "dead" : state["timers"]["dead"] }
-                incapacitated = true
-                break
-        elif timer == "dead":
-            respawn()
-            new_timers = {}
-            incapacitated = false
-            break
-    state["timers"] = new_timers
+        
+    var is_bot = is_in_group("Bot")
+    if is_bot:
+        var botbrain = ai_processing(delta, get_botbrain(), state)
+        state["target"] = botbrain["attack_location"]
+        botbrain["attack_location"] = null
+        rpc("set_botbrain", botbrain)
+        
+    mouse_pos = fake_mouse_move(self.position, mouse_pos, 60 * delta) if is_bot else get_global_mouse_position()
 
-    if not incapacitated:
-        var path = state["path"]
-        path["position"] = self.position
+    var path = get_botbrain()["path"] if is_bot else state["path"]
+    if not path["to"].empty():
+        if path["to"].size() > JUMP_Q_LIM:
+            path["to"].resize(JUMP_Q_LIM + 1)
+        if path["from"] == null:
+            path["from"] = path["position"]
+        state["path"] = path
+        rpc("set_motion_state", new_motion_state(delta, state))
 
-        var focus = Vector2()
+    if not state["timers"].has("weapon_cd") and state["target"] != null:
+        state = attack(state)
+        print("attacking")
+    
+    # While insignia is broken, focus is useless
+#    var is_attacking = state["target"] != null and state["timers"].has("attacking")
+#    var dest_or_mpos = path["to"][0] if not path["to"].empty() else mouse_pos
+#    var focus = state["target"] if is_attacking else dest_or_mpos
 
-        if is_network_master():
-            if is_in_group("Bot"):
-                var botbrain = get_botbrain()
-                mouse_pos = GameState.rand_loc(botbrain["path"]["position"], 0, 1) if ( (rand_range(0, 100)) <= (60 * delta) ) else mouse_pos
-                botbrain = ai_processing(delta, botbrain, state)
-                path = botbrain["path"]
-                state["target"] = botbrain["attack_location"]
-                botbrain["attack_location"] = null
-                rpc("set_botbrain", botbrain)
-            else:
-                mouse_pos = get_global_mouse_pos()
-
-
-            if path["to"].size() > 0:
-                if path["to"].size() > JUMP_Q_LIM:
-                    path["to"].resize(JUMP_Q_LIM + 1)
-                if path["from"] == null:
-                    path["from"] = path["position"]
-                state["path"] = path
-                rpc("set_motion_state", new_motion_state(delta, state))
-
-            if state["timers"].empty() and not state["timers"].has("weapon_cd") and state["target"] != null:
-              state = attack(state)
-
-            focus = state["target"] if (state["target"] != null) and state["timers"].has("attacking") else ( path["to"][0] if not path["to"].empty() else mouse_pos )
-
-            state["path"] = path
-            rset("slave_focus", focus)
-            rpc("set_state", state)
-        else:
-            focus = slave_focus
-
-#        nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))
+    state["path"] = path
+#    rset("slave_focus", focus)
+    rpc("set_state", state)
+        
+    # Insignia broke while porting to 3.0.
+#    nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))
 
     return
 

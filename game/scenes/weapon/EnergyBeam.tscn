@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://scenes/weapon/weapon-beam2.png" type="Texture" id=1]
-[ext_resource path="res://tilesets/individualtiles/novatile.png" type="Texture" id=2]
+[ext_resource path="res://scripts/BeamWeapon.gd" type="Script" id=1]
+[ext_resource path="res://scenes/weapon/weapon-beam2.png" type="Texture" id=2]
+[ext_resource path="res://tilesets/individualtiles/novatile.png" type="Texture" id=3]
 
 [sub_resource type="Animation" id=1]
 
@@ -80,6 +81,7 @@ linear_damp = 0.1
 angular_damp = 1.0
 audio_bus_override = false
 audio_bus_name = "Master"
+script = ExtResource( 1 )
 __meta__ = {
 "__editor_plugin_screen__": "2D"
 }
@@ -190,7 +192,7 @@ v_frames = 1
 
 enabled = true
 editor_only = false
-texture = ExtResource( 1 )
+texture = ExtResource( 2 )
 offset = Vector2( 0, 0 )
 scale = 1.0
 color = Color( 0, 0.34375, 1, 1 )
@@ -212,7 +214,8 @@ shadow_item_cull_mask = 1
 
 [node name="TestBG" type="Sprite" parent="."]
 
-texture = ExtResource( 2 )
+visible = false
+texture = ExtResource( 3 )
 __meta__ = {
 "_edit_lock_": true
 }

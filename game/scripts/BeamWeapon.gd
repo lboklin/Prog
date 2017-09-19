@@ -26,13 +26,13 @@ func _fixed_process(delta):
 
 
 func _ready():
-  var current_pos = self.get_global_pos()
-  var dir = (self.destination - current_pos).normalized()
-  set_rot(dir.angle() - deg2rad(90))
-  set_scale(Vector2(0.5+abs(dir.x/2), 1))
-
-  var anim = get_node("Animation")
-  anim.play("Beam")
-  anim.connect("finished", self, "_animation_finished")
-
-  set_fixed_process(true)
+    var current_pos = self.global_position
+    var dir = (self.destination - current_pos).normalized()
+    self.rotation = (dir.angle())
+    set_scale(Vector2(0.5+abs(dir.x/2), 1))
+    
+    var anim = get_node("Animation")
+    anim.play("Beam")
+    anim.connect("finished", self, "_animation_finished")
+    
+    set_fixed_process(true)

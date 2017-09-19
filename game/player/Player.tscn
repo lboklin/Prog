@@ -43,7 +43,7 @@ _sections_unfolded = [ "Visibility" ]
 modulate = Color( 0.237986, 0.167175, 0.257812, 0.655725 )
 texture = ExtResource( 3 )
 offset = Vector2( 0, -134 )
-_sections_unfolded = [ "Transform" ]
+_sections_unfolded = [ "Material", "Transform", "Visibility" ]
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="."]
 
