@@ -14,7 +14,7 @@ polygon = PoolVector2Array( -257, 13, -247, 43, -212, 78, -137, 113, -47, 128, 4
 "Prog",
 ]]
 
-scale = Vector2( 0.22, 0.22 )
+scale = Vector2( 0.18, 0.18 )
 input_pickable = true
 gravity_vec = Vector2( 0, 1 )
 gravity = 98.0

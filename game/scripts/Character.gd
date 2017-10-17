@@ -199,7 +199,7 @@ sync func spawn_energy_beam(from, to):
     var nd_energy_beam = preload("res://scenes/weapon/EnergyBeam.tscn").instance()
     nd_energy_beam.owner = get_name()
     nd_energy_beam.destination = to
-    nd_energy_beam.global_position = (from)
+    nd_energy_beam.global_position = from
     get_parent().add_child(nd_energy_beam)
 
 #    var nd_beam_impact = preload("res://scenes/weapon/EnergyBeamImpact.tscn").instance()

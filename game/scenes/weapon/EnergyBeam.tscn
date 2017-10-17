@@ -74,6 +74,7 @@ extents = Vector2( 400, 10 )
 "Damaging",
 ]]
 
+position = Vector2( 394.461, 0 )
 input_pickable = true
 gravity_vec = Vector2( 0, 1 )
 gravity = 98.0
@@ -190,7 +191,7 @@ v_frames = 1
 
 [node name="GlowLight" type="Light2D" parent="CollisionShape"]
 
-enabled = true
+enabled = false
 editor_only = false
 texture = ExtResource( 2 )
 offset = Vector2( 0, 0 )
