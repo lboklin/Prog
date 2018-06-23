@@ -28,6 +28,7 @@ const JUMP_CD = 0.1    # Jump cooldown after landing
 const MAX_SPEED = 1500    # Max horizontal (ground) speed
 const MAX_JUMP_RANGE = 1000    # How far you can jump from any given starting pos
 const JUMP_Q_LIM = 2    # Jump queue limit
+const G = 9.8 * 1000
 
 onready var nd_sprite = get_node("Sprite")
 #onready var nd_insignia = get_node("Sprite/Insignia/InsigniaViewport/InsigniaSprite")
@@ -327,10 +328,21 @@ static func new_motion_state(delta, state):
         state["motion"] = path["to"][0] - path["position"]
 
     var jump_completion = dist_covered / dist_total if dist_total > 0 else 1
-    state["height"] = sin(PI*jump_completion) * dist_total * 0.4
+    var total_time = dist_total / speed
+    var t = total_time * jump_completion
+    state["height"] = height_at(t, total_time, G)
 
     state["path"] = path
     return state
+    
+static func height_at(t, t_total, g):
+    # d_y = v_0y * t + (1/2)(-g)(t^2) when 
+    # t is total_time and 
+    # d_y (displacement in height) is 0 we get the initial velocity:
+    var v_0y = 0.5 * G * t_total
+    # and now we can use the original formula above
+    return v_0y * t + 0.5 * (-G) * t * t
+    
     
 
 static func fake_mouse_move(bot_pos, mouse_pos, chance):
