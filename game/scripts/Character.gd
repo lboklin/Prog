@@ -239,6 +239,7 @@ sync func set_colors(primary, secondary):
 
 sync func animate_jump(state):
     var jump_height = state["height"]
+#    print(jump_height)
     # If we're not in the air, just set everything
     # accordingly and skip the calculations.
     if jump_height <= 0:
@@ -247,25 +248,21 @@ sync func animate_jump(state):
         nd_shadow.modulate.a = nd_shadow_opacity
         nd_shadow.set_scale(nd_shadow_scale)
     else:
-        # Set sprite vertical pos based on height and adjusted for the perspective
-        var sprite_pos = Vector2(0, -1) * ( jump_height / 2 )
+        # Set sprite vertical pos based on height and
+        # adjusted for the perspective
+        var sprite_pos = Vector2(0, -1) * (jump_height)
 
         # Since the lightsource is ~26 degrees rotated downwards vertically
         # the shadow should project about halfway between directly below
         # and (from the camera's perspective) directly behind the Prog.
         var shadow_pos = sprite_pos * 0.5
 
-        var no_shadow_h = 1200
-        var shadow_opacity = 1 - max(0, min(1, ( jump_height / no_shadow_h )))
+        var no_shadow_h = 600
+        var shadow_opacity = 1 - clamp(jump_height / no_shadow_h, 0, 1)
         shadow_opacity *= nd_shadow_opacity
 
-        var shadow_shrink_ratio = Vector2(0.8, 0.5) * max(0, min(1, ( jump_height / (no_shadow_h*4) )))
-        var shadow_scale = Vector2(1, 1) - shadow_shrink_ratio
-        shadow_scale *= nd_shadow_scale
-
         nd_sprite.position = sprite_pos
-        nd_shadow.position = (shadow_pos)
-        nd_shadow.set_scale(shadow_scale)
+        nd_shadow.position = shadow_pos
         nd_shadow.modulate.a = shadow_opacity
         self.z_index = jump_height + 1    # +1 to render after everything below
 
@@ -323,7 +320,9 @@ static func new_motion_state(delta, state):
     state["motion"] = dir * speed * delta
     state["motion"].y *= 0.5
     # If about to overshoot destination
-    var coming_in_hot = ( state["motion"].length() > 0 ) and ( state["motion"].length() >= path["position"].distance_to(path["to"][0]) )
+    var current_speed = state["motion"].length()
+    var dist = path["position"].distance_to(path["to"][0])
+    var coming_in_hot = ( current_speed > 0 ) and ( current_speed >= dist )
     if coming_in_hot:
         state["motion"] = path["to"][0] - path["position"]
 
@@ -334,16 +333,17 @@ static func new_motion_state(delta, state):
 
     state["path"] = path
     return state
-    
+
+
 static func height_at(t, t_total, g):
-    # d_y = v_0y * t + (1/2)(-g)(t^2) when 
-    # t is total_time and 
+    # d_y = v_0y * t + (1/2)(-g)(t^2) when
+    # t is total_time and
     # d_y (displacement in height) is 0 we get the initial velocity:
     var v_0y = 0.5 * G * t_total
     # and now we can use the original formula above
     return v_0y * t + 0.5 * (-G) * t * t
-    
-    
+
+
 
 static func fake_mouse_move(bot_pos, mouse_pos, chance):
     var move_fake_mouse = rand_range(0, 100) <= chance
@@ -355,7 +355,7 @@ func _physics_process(delta):
     var state = get_state()
 
     var incapacitated = false
-    
+
     # Update all state timers.
     var updated_timers = {}
     for timer in state["timers"]:
@@ -365,7 +365,7 @@ func _physics_process(delta):
             { "stunned": _, .. }:
                 incapacitated = !expired
             { "dead": var t, .. }:
-                if expired: 
+                if expired:
                     respawn()
                     state["timers"] = {}
                     return
@@ -374,33 +374,36 @@ func _physics_process(delta):
                     return
         if not expired:
             updated_timers[timer] = time
-            
+
     state["timers"] = updated_timers
 
-    if incapacitated: 
-        return 
+    if incapacitated:
+        return
 
     if damaged_by != null:
         if state["height"] < 10:
             var shielded = state["timers"].has("shield")
             state = shield_deflect(state) if shielded else die(state, damaged_by)
         damaged_by = null
-    
+
 #    if not self.is_network_master():
 #        return
-    
-    print("Am network master")
+
+#    print("Am network master")
     state["path"]["position"] = self.position
 
-        
+
     var is_bot = is_in_group("Bot")
     if is_bot:
         var botbrain = ai_processing(delta, get_botbrain(), state)
         state["target"] = botbrain["attack_location"]
         botbrain["attack_location"] = null
         rpc("set_botbrain", botbrain)
-        
-    mouse_pos = fake_mouse_move(self.position, mouse_pos, 60 * delta) if is_bot else get_global_mouse_position()
+
+    if is_bot:
+        self.mouse_pos = fake_mouse_move(self.position, mouse_pos, 60 * delta)
+    else:
+        self.mouse_pos = get_global_mouse_position()
 
     var path = get_botbrain()["path"] if is_bot else state["path"]
     if not path["to"].empty():
@@ -414,7 +417,7 @@ func _physics_process(delta):
     if not state["timers"].has("weapon_cd") and state["target"] != null:
         state = attack(state)
         print("attacking")
-    
+
     # While insignia is broken, focus is useless
 #    var is_attacking = state["target"] != null and state["timers"].has("attacking")
 #    var dest_or_mpos = path["to"][0] if not path["to"].empty() else mouse_pos
@@ -423,12 +426,19 @@ func _physics_process(delta):
     state["path"] = path
 #    rset("slave_focus", focus)
     rpc("set_state", state)
-        
+
     # Insignia broke while porting to 3.0.
 #    nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))
 
     return
 
+
+static func rand_color():
+    return Color(
+        rand_range(0, 0.7),
+        rand_range(0, 0.7),
+        rand_range(0, 0.7),
+        rand_range(0.5, 0.7))
 
 ######################
 ######################
@@ -439,8 +449,8 @@ func _ready():
     if is_network_master():
         self.connect("area_enter", self, "_area_enter")
         # if is_in_group("Bot"):
-        rset("primary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
-        rset("secondary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
+        rset("primary_color", rand_color())
+        rset("secondary_color", rand_color())
         rpc("set_colors", primary_color, secondary_color)
 
     set_physics_process(true)
