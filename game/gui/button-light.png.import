@@ -4,6 +4,11 @@ importer="texture"
 type="StreamTexture"
 path="res://.import/button-light.png-b8cde78ae84aeb4f7734736c32276f65.stex"
 
+[deps]
+
+source_file="res://gui/button-light.png"
+dest_files=[ "res://.import/button-light.png-b8cde78ae84aeb4f7734736c32276f65.stex" ]
+
 [params]
 
 compress/mode=0
@@ -21,3 +26,4 @@ process/HDR_as_SRGB=false
 stream=false
 size_limit=0
 detect_3d=true
+svg/scale=1.0

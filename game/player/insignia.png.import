@@ -4,6 +4,11 @@ importer="texture"
 type="StreamTexture"
 path="res://.import/insignia.png-069318673d22707c9aa49dbb5a453a80.stex"
 
+[deps]
+
+source_file="res://player/insignia.png"
+dest_files=[ "res://.import/insignia.png-069318673d22707c9aa49dbb5a453a80.stex" ]
+
 [params]
 
 compress/mode=0
@@ -21,3 +26,4 @@ process/HDR_as_SRGB=false
 stream=false
 size_limit=0
 detect_3d=true
+svg/scale=1.0

@@ -4,6 +4,11 @@ importer="texture"
 type="StreamTexture"
 path="res://.import/background_normal.png-8b03411ba6223f7110d8fbc057e5a785.stex"
 
+[deps]
+
+source_file="res://gui/background_normal.png"
+dest_files=[ "res://.import/background_normal.png-8b03411ba6223f7110d8fbc057e5a785.stex" ]
+
 [params]
 
 compress/mode=0
@@ -21,3 +26,4 @@ process/HDR_as_SRGB=false
 stream=false
 size_limit=0
 detect_3d=true
+svg/scale=1.0

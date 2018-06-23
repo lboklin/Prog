@@ -4,6 +4,11 @@ importer="texture"
 type="StreamTexture"
 path="res://.import/background_tile.png-4cbbf79b79cfe3a5611cc5dd176f5dfe.stex"
 
+[deps]
+
+source_file="res://gui/background_tile.png"
+dest_files=[ "res://.import/background_tile.png-4cbbf79b79cfe3a5611cc5dd176f5dfe.stex" ]
+
 [params]
 
 compress/mode=0
@@ -21,3 +26,4 @@ process/HDR_as_SRGB=false
 stream=false
 size_limit=0
 detect_3d=true
+svg/scale=1.0

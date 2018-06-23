@@ -4,6 +4,11 @@ importer="texture"
 type="StreamTexture"
 path="res://.import/character-shadow-lighter.png-1ff185e5114286b917aabe240c68eb1e.stex"
 
+[deps]
+
+source_file="res://common/Character/character-shadow-lighter.png"
+dest_files=[ "res://.import/character-shadow-lighter.png-1ff185e5114286b917aabe240c68eb1e.stex" ]
+
 [params]
 
 compress/mode=0
@@ -21,3 +26,4 @@ process/HDR_as_SRGB=false
 stream=false
 size_limit=0
 detect_3d=true
+svg/scale=1.0

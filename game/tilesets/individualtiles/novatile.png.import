@@ -4,6 +4,11 @@ importer="texture"
 type="StreamTexture"
 path="res://.import/novatile.png-472768e72238e5c668a357bda3ba7b82.stex"
 
+[deps]
+
+source_file="res://tilesets/individualtiles/novatile.png"
+dest_files=[ "res://.import/novatile.png-472768e72238e5c668a357bda3ba7b82.stex" ]
+
 [params]
 
 compress/mode=0
@@ -21,3 +26,4 @@ process/HDR_as_SRGB=false
 stream=false
 size_limit=0
 detect_3d=true
+svg/scale=1.0

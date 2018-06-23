@@ -4,6 +4,11 @@ importer="texture"
 type="StreamTexture"
 path="res://.import/background_depth.png-89acfe8bcf4122b72d7547017c7230ed.stex"
 
+[deps]
+
+source_file="res://gui/background_depth.png"
+dest_files=[ "res://.import/background_depth.png-89acfe8bcf4122b72d7547017c7230ed.stex" ]
+
 [params]
 
 compress/mode=0
@@ -21,3 +26,4 @@ process/HDR_as_SRGB=false
 stream=false
 size_limit=0
 detect_3d=true
+svg/scale=1.0
