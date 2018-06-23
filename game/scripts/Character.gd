@@ -170,10 +170,10 @@ func respawn(pos = GameState.rand_loc(Vector2(0,0),0,1000)):
 
 func _area_enter(nd_area):
     if nd_area.is_in_group("Damaging"):
-        var owner = nd_area.owner
+        var wielder = nd_area.wielder
         var my_name = get_name()
-        if not owner == my_name:
-            rset("damaged_by", nd_area.owner)
+        if not wielder == my_name:
+            rset("damaged_by", nd_area.wielder)
 
 
 func die(state, killer):
@@ -198,13 +198,13 @@ func shield_deflect(state):
 
 sync func spawn_energy_beam(from, to):
     var nd_energy_beam = preload("res://scenes/weapon/EnergyBeam.tscn").instance()
-    nd_energy_beam.owner = get_name()
+    nd_energy_beam.wielder = get_name()
     nd_energy_beam.destination = to
     nd_energy_beam.global_position = from
     get_parent().add_child(nd_energy_beam)
 
 #    var nd_beam_impact = preload("res://scenes/weapon/EnergyBeamImpact.tscn").instance()
-#    nd_beam_impact.owner = nd_energy_beam.owner
+#    nd_beam_impact.wielder = nd_energy_beam.wielder
 #    nd_beam_impact.position = (to)
 #    get_parent().add_child(nd_beam_impact)
 
@@ -242,7 +242,7 @@ sync func animate_jump(state):
     # If we're not in the air, just set everything
     # accordingly and skip the calculations.
     if jump_height <= 0:
-        set_z(1)    # Back onto ground
+        self.z_index = 1    # Back onto ground
         nd_sprite.position = (Vector2(0, 0))
         nd_shadow.modulate.a = nd_shadow_opacity
         nd_shadow.set_scale(nd_shadow_scale)
@@ -266,8 +266,8 @@ sync func animate_jump(state):
         nd_sprite.position = sprite_pos
         nd_shadow.position = (shadow_pos)
         nd_shadow.set_scale(shadow_scale)
-        nd_shadow.modulate.a = (shadow_opacity)
-        set_z(jump_height + 1)    # +1 to render after everything below
+        nd_shadow.modulate.a = shadow_opacity
+        self.z_index = jump_height + 1    # +1 to render after everything below
 
         state["timers"]["moving"] = 10.0
     return
@@ -350,7 +350,7 @@ static func fake_mouse_move(bot_pos, mouse_pos, chance):
     return GameState.rand_loc(bot_pos, 0, 1) if move_fake_mouse else mouse_pos
 
 
-func _fixed_process(delta):
+func _physics_process(delta):
 
     var state = get_state()
 
@@ -443,4 +443,4 @@ func _ready():
         rset("secondary_color", Color(rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0, 0.7), rand_range(0.5, 0.7)))
         rpc("set_colors", primary_color, secondary_color)
 
-    set_fixed_process(true)
+    set_physics_process(true)

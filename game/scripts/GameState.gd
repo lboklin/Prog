@@ -223,8 +223,8 @@ sync func spawn_players():
             # Add a HUD for displaying name and score
             var nd_hud = load("res://gui/HUD.tscn").instance()
             nd_game_round.add_child(nd_hud)
-        else:
-            nd_player.set_network_mode( RPC_MODE_SLAVE )
+#        else:
+#            nd_player.set_network_mode( RPC_MODE_SLAVE )
 
         nd_game_round.find_node("Players").add_child(nd_player)
         nd_game_round.add_to_keepers(p, name)
