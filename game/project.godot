@@ -17,6 +17,7 @@ _global_script_class_icons={
 
 config/name="prog-gd3"
 run/main_scene="res://scenes/MainMenu.tscn"
+run/low_processor_mode=true
 config/icon="res://icon.png"
 
 [autoload]
@@ -48,4 +49,5 @@ attack={
 
 [rendering]
 
+quality/depth/hdr=false
 environment/default_environment="res://default_env.tres"

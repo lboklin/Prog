@@ -15,11 +15,12 @@ onready var window_size = get_viewport().get_visible_rect().size
 const PLAYER_NAME_DEFAULT = "Player"
 const SERVER_NAME_DEFAULT = "Server"
 
+const MENU_LIGHT_SPEED = 400
+
 export var is_in_editor = false
 export var no_main_menu = true
 
 var light_pos = Vector2(0,0)
-var light_speed = 300
 
 # MAIN MENU - Join Game
 # Opens up the 'Connect to Server' window
@@ -179,8 +180,7 @@ func _on_viewport_size_changed():
 # Opens the server for connectivity from clients
 
 func skip_main_menu():    ## TEMP FOR DEV
-    # if get_tree().is_editor_hint():
-    if is_in_editor:
+    if self.no_main_menu:
         menu_container.find_node("HostGameButton").emit_signal("pressed")
         host_container.find_node("ContinueButton").emit_signal("pressed")
         lobby_container.find_node("StartGameButton").emit_signal("pressed")
@@ -211,17 +211,18 @@ func _ready():
 
 func _process(delta):
 
-    var margin = 600
+    var margin_x = window_size.x * 0.08 * light_1.texture_scale
+    var margin_y = window_size.y * 0.02 * light_1.texture_scale
 
-    light_pos.x += delta * light_speed
+    light_pos.x += delta * MENU_LIGHT_SPEED
     light_pos.y = -10
-    if light_pos.x > window_size.x + margin:
-        light_pos.x = -margin
+    if light_pos.x > window_size.x + margin_x:
+        light_pos.x = -margin_x
     light_1.position = light_pos
 
     var light_2_pos = Vector2()
     light_2_pos.x = -light_pos.x + window_size.x
-    light_2_pos.y = window_size.y + 20
+    light_2_pos.y = window_size.y + margin_y
     light_2.position = light_2_pos
 
 

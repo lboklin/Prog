@@ -158,7 +158,7 @@ master func new_rot(delta, current_pos, current_rot, point):
 func respawn(pos = GameState.rand_loc(Vector2(0,0),0,1000)):
 
     set_monitorable(true)    # Enable detection by other bodies and areas
-    set_hidden(false)
+    self.hide()
     position = (pos)
 
     var state = get_state()
@@ -178,7 +178,7 @@ func _area_enter(nd_area):
 
 func die(state, killer):
     set_monitorable(false)
-    set_hidden(true)
+    self.hide()
 
 #    var nd_death_anim = preload("res://common/DeathEffect.tscn").instance()
 #    nd_death_anim.position = (self.position)
@@ -393,19 +393,20 @@ func _physics_process(delta):
     state["path"]["position"] = self.position
 
 
-    var is_bot = is_in_group("Bot")
-    if is_bot:
-        var botbrain = ai_processing(delta, get_botbrain(), state)
-        state["target"] = botbrain["attack_location"]
-        botbrain["attack_location"] = null
-        rpc("set_botbrain", botbrain)
+#    var is_bot = is_in_group("Bot")
+#    if is_bot:
+#        var botbrain = ai_processing(delta, get_botbrain(), state)
+#        state["target"] = botbrain["attack_location"]
+#        botbrain["attack_location"] = null
+#        rpc("set_botbrain", botbrain)
 
-    if is_bot:
-        self.mouse_pos = fake_mouse_move(self.position, mouse_pos, 60 * delta)
-    else:
-        self.mouse_pos = get_global_mouse_position()
-
-    var path = get_botbrain()["path"] if is_bot else state["path"]
+#    if is_bot:
+#        self.mouse_pos = fake_mouse_move(self.position, mouse_pos, 60 * delta)
+#    else:
+    self.mouse_pos = get_global_mouse_position()
+	
+#    var path = get_botbrain()["path"] if is_bot else state["path"]
+    var path = state["path"]
     if not path["to"].empty():
         if path["to"].size() > JUMP_Q_LIM:
             path["to"].resize(JUMP_Q_LIM + 1)

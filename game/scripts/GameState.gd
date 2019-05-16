@@ -51,7 +51,7 @@ func join_game(name, ip_address):
     # Initializing the network as server
     var host = NetworkedMultiplayerENet.new()
     host.create_client(ip_address, SERVER_PORT)
-    get_tree().set_network_peer(host)
+    get_tree().network_peer = host
 
 # Host the server
 func host_game(name):
@@ -61,7 +61,7 @@ func host_game(name):
     # Initializing the network as client
     var host = NetworkedMultiplayerENet.new()
     host.create_server(SERVER_PORT, 6) # Max 6 players can be connected
-    get_tree().set_network_peer(host)
+    get_tree().network_peer = host
 
     add_player(1, name)
 
@@ -86,7 +86,7 @@ func _connected_ok():
 
 # Could not connect to server (client)
 func _connected_fail():
-    get_tree().set_network_peer(null)
+    get_tree().network_peer = null
     emit_signal("connection_fail")
 
 
@@ -207,8 +207,9 @@ sync func spawn_players():
         var nd_player = scn_player.instance()
 
         var name = players[p]
-        var node_name = name + str(p)
-        nd_player.set_name(name)
+        var node_name = name if name == "Server" else name + str(p)
+#        var node_name = name + str(p)
+        nd_player.set_name(node_name)
 
         # Spawn at origin
         var spawn_pos = Vector2(0,0)

@@ -26,7 +26,6 @@ func get_respawn_time():
 
 func add_to_keepers(id, name):
     var nd_players = find_node("Players")
-    # var node_name = name if name == "Server" else name + str(id)
     var node_name = name
     var nd_participant = nd_players.get_node(node_name)
     print("Adding ", node_name)
