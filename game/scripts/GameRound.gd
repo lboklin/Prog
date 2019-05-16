@@ -6,63 +6,63 @@ const RESPAWNS_PER_ERT = 3  # Respawn timer to elapsed round time ratio
 
 var timer_round = 0
 #var timer_point_reward = 0
-var scorekeeper = {}
-var statuskeeper = {}
+var scorekeeper = {} # Dict of player id => player_score (int)
+var statuskeeper = {} # Dict of player id => Status
 
 enum Status { ALIVE, DEAD }
 
 signal score_updated()
 
-
-func get_participants():
-    return scorekeeper.keys()
     
-func get_participant_node(name):
-    var node_name = get_participants()[name]
-    find_node("Players/" + node_name)
+func get_participant_node(id : int) -> Node:
+    var node = GameState.get_player_node(id)
+    return node
 
 
 func get_respawn_time():
-    var time = timer_round / RESPAWNS_PER_ERT
+    var time: float = timer_round / RESPAWNS_PER_ERT
     time = clamp(time, 5, 60)
     return time
 
 
 # TODO: Make sure there aren't any duplicate names
-func add_to_keepers(name):
-    var nd_players = find_node("Players")
-    var node_name = name
-    var nd_participant = nd_players.get_node(node_name)
-    print("Adding ", node_name)
+func add_to_keepers(id: int) -> void:
+    var nd_participant = get_participant_node(id)
+    var nd_name = nd_participant.name
+    print("Adding ", nd_name)
     print("Player nodes: ")
-    for node in nd_players.get_children():
-        print(node.get_name())
+#    for p in GameState.get_players().keys():
+#        var node = GameState.get_player_node(p)
+#        print(node.name,"\n")
 
     # Award points to the killer upon the death of their target
-    nd_participant.connect("player_killed", self, "_player_killed")
-    nd_participant.connect("player_respawned", self, "_player_respawned")
+    if not nd_participant.is_connected("player_killed", self, "_player_killed"):
+        nd_participant.connect("player_killed", self, "_player_killed")
+    if not nd_participant.is_connected("player_respawned", self, "_player_respawned"):
+        nd_participant.connect("player_respawned", self, "_player_respawned")
 
-    var display_name = node_name.replace("@", "")
+    var display_name: String = nd_name.replace("@", "").replace(id, "")
     statuskeeper[display_name] = Status.ALIVE
     scorekeeper[display_name] = 0
-    get_node("HUD").add_to_scoreboard(display_name, 0)
+    nd_participant.get_node("HUD").add_to_scoreboard(display_name, 0)
     return
 
 
-func _player_respawned(player):
+func _player_respawned(player: Player) -> void:
     statuskeeper[player] = Status.ALIVE
     return
 
 
-func _player_killed(player, killer):
+func _player_killed(player: int, killer: int) -> void:
     statuskeeper[player] = Status.DEAD
     self.add_points(killer, 1)
     return
 
 
-sync func add_points(name, points):
-    if name == "all":
-        for p in get_participants():
+# Assigns player (ID) additional points. If player is -1 all players are given the points.
+sync func add_points(player: int, points: int):
+    if player == -1: # Give everyone points
+        for p in scorekeeper.keys():
             if statuskeeper[p] == Status.ALIVE:
                 scorekeeper[p] += points
     else:
@@ -73,7 +73,7 @@ sync func add_points(name, points):
 func _process(delta):
     timer_round += delta
 
-    rpc("add_points", "all", delta)
+    rpc("add_points", -1, delta)
 
     # timer_point_reward += delta
     # if timer_point_reward > REWARD_TIMER:

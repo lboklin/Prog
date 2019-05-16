@@ -6,14 +6,14 @@ extends Node
 const SERVER_PORT = 31041
 
 # GAMEDATA
-var p_players = {} setget set_players, get_players # Dictionary containing player names and their ID
+var p_players = {} setget set_players, get_players # Dictionary with player_id => player_name
 var my_name # Your own player name
 #var my_id # Your own player id
 
 # SIGNALS to Main Menu (GUI)
 signal refresh_lobby()
 signal server_ended()
-#signal server_error()
+signal server_error()
 signal connection_success()
 signal connection_fail()
 
@@ -22,23 +22,35 @@ signal connection_fail()
 var nd_game_round
 
 
-sync func set_players(players):
+sync func set_players(players: Dictionary):
     p_players = players
     return
 
 
-func get_players():
+func get_players() -> Dictionary:
+    return p_players
+    
+
+func get_player_node(id: int) -> Node:
+    var node_name = get_players()[id]
+    var node = get_node("/root/GameRound/Players/" + node_name)
+    return node
+    
+    
+func name_to_node_name(name: String, id: int) -> String:
+    return name + String(id)
+
+
+sync func add_player(id: int, nd_name: String) -> Dictionary:
+    # If there's already a player with that name, append it with its ID
+    nd_name = name_to_node_name(nd_name, id)
+    while get_players().values().has(nd_name):
+        nd_name = name_to_node_name(nd_name, id)
+    p_players[id] = nd_name
     return p_players
 
 
-sync func add_player(id, name):
-    while get_players().values().has(name):
-        name = name + "'"
-    p_players[id] = name
-    return p_players
-
-
-func remove_player(id):
+func remove_player(id: int) -> void:
     p_players.erase(id)
     return
 
@@ -60,7 +72,9 @@ func host_game(name):
 
     # Initializing the network as client
     var host = NetworkedMultiplayerENet.new()
-    host.create_server(SERVER_PORT, 6) # Max 6 players can be connected
+    var err = host.create_server(SERVER_PORT, 6) # Max 6 players can be connected
+    if err != OK:
+        emit_signal("server_error", err)
     get_tree().network_peer = host
 
     add_player(1, name)
@@ -202,14 +216,15 @@ sync func spawn_players():
     var scn_player = load("res://player/Player.tscn")
     var scn_camera = load("res://player/PlayerCam.tscn")
 
+    # Add player nodes
     var players = get_players()
-    for p in players:
+    for id in players.keys():
         # Create nd_player instance
         var nd_player = scn_player.instance()
 
-        var name = players[p]
-        var node_name = name if name == "Server" else name + str(p)
-#        var node_name = name + str(p)
+        var name: String = players[id]
+        var node_name = name #if name == "Server" else name + str(id)
+#        var node_name = name + str(id)
         nd_player.set_name(node_name)
 
         # Spawn at origin
@@ -217,7 +232,7 @@ sync func spawn_players():
         nd_player.position = spawn_pos
 
         # If the new nd_player is you
-        if (p == get_tree().get_network_unique_id()):
+        if (id == get_tree().get_network_unique_id()):
             # Set as master on yourself
             nd_player.set_network_master( 0 )
             # Add camera to your nd_player
@@ -228,8 +243,11 @@ sync func spawn_players():
 #        else:
 #            nd_player.set_network_mode( RPC_MODE_SLAVE )
 
-        nd_game_round.find_node("Players").add_child(nd_player)
-        nd_game_round.add_to_keepers(name)
+        get_node("/root/GameRound/Players").add_child(nd_player)
+        nd_game_round.add_to_keepers(id)
+        
+#    # Once everyone is added, add them to keepers
+#    for id in players.keys():
 
 
 func _ready():

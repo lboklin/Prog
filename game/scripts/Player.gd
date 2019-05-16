@@ -1,3 +1,4 @@
+class_name Player
 extends "res://scripts/Character.gd"
 
 #####################################################################
@@ -41,6 +42,6 @@ func _input(ev):
 
 
 func _ready():
-#	var nd_hud = load("res://gui/HUD.tscn").instance()
-#	add_child(nd_hud)
+    var nd_hud = load("res://gui/HUD.tscn").instance()
+    add_child(nd_hud)
     set_process_unhandled_input(is_network_master())

@@ -13,6 +13,7 @@ anchor_bottom = 1.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource( 1 )
+quick_host = false
 
 [node name="Background" type="Sprite" parent="."]
 texture = ExtResource( 2 )
@@ -56,6 +57,7 @@ size_flags_vertical = 3
 theme = ExtResource( 6 )
 
 [node name="PanelContainer" type="PanelContainer" parent="MenuContainer"]
+editor/display_folded = true
 light_mask = 0
 anchor_bottom = 1.0
 margin_right = 150.0
@@ -107,20 +109,17 @@ visible = false
 theme = ExtResource( 6 )
 
 [node name="PanelContainer" type="PanelContainer" parent="JoinContainer"]
-visible = false
 margin_left = 352.0
 margin_top = 96.0
 margin_right = 658.0
 margin_bottom = 266.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="JoinContainer/PanelContainer"]
-margin_left = 22.0
-margin_top = 22.0
-margin_right = 284.0
-margin_bottom = 148.0
+margin_right = 306.0
+margin_bottom = 170.0
 
 [node name="LabelTitle" type="Label" parent="JoinContainer/PanelContainer/VBoxContainer"]
-margin_right = 262.0
+margin_right = 306.0
 margin_bottom = 14.0
 text = "Connect to Server"
 align = 1
@@ -128,65 +127,63 @@ valign = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="JoinContainer/PanelContainer/VBoxContainer"]
 margin_top = 18.0
-margin_right = 262.0
-margin_bottom = 36.0
+margin_right = 306.0
+margin_bottom = 32.0
 custom_constants/separation = 30
 
 [node name="LabelNickname" type="Label" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer"]
-margin_top = 2.0
 margin_right = 68.0
-margin_bottom = 16.0
+margin_bottom = 14.0
 text = "Nickname:"
 
 [node name="LineEditNickname" type="LineEdit" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer"]
 margin_left = 98.0
-margin_right = 262.0
-margin_bottom = 18.0
+margin_right = 258.0
+margin_bottom = 14.0
 custom_constants/minimum_spaces = 40
 
 [node name="HBoxContainer1" type="HBoxContainer" parent="JoinContainer/PanelContainer/VBoxContainer"]
-margin_top = 40.0
-margin_right = 262.0
-margin_bottom = 58.0
+margin_top = 36.0
+margin_right = 306.0
+margin_bottom = 50.0
 custom_constants/separation = 25
 
 [node name="LabelIPAddress" type="Label" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer1"]
-margin_top = 2.0
 margin_right = 73.0
-margin_bottom = 16.0
+margin_bottom = 14.0
 text = "IP Address:"
 
 [node name="LineEditIPAddress" type="LineEdit" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer1"]
 margin_left = 98.0
-margin_right = 262.0
-margin_bottom = 18.0
+margin_right = 258.0
+margin_bottom = 14.0
 custom_constants/minimum_spaces = 40
 text = "127.0.0.1"
 
 [node name="LabelError" type="Label" parent="JoinContainer/PanelContainer/VBoxContainer"]
-margin_top = 62.0
-margin_right = 262.0
-margin_bottom = 76.0
+margin_top = 54.0
+margin_right = 306.0
+margin_bottom = 68.0
 custom_colors/font_color = Color( 1, 0.410156, 0.410156, 1 )
 align = 1
 valign = 1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="JoinContainer/PanelContainer/VBoxContainer"]
-margin_top = 80.0
-margin_right = 262.0
-margin_bottom = 126.0
+margin_top = 72.0
+margin_right = 306.0
+margin_bottom = 86.0
 alignment = 1
 
 [node name="CancelButton" type="Button" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer2"]
-margin_left = 50.0
-margin_right = 124.0
-margin_bottom = 46.0
+margin_left = 104.0
+margin_right = 146.0
+margin_bottom = 14.0
 text = "Cancel"
 
 [node name="ConnectButton" type="Button" parent="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer2"]
-margin_left = 128.0
-margin_right = 212.0
-margin_bottom = 46.0
+margin_left = 150.0
+margin_right = 202.0
+margin_bottom = 14.0
 text = "Connect"
 
 [node name="HostContainer" type="Control" parent="."]

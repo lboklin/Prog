@@ -13,7 +13,7 @@ same value. This makes it much easier to predict
 the results and also allows for easier syncing
 between clients over a network.
 """
-
+class_name Character
 extends Area2D
 
 signal player_killed()

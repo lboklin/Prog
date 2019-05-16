@@ -45,7 +45,7 @@ func _process(delta):
     # Round timer
     nd_timer_label.set_text("ROUND: " + str(floor(GameState.get_round_timer())))
 
-    for p in nd_game_round.get_participants():
+    for p in nd_game_round.scorekeeper.keys():
         update_score(p, nd_game_round.scorekeeper[p])
 
     # Respawn timer
