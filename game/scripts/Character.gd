@@ -35,7 +35,7 @@ onready var nd_sprite = get_node("Sprite")
 onready var nd_shadow = get_node("Shadow")
 onready var nd_shadow_opacity = nd_shadow.modulate.a
 onready var nd_shadow_scale = nd_shadow.get_scale()
-onready var nd_hud = GameState.nd_game_round.get_node("HUD")
+#onready var nd_hud = GameState.nd_game_round.get_node("HUD")
 
 # "enums"
 # enum Condition {OK, DEAD, RESPAWNING, STUNNED}
@@ -47,13 +47,13 @@ var mouse_pos = Vector2()
 
 sync var damaged_by = null
 
-#slave var slave_pos = Vector2()
-slave var slave_atk_loc = Vector2()
-#slave var slave_motion = Vector2()
-slave var slave_focus = Vector2()
+#puppet var puppet_pos = Vector2()
+puppet var puppet_atk_loc = Vector2()
+#puppet var puppet_motion = Vector2()
+#puppet var puppet_focus = Vector2()
 
 # Counters
-var points = 0
+#var points = 0
 #var time_of_death = null    # If applicable
 
 
@@ -209,9 +209,9 @@ sync func spawn_energy_beam(from, to):
 #    get_parent().add_child(nd_beam_impact)
 
 
-slave func slave_attack(loc):
+puppet func puppet_attack(loc):
     spawn_energy_beam(self.position, loc)
-    self.slave_atk_loc = null
+    self.puppet_atk_loc = null
 
 
 # Attack given location (not relative to prog)
@@ -226,7 +226,7 @@ func attack(state):
     return state
 
 
-sync func set_colors(primary, secondary):
+sync func set_colors(primary, _secondary):
 
     if primary_color != null:
         nd_sprite.set_modulate(primary)
@@ -329,13 +329,13 @@ static func new_motion_state(delta, state):
     var jump_completion = dist_covered / dist_total if dist_total > 0 else 1
     var total_time = dist_total / speed
     var t = total_time * jump_completion
-    state["height"] = height_at(t, total_time, G)
+    state["height"] = height_at(t, total_time)
 
     state["path"] = path
     return state
 
 
-static func height_at(t, t_total, g):
+static func height_at(t, t_total):
     # d_y = v_0y * t + (1/2)(-g)(t^2) when
     # t is total_time and
     # d_y (displacement in height) is 0 we get the initial velocity:
@@ -364,13 +364,13 @@ func _physics_process(delta):
         match timer:
             { "stunned": _, .. }:
                 incapacitated = !expired
-            { "dead": var t, .. }:
+            { "dead": _, .. }:
                 if expired:
                     respawn()
                     state["timers"] = {}
                     return
                 else:
-                    state["timers"] = { "dead": t }
+                    state["timers"] = { "dead": timer["dead"] }
                     return
         if not expired:
             updated_timers[timer] = time
@@ -425,7 +425,7 @@ func _physics_process(delta):
 #    var focus = state["target"] if is_attacking else dest_or_mpos
 
     state["path"] = path
-#    rset("slave_focus", focus)
+#    rset("puppet_focus", focus)
     rpc("set_state", state)
 
     # Insignia broke while porting to 3.0.

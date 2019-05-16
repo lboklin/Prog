@@ -17,8 +17,8 @@ const SERVER_NAME_DEFAULT = "Server"
 
 const MENU_LIGHT_SPEED = 400
 
-export var is_in_editor = false
 export var no_main_menu = true
+export var quick_host = true
 
 var light_pos = Vector2(0,0)
 
@@ -180,7 +180,7 @@ func _on_viewport_size_changed():
 # Opens the server for connectivity from clients
 
 func skip_main_menu():    ## TEMP FOR DEV
-    if self.no_main_menu:
+    if self.quick_host:
         menu_container.find_node("HostGameButton").emit_signal("pressed")
         host_container.find_node("ContinueButton").emit_signal("pressed")
         lobby_container.find_node("StartGameButton").emit_signal("pressed")
@@ -204,7 +204,7 @@ func _ready():
     GameState.connect("connection_fail", self, "_on_connection_fail")
 
     ## TEMP FOR DEV:
-    if no_main_menu:
+    if self.no_main_menu:
         call_deferred("skip_main_menu")
     set_process(true)
 
@@ -226,6 +226,6 @@ func _process(delta):
     light_2.position = light_2_pos
 
 
-func _on_lineedit_nickname_text_entered( text ):
-    var continue_button = get_node("HostContainer").find_node("ContinueButton")
-    continue_button.emit_signal("pressed")
+#func _on_lineedit_nickname_text_entered( text ):
+#    var continue_button = get_node("HostContainer").find_node("ContinueButton")
+#    continue_button.emit_signal("pressed")

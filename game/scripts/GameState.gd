@@ -8,12 +8,12 @@ const SERVER_PORT = 31041
 # GAMEDATA
 var p_players = {} setget set_players, get_players # Dictionary containing player names and their ID
 var my_name # Your own player name
-var my_id # Your own player id
+#var my_id # Your own player id
 
 # SIGNALS to Main Menu (GUI)
 signal refresh_lobby()
 signal server_ended()
-signal server_error()
+#signal server_error()
 signal connection_success()
 signal connection_fail()
 
@@ -68,6 +68,7 @@ func host_game(name):
 
 # Client connected with you (can be both server or client)
 func _player_connected(id):
+    print("Player ", id, " connected")
     pass
 
 
@@ -228,7 +229,7 @@ sync func spawn_players():
 #            nd_player.set_network_mode( RPC_MODE_SLAVE )
 
         nd_game_round.find_node("Players").add_child(nd_player)
-        nd_game_round.add_to_keepers(p, name)
+        nd_game_round.add_to_keepers(name)
 
 
 func _ready():

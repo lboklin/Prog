@@ -5,7 +5,7 @@ extends Node
 const RESPAWNS_PER_ERT = 3  # Respawn timer to elapsed round time ratio
 
 var timer_round = 0
-var timer_point_reward = 0
+#var timer_point_reward = 0
 var scorekeeper = {}
 var statuskeeper = {}
 
@@ -16,6 +16,10 @@ signal score_updated()
 
 func get_participants():
     return scorekeeper.keys()
+    
+func get_participant_node(name):
+    var node_name = get_participants()[name]
+    find_node("Players/" + node_name)
 
 
 func get_respawn_time():
@@ -24,7 +28,8 @@ func get_respawn_time():
     return time
 
 
-func add_to_keepers(id, name):
+# TODO: Make sure there aren't any duplicate names
+func add_to_keepers(name):
     var nd_players = find_node("Players")
     var node_name = name
     var nd_participant = nd_players.get_node(node_name)
@@ -49,8 +54,9 @@ func _player_respawned(player):
     return
 
 
-func _player_killed(player, killer, respawn_time):
+func _player_killed(player, killer):
     statuskeeper[player] = Status.DEAD
+    self.add_points(killer, 1)
     return
 
 

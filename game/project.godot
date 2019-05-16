@@ -24,6 +24,11 @@ config/icon="res://icon.png"
 
 GameState="*res://scripts/GameState.gd"
 
+[debug]
+
+gdscript/warnings/treat_warnings_as_errors=true
+gdscript/warnings/return_value_discarded=false
+
 [input]
 
 move_to={

@@ -2,7 +2,7 @@ extends CanvasLayer
 
 onready var nd_game_round = get_node("/root/GameRound")
 #onready var nd_player = GameState.player_name
-onready var nd_scoreboard = get_node("Control/Scoreboard")
+#onready var nd_scoreboard = get_node("Control/Scoreboard")
 onready var nd_vbox_container = get_node("Control/Scoreboard/VBoxContainer")
 # onready var nd_name_score = get_node("Control/Scoreboard/ScrollContainer/NameScore")
 onready var nd_timer_label = get_node("Control/RoundTimer")
@@ -33,11 +33,11 @@ func add_to_scoreboard(name, score):
     nd_vbox_container.add_child(nd_name_score)
 
 
-func _player_killed(player, killer, respawn_time):
+func _player_killed(_player, _killer, respawn_time):
     respawn_timer = respawn_time
 
 
-func _player_respawned(player):
+func _player_respawned(_player):
     return
 
 

@@ -4,19 +4,19 @@ extends Area2D
 const MAX_RANGE = 500
 const SAFE_RADIUS = 128
 
-onready var shape_projectile = self.get_node("CollisionShapeBeam")
-onready var shape_explosion = self.get_node("CollisionShapeExplosion")
+#onready var shape_projectile = self.get_node("CollisionShape")
+#onready var shape_explosion = self.get_node("CollisionShape/Explosion")
 
 var wielder = ""
 var destination = Vector2()
 var hit = false
 
 
-func _animation_finished():
+func _animation_finished(_anim_name):
   queue_free()
 
 
-func _physics_process(delta):
+func _physics_process(_delta):
   var colliders = self.get_overlapping_areas()
   if not hit and colliders.size() > 0:
     for collider in colliders:
@@ -33,6 +33,6 @@ func _ready():
     
     var anim = get_node("Animation")
     anim.play("Beam")
-    anim.connect("finished", self, "_animation_finished")
+    anim.connect("animation_finished", self, "_animation_finished")
     
     set_physics_process(true)
