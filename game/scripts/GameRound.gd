@@ -1,8 +1,11 @@
 extends Node
+class_name GameRound
 
 
 # const REWARD_TIMER = 1
 const RESPAWNS_PER_ERT = 3  # Respawn timer to elapsed round time ratio
+
+onready var game_state = $"/root/GameState"
 
 var timer_round = 0
 #var timer_point_reward = 0
@@ -13,9 +16,9 @@ enum Status { ALIVE, DEAD }
 
 signal score_updated()
 
-    
+
 func get_participant_node(id : int) -> Node:
-    var node = GameState.get_player_node(id)
+    var node = game_state.get_player_node(id)
     return node
 
 
@@ -31,8 +34,8 @@ func add_to_keepers(id: int) -> void:
     var nd_name = nd_participant.name
     print("Adding ", nd_name)
     print("Player nodes: ")
-#    for p in GameState.get_players().keys():
-#        var node = GameState.get_player_node(p)
+#    for p in game_state.get_players().keys():
+#        var node = game_state.get_player_node(p)
 #        print(node.name,"\n")
 
     # Award points to the killer upon the death of their target
@@ -82,7 +85,7 @@ func _process(delta):
 
 
 func _ready():
-    for player in GameState.get_players().values():
+    for player in game_state.get_players().values():
         call_deferred("add_to_keepers", player)
 
     set_process(true)

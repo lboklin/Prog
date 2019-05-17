@@ -35,7 +35,8 @@ onready var nd_sprite = get_node("Sprite")
 onready var nd_shadow = get_node("Shadow")
 onready var nd_shadow_opacity = nd_shadow.modulate.a
 onready var nd_shadow_scale = nd_shadow.get_scale()
-#onready var nd_hud = GameState.nd_game_round.get_node("HUD")
+#onready var nd_hud = game_state.nd_game_round.get_node("HUD")
+onready var game_state = $"/root/GameState"
 
 # "enums"
 # enum Condition {OK, DEAD, RESPAWNING, STUNNED}
@@ -59,7 +60,7 @@ puppet var puppet_atk_loc = Vector2()
 
 ## Dicts
 
-sync var p_state = {
+sync var state = {
     "timers" : {},
     "target" : null,
     "motion" : Vector2(), # Horizontal
@@ -86,10 +87,10 @@ sync func set_state(new_state):
         var t = new_state["timers"]["stunned"]
         new_state["timers"].clear()
         new_state["timers"]["stunned"] = t
-    p_state = new_state
+    state = new_state
 
 func get_state():
-    return p_state
+    return state
 
 
 #-------------
@@ -155,13 +156,12 @@ master func new_rot(delta, current_pos, current_rot, point):
 
 
 # Well, this one makes you respawn
-func respawn(pos = GameState.rand_loc(Vector2(0,0),0,1000)):
+func respawn(pos = game_state.rand_loc(Vector2(0,0),0,1000)):
 
     set_monitorable(true)    # Enable detection by other bodies and areas
     self.hide()
     position = (pos)
 
-    var state = get_state()
     state["timers"]["shield"] = 2.0
     state["path"] = { "position" : pos, "from" : null, "to" : [] }
     rpc("set_state", state)
@@ -184,7 +184,7 @@ func die(state, killer):
 #    nd_death_anim.position = (self.position)
 #    get_parent().add_child(nd_death_anim)
 
-    state["timers"]["dead"] = GameState.nd_game_round.get_respawn_time()
+    state["timers"]["dead"] = game_state.nd_game_round.get_respawn_time()
 
     emit_signal("player_killed", get_name(), killer, state["timers"]["dead"])
 
@@ -211,7 +211,7 @@ sync func spawn_energy_beam(from, to):
 
 puppet func puppet_attack(loc):
     spawn_energy_beam(self.position, loc)
-    self.puppet_atk_loc = null
+    puppet_atk_loc = null
 
 
 # Attack given location (not relative to prog)
@@ -403,8 +403,8 @@ func _physics_process(delta):
 #    if is_bot:
 #        self.mouse_pos = fake_mouse_move(self.position, mouse_pos, 60 * delta)
 #    else:
-    self.mouse_pos = get_global_mouse_position()
-	
+    mouse_pos = get_global_mouse_position()
+
 #    var path = get_botbrain()["path"] if is_bot else state["path"]
     var path = state["path"]
     if not path["to"].empty():

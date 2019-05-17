@@ -15,7 +15,6 @@
 [ext_resource path="res://gui/theme/panel_container.tres" type="StyleBox" id=13]
 
 [resource]
-
 Button/colors/font_color = Color( 0.597656, 0.641663, 1, 1 )
 Button/colors/font_color_disabled = Color( 0.268204, 0.279125, 0.316406, 1 )
 Button/colors/font_color_hover = Color( 0.714844, 0.792816, 1, 1 )
@@ -58,5 +57,3 @@ LineEdit/styles/focus = ExtResource( 10 )
 LineEdit/styles/normal = ExtResource( 11 )
 LineEdit/styles/read_only = ExtResource( 12 )
 PanelContainer/styles/panel = ExtResource( 13 )
-_sections_unfolded = [ "PanelContainer", "PanelContainer/styles" ]
-

@@ -10,17 +10,35 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Area2D",
+"class": "BeamWeapon",
+"language": "GDScript",
+"path": "res://scripts/BeamWeapon.gd"
+}, {
+"base": "Area2D",
 "class": "Character",
 "language": "GDScript",
 "path": "res://scripts/Character.gd"
 }, {
-"base": "Area2D",
+"base": "Node",
+"class": "GameRound",
+"language": "GDScript",
+"path": "res://scripts/GameRound.gd"
+}, {
+"base": "Node",
+"class": "GameState",
+"language": "GDScript",
+"path": "res://scripts/GameState.gd"
+}, {
+"base": "Character",
 "class": "Player",
 "language": "GDScript",
 "path": "res://scripts/Player.gd"
 } ]
 _global_script_class_icons={
+"BeamWeapon": "",
 "Character": "",
+"GameRound": "",
+"GameState": "",
 "Player": ""
 }
 
@@ -38,7 +56,12 @@ GameState="*res://scripts/GameState.gd"
 [debug]
 
 gdscript/warnings/treat_warnings_as_errors=true
+gdscript/completion/autocomplete_setters_and_getters=true
 gdscript/warnings/return_value_discarded=false
+gdscript/warnings/unsafe_property_access=true
+gdscript/warnings/unsafe_method_access=true
+gdscript/warnings/unsafe_cast=true
+gdscript/warnings/unsafe_call_argument=true
 
 [input]
 

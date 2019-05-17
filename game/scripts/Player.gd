@@ -1,5 +1,5 @@
+extends Character
 class_name Player
-extends "res://scripts/Character.gd"
 
 #####################################################################
 #####################################################################
@@ -8,11 +8,11 @@ extends "res://scripts/Character.gd"
 
 func _input(ev):
     if ev.is_action_pressed("spawn_enemy"):
-        GameState.rpc("spawn_enemy", GameState.rand_loc(mouse_pos, 0, 600))
+        game_state.rpc("spawn_enemy", game_state.rand_loc(mouse_pos, 0, 600))
     if ev.is_action_pressed("quit_game"):
-        GameState.quit_game()
+        game_state.quit_game()
 
-    if get_state()["timers"].has("dead"):
+    if state["timers"].has("dead"):
         return
 
     if Input.is_action_just_pressed("move_to"):
@@ -25,15 +25,15 @@ func _input(ev):
                 state["path"]["from"] = state["path"]["position"]
             state["path"]["to"].append(mouse_pos)
             set_state(state)
-            GameState.spawn_click_indicator(mouse_pos, "move_to")
+            game_state.spawn_click_indicator(mouse_pos, "move_to")
         elif out_of_range:
-            GameState.spawn_click_indicator(mouse_pos, "no_can_do")
+            game_state.spawn_click_indicator(mouse_pos, "no_can_do")
     if Input.is_action_just_pressed("attack"):
         var state = get_state()
         state["target"] = mouse_pos
         set_state(state)
         rset("slave_atk_loc", state["target"])
-        GameState.spawn_click_indicator(mouse_pos, "attack")
+        game_state.spawn_click_indicator(mouse_pos, "attack")
 
 
 ######################
@@ -42,6 +42,6 @@ func _input(ev):
 
 
 func _ready():
-    var nd_hud = load("res://gui/HUD.tscn").instance()
+    var nd_hud = (load("res://gui/HUD.tscn") as PackedScene).instance()
     add_child(nd_hud)
     set_process_unhandled_input(is_network_master())

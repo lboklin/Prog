@@ -1,12 +1,13 @@
 extends CanvasLayer
 
 onready var nd_game_round = get_node("/root/GameRound")
-#onready var nd_player = GameState.player_name
+#onready var nd_player = game_state.player_name
 #onready var nd_scoreboard = get_node("Control/Scoreboard")
 onready var nd_vbox_container = get_node("Control/Scoreboard/VBoxContainer")
 # onready var nd_name_score = get_node("Control/Scoreboard/ScrollContainer/NameScore")
 onready var nd_timer_label = get_node("Control/RoundTimer")
 onready var nd_respawn_label = get_node("Control/RespawnTimer")
+onready var game_state = $"/root/GameState"
 
 var respawn_timer = 0
 
@@ -43,7 +44,7 @@ func _player_respawned(_player):
 
 func _process(delta):
     # Round timer
-    nd_timer_label.set_text("ROUND: " + str(floor(GameState.get_round_timer())))
+    nd_timer_label.set_text("ROUND: " + str(floor(game_state.get_round_timer())))
 
     for p in nd_game_round.scorekeeper.keys():
         update_score(p, nd_game_round.scorekeeper[p])
@@ -62,11 +63,11 @@ func _process(delta):
 
 func _ready():
     nd_game_round.connect("score_updated", self, "_update_score")
-    for player in GameState.nd_game_round.find_node("Players").get_children():
+    for player in game_state.nd_game_round.find_node("Players").get_children():
         player.connect("player_killed", self, "_player_killed")
         player.connect("player_respawned", self, "_player_respawned")
 
     # nd_names_label.set_text("")
     # nd_points_label.set_text("")
-#    add_to_scoreboard(GameState.player_name, 0)
+#    add_to_scoreboard(game_state.player_name, 0)
     set_process(true)

@@ -1,4 +1,5 @@
 extends Node
+class_name GameState
 
 # NETWORK DATA
 # Port Tip: Check the web for available ports that is not preoccupied by other important services
@@ -29,14 +30,14 @@ sync func set_players(players: Dictionary):
 
 func get_players() -> Dictionary:
     return p_players
-    
+
 
 func get_player_node(id: int) -> Node:
     var node_name = get_players()[id]
     var node = get_node("/root/GameRound/Players/" + node_name)
     return node
-    
-    
+
+
 func name_to_node_name(name: String, id: int) -> String:
     return name + String(id)
 
@@ -166,7 +167,7 @@ func start_game():
 
 # Get a random location inside a cut-out circle defined
 # by a min and max of a radius from the given origin.
-func rand_loc(location, radius_min, radius_max):
+static func rand_loc(location, radius_min, radius_max):
     randomize() # generate new random seed or we might get the same result as previous time
     var new_radius = rand_range(radius_min, radius_max)
     var angle = deg2rad(rand_range(0, 360))
@@ -208,7 +209,7 @@ sync func spawn_players():
     if(has_node("/root/GameRound")):
         nd_game_round = get_node("/root/GameRound")
     else:
-        nd_game_round = load("res://scenes/GameRound.tscn").instance()
+        nd_game_round = (load("res://scenes/GameRound.tscn") as PackedScene).instance()
         get_tree().get_root().add_child(nd_game_round)
         get_tree().get_root().get_node("MainMenu").queue_free()
 
@@ -238,14 +239,14 @@ sync func spawn_players():
             # Add camera to your nd_player
             nd_player.add_child(scn_camera.instance())
             # Add a HUD for displaying name and score
-            var nd_hud = load("res://gui/HUD.tscn").instance()
+            var nd_hud = (load("res://gui/HUD.tscn") as PackedScene).instance()
             nd_game_round.add_child(nd_hud)
 #        else:
 #            nd_player.set_network_mode( RPC_MODE_SLAVE )
 
         get_node("/root/GameRound/Players").add_child(nd_player)
         nd_game_round.add_to_keepers(id)
-        
+
 #    # Once everyone is added, add them to keepers
 #    for id in players.keys():
 

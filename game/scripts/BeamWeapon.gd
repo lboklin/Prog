@@ -1,4 +1,5 @@
 extends Area2D
+class_name BeamWeapon
 
 
 const MAX_RANGE = 500
@@ -21,18 +22,18 @@ func _physics_process(_delta):
   if not hit and colliders.size() > 0:
     for collider in colliders:
       if collider.has_method("hit"):
-        collider.hit(self.wielder)
-        self.hit = true
+        collider.hit(wielder)
+        hit = true
 
 
 func _ready():
     var current_pos = self.global_position
-    var dir = (self.destination - current_pos).normalized()
+    var dir = (destination - current_pos).normalized()
     self.rotation = (dir.angle())
     set_scale(Vector2(0.5+abs(dir.x/2), 1))
-    
+
     var anim = get_node("Animation")
     anim.play("Beam")
     anim.connect("animation_finished", self, "_animation_finished")
-    
+
     set_physics_process(true)

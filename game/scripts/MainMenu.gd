@@ -5,6 +5,7 @@ onready var menu_container = get_node("MenuContainer")
 onready var join_container = get_node("JoinContainer")
 onready var host_container = get_node("HostContainer")
 onready var lobby_container = get_node("LobbyContainer")
+onready var game_state = $"/root/GameState"
 
 onready var light_1 = get_node("Background/Light1")
 onready var light_2 = get_node("Background/Light2")
@@ -64,7 +65,7 @@ func _on_connect_button_pressed():
     join_container.find_node("LabelError").set_text("")
 
     # Connect to server
-    GameState.join_game(player_name, ip_address)
+    game_state.join_game(player_name, ip_address)
 
     # While we are attempting to connect, disable button for 'continue'
     join_container.find_node("ConnectButton").set_disabled(true)
@@ -83,10 +84,10 @@ func _on_host_continue_button_pressed():
     host_container.find_node("LabelError").set_text("")
 
     # Establish network
-    GameState.host_game(player_name)
+    game_state.host_game(player_name)
 
     # Refresh Player List (with your own name)
-    refresh_lobby()
+    rpc("refresh_lobby")
 
     # Toggle to Lobby
     host_container.hide()
@@ -96,7 +97,7 @@ func _on_host_continue_button_pressed():
 
 # LOBBY CONTAINER - Starts the Game
 func _on_start_game_button_pressed():
-    GameState.start_game()
+    game_state.start_game()
 
 
 # LOBBY CONTAINER - Cancel Lobby
@@ -123,19 +124,21 @@ func _on_cancel_button_pressed():
 
 # Refresh Lobby's player list
 # This is run after we have gotten updates from the server regarding new players
-func refresh_lobby():
-    # Get the latest list of players from gamestate
-    var player_list = GameState.get_players().values()
-    player_list.sort()
+sync func refresh_lobby():
+    # Get the latest list of players from game_state
+    var player_names: Array = game_state.get_players().values()
+    player_names.sort()
+    var player_list: PoolStringArray = PoolStringArray(player_names)
 
     # Add the updated player_list to the itemlist
     var itemlist = lobby_container.find_node("ItemListPlayers")
     itemlist.clear()
-    # itemlist.add_item(GameState.my_name + " (YOU)") # Add yourself to the top
+    # itemlist.add_item(game_state.my_name + " (YOU)") # Add yourself to the top
 
     # Add every other player to the list
     for player in player_list:
         itemlist.add_item(player)
+        itemlist.add_item("Player")
 
     # If you are not the server, we disable the 'start game' button
     if(!get_tree().is_network_server()):
@@ -151,7 +154,7 @@ func _on_server_ended():
 
     # If we are ingame, remove world from existence!
     if(has_node("/root/World")):
-        get_node("/root/MainMenu").show() # Enable main menu
+        (get_node("/root/MainMenu") as Control).show() # Enable main menu
         get_node("/root/World").queue_free() # Terminate world
 
 
@@ -179,8 +182,8 @@ func _on_viewport_size_changed():
 # HOST CONTAINER - Continue (from choosing a nickname)
 # Opens the server for connectivity from clients
 
-func skip_main_menu():    ## TEMP FOR DEV
-    if self.quick_host:
+func skip_main_menu() -> void:    ## TEMP FOR DEV
+    if quick_host:
         menu_container.find_node("HostGameButton").emit_signal("pressed")
         host_container.find_node("ContinueButton").emit_signal("pressed")
         lobby_container.find_node("StartGameButton").emit_signal("pressed")
@@ -196,15 +199,15 @@ func _ready():
     join_container.find_node("LineEditNickname").set_text(PLAYER_NAME_DEFAULT)
     host_container.find_node("LineEditNickname").set_text(SERVER_NAME_DEFAULT)
 
-    # Setup Network Signaling between Gamestate and Game UI
-    GameState.connect("refresh_lobby", self, "refresh_lobby")
-    GameState.connect("server_ended", self, "_on_server_ended")
-    GameState.connect("server_error", self, "_on_server_error")
-    GameState.connect("connection_success", self, "_on_connection_success")
-    GameState.connect("connection_fail", self, "_on_connection_fail")
+    # Setup Network Signaling between game_state and Game UI
+    game_state.connect("refresh_lobby", self, "refresh_lobby")
+    game_state.connect("server_ended", self, "_on_server_ended")
+    game_state.connect("server_error", self, "_on_server_error")
+    game_state.connect("connection_success", self, "_on_connection_success")
+    game_state.connect("connection_fail", self, "_on_connection_fail")
 
     ## TEMP FOR DEV:
-    if self.no_main_menu:
+    if no_main_menu:
         call_deferred("skip_main_menu")
     set_process(true)
 
