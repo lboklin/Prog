@@ -1,14 +1,14 @@
 extends Node
 
 # CONTAINERS
-onready var menu_container = get_node("MenuContainer")
-onready var join_container = get_node("JoinContainer")
-onready var host_container = get_node("HostContainer")
-onready var lobby_container = get_node("LobbyContainer")
+onready var menu_container = $MenuContainer
+onready var join_container = $JoinContainer
+onready var host_container = $HostContainer
+onready var lobby_container = $LobbyContainer
 onready var game_state = $"/root/GameState"
 
-onready var light_1 = get_node("Background/Light1")
-onready var light_2 = get_node("Background/Light2")
+onready var light_1 = $Background/Light1
+onready var light_2 = $Background/Light2
 
 onready var window_size = get_viewport().get_visible_rect().size
 
