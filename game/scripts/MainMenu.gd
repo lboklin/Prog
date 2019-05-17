@@ -72,7 +72,7 @@ func _on_connect_button_pressed():
 
 # HOST CONTAINER - Continue (from choosing a nickname)
 # Opens the server for connectivity from clients
-func _on_continue_button_pressed():
+func _on_host_continue_button_pressed():
     # Check if nickname is valid
     var player_name = host_container.find_node("LineEditNickname").get_text()
     if(player_name == ""):

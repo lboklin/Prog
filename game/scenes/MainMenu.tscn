@@ -311,6 +311,6 @@ text = "Start Game"
 [connection signal="pressed" from="JoinContainer/PanelContainer/VBoxContainer/HBoxContainer2/ConnectButton" to="." method="_on_connect_button_pressed"]
 [connection signal="text_entered" from="HostContainer/PanelContainer/VBoxContainer/HBoxContainer/LineEditNickname" to="." method="_on_lineedit_nickname_text_entered"]
 [connection signal="pressed" from="HostContainer/PanelContainer/VBoxContainer/HBoxContainer2/CancelButton" to="." method="_on_cancel_button_pressed"]
-[connection signal="pressed" from="HostContainer/PanelContainer/VBoxContainer/HBoxContainer2/ContinueButton" to="." method="_on_continue_button_pressed"]
+[connection signal="pressed" from="HostContainer/PanelContainer/VBoxContainer/HBoxContainer2/ContinueButton" to="." method="_on_host_continue_button_pressed"]
 [connection signal="pressed" from="LobbyContainer/PanelContainer/VBoxContainer/HBoxContainer2/CancelButton" to="." method="_on_cancel_lobby_button_pressed"]
 [connection signal="pressed" from="LobbyContainer/PanelContainer/VBoxContainer/HBoxContainer2/StartGameButton" to="." method="_on_start_game_button_pressed"]
