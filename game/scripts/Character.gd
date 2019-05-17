@@ -46,7 +46,7 @@ onready var game_state = $"/root/GameState"
 
 var mouse_pos = Vector2()
 
-sync var damaged_by = null
+remotesync var damaged_by = null
 
 #puppet var puppet_pos = Vector2()
 puppet var puppet_atk_loc = Vector2()
@@ -60,7 +60,7 @@ puppet var puppet_atk_loc = Vector2()
 
 ## Dicts
 
-sync var state = {
+remotesync var state = {
     "timers" : {},
     "target" : null,
     "motion" : Vector2(), # Horizontal
@@ -80,14 +80,14 @@ sync var state = {
 #-------------
 # General state
 
-sync func set_state(new_state):
+remotesync func set_state(new_state):
     # if new_state["timers"].has("dead"):
     #     queue_free()
     if new_state["timers"].has("stunned"):
         var t = new_state["timers"]["stunned"]
         new_state["timers"].clear()
         new_state["timers"]["stunned"] = t
-    state = new_state
+    state = set_motion_state(new_state)
 
 func get_state():
     return state
@@ -215,7 +215,7 @@ puppet func puppet_attack(loc):
 
 
 # Attack given location (not relative to prog)
-func attack(state):
+master func attack(state):
     rpc("spawn_energy_beam", self.position, state["target"])
     spawn_energy_beam(self.position, state["target"])
 
@@ -270,9 +270,9 @@ sync func animate_jump(state):
     return
 
 
-sync func set_motion_state(state):
+func set_motion_state(state_: Dictionary) -> Dictionary:
 
-    var path = state["path"]
+    var path = state_["path"]
     # Check if there are any jumps queued and
     # if so pop any that hold our current pos.
     # Use while loop to catch any duplicates.
@@ -280,28 +280,26 @@ sync func set_motion_state(state):
         path["to"].pop_front()
         path["from"] = path["position"] if path["to"].size() > 0 else null
 
-    animate_jump(state)
-
     # Check if (supposed to be) moving and apply motion
-    if (state["motion"].length() > 0 or path["to"].size() > 0):
+    if (state_["motion"].length() > 0 or path["to"].size() > 0):
         # Disable detection by other bodies and areas.
         # This is to avoid hitting or being hit by anything while jumping.
         set_monitorable(false)
-        self.position = (path["position"] + state["motion"])
+        self.position = (path["position"] + state_["motion"])
     # Stun on landing
-    elif state["timers"].has("moving"):
+    elif state_["timers"].has("moving"):
         set_monitorable(true)
-        state["timers"]["stunned"] = JUMP_CD
-        set_state(state)
+        state_["timers"]["stunned"] = JUMP_CD
+        set_state(state_)
 
-    state["path"] = path
-    return state
+    state_["path"] = path
+    return state_
 
 
-# Update the state of motion to reflect what is desired
-static func new_motion_state(delta, state):
+# Update the state_ of motion to reflect what is desired
+static func new_motion_state(delta: float, state_: Dictionary) -> Dictionary:
 
-    var path = state["path"]
+    var path = state_["path"]
     var dist_covered = path["position"] - path["from"]
     dist_covered.y *= 2
     dist_covered = dist_covered.length()
@@ -317,22 +315,22 @@ static func new_motion_state(delta, state):
 
     # Where to put ourselves next
     var speed = min(dist_total*2, MAX_SPEED)
-    state["motion"] = dir * speed * delta
-    state["motion"].y *= 0.5
+    state_["motion"] = dir * speed * delta
+    state_["motion"].y *= 0.5
     # If about to overshoot destination
-    var current_speed = state["motion"].length()
+    var current_speed = state_["motion"].length()
     var dist = path["position"].distance_to(path["to"][0])
     var coming_in_hot = ( current_speed > 0 ) and ( current_speed >= dist )
     if coming_in_hot:
-        state["motion"] = path["to"][0] - path["position"]
+        state_["motion"] = path["to"][0] - path["position"]
 
     var jump_completion = dist_covered / dist_total if dist_total > 0 else 1
     var total_time = dist_total / speed
     var t = total_time * jump_completion
-    state["height"] = height_at(t, total_time)
+    state_["height"] = height_at(t, total_time)
 
-    state["path"] = path
-    return state
+    state_["path"] = path
+    return state_
 
 
 static func height_at(t, t_total):
@@ -352,14 +350,14 @@ static func fake_mouse_move(bot_pos, mouse_pos, chance):
 
 func _physics_process(delta):
 
-    var state = get_state()
+    var state_ = get_state()
 
     var incapacitated = false
 
-    # Update all state timers.
+    # Update all state_ timers.
     var updated_timers = {}
-    for timer in state["timers"]:
-        var time = state["timers"][timer] - delta
+    for timer in state_["timers"]:
+        var time = state_["timers"][timer] - delta
         var expired = time <= 0
         match timer:
             { "stunned": _, .. }:
@@ -367,36 +365,36 @@ func _physics_process(delta):
             { "dead": _, .. }:
                 if expired:
                     respawn()
-                    state["timers"] = {}
+                    state_["timers"] = {}
                     return
                 else:
-                    state["timers"] = { "dead": timer["dead"] }
+                    state_["timers"] = { "dead": timer["dead"] }
                     return
         if not expired:
             updated_timers[timer] = time
 
-    state["timers"] = updated_timers
+    state_["timers"] = updated_timers
 
     if incapacitated:
         return
 
     if damaged_by != null:
-        if state["height"] < 10:
-            var shielded = state["timers"].has("shield")
-            state = shield_deflect(state) if shielded else die(state, damaged_by)
+        if state_["height"] < 10:
+            var shielded = state_["timers"].has("shield")
+            state_ = shield_deflect(state_) if shielded else die(state_, damaged_by)
         damaged_by = null
 
 #    if not self.is_network_master():
 #        return
 
 #    print("Am network master")
-    state["path"]["position"] = self.position
+    state_["path"]["position"] = self.position
 
 
 #    var is_bot = is_in_group("Bot")
 #    if is_bot:
-#        var botbrain = ai_processing(delta, get_botbrain(), state)
-#        state["target"] = botbrain["attack_location"]
+#        var botbrain = ai_processing(delta, get_botbrain(), state_)
+#        state_["target"] = botbrain["attack_location"]
 #        botbrain["attack_location"] = null
 #        rpc("set_botbrain", botbrain)
 
@@ -405,28 +403,29 @@ func _physics_process(delta):
 #    else:
     mouse_pos = get_global_mouse_position()
 
-#    var path = get_botbrain()["path"] if is_bot else state["path"]
-    var path = state["path"]
+#    var path = get_botbrain()["path"] if is_bot else state_["path"]
+    var path = state_["path"]
     if not path["to"].empty():
         if path["to"].size() > JUMP_Q_LIM:
             path["to"].resize(JUMP_Q_LIM + 1)
         if path["from"] == null:
             path["from"] = path["position"]
-        state["path"] = path
-        rpc("set_motion_state", new_motion_state(delta, state))
+        state_["path"] = path
+        state_ = new_motion_state(delta, state_)
 
-    if not state["timers"].has("weapon_cd") and state["target"] != null:
-        state = attack(state)
+    if not state_["timers"].has("weapon_cd") and state_["target"] != null:
+        state_ = attack(state_)
         print("attacking")
 
     # While insignia is broken, focus is useless
-#    var is_attacking = state["target"] != null and state["timers"].has("attacking")
+#    var is_attacking = state_["target"] != null and state_["timers"].has("attacking")
 #    var dest_or_mpos = path["to"][0] if not path["to"].empty() else mouse_pos
-#    var focus = state["target"] if is_attacking else dest_or_mpos
+#    var focus = state_["target"] if is_attacking else dest_or_mpos
 
-    state["path"] = path
+    state_["path"] = path
 #    rset("puppet_focus", focus)
-    rpc("set_state", state)
+    rpc("set_state", state_)
+    rpc("animate_jump", state_)
 
     # Insignia broke while porting to 3.0.
 #    nd_insignia.set_rot(new_rot(delta, path["position"], nd_insignia.get_rot(), focus))

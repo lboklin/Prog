@@ -8,7 +8,7 @@ class_name Player
 
 func _input(ev):
     if ev.is_action_pressed("spawn_enemy"):
-        game_state.rpc("spawn_enemy", game_state.rand_loc(mouse_pos, 0, 600))
+        game_state.rpc("spawn_enemy", GameState.rand_loc(mouse_pos, 0, 600))
     if ev.is_action_pressed("quit_game"):
         game_state.quit_game()
 
@@ -16,23 +16,23 @@ func _input(ev):
         return
 
     if Input.is_action_just_pressed("move_to"):
-        var state = get_state()
-        var is_empty_q = state["path"]["to"].empty()
-        var is_duplicate_input = false if is_empty_q else mouse_pos == state["path"]["to"].back()
-        var out_of_range = state["path"]["position"].distance_to(mouse_pos) > MAX_JUMP_RANGE
+        var cur_state = get_state()
+        var is_empty_q = cur_state["path"]["to"].empty()
+        var is_duplicate_input = false if is_empty_q else mouse_pos == cur_state["path"]["to"].back()
+        var out_of_range = cur_state["path"]["position"].distance_to(mouse_pos) > MAX_JUMP_RANGE
         if not is_duplicate_input and not out_of_range:
             if is_empty_q:
-                state["path"]["from"] = state["path"]["position"]
-            state["path"]["to"].append(mouse_pos)
-            set_state(state)
+                cur_state["path"]["from"] = cur_state["path"]["position"]
+            cur_state["path"]["to"].append(mouse_pos)
+            set_state(cur_state)
             game_state.spawn_click_indicator(mouse_pos, "move_to")
         elif out_of_range:
             game_state.spawn_click_indicator(mouse_pos, "no_can_do")
     if Input.is_action_just_pressed("attack"):
-        var state = get_state()
-        state["target"] = mouse_pos
-        set_state(state)
-        rset("slave_atk_loc", state["target"])
+        var cur_state = get_state()
+        cur_state["target"] = mouse_pos
+        set_state(cur_state)
+        rset("slave_atk_loc", cur_state["target"])
         game_state.spawn_click_indicator(mouse_pos, "attack")
 
 

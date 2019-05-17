@@ -150,6 +150,7 @@ func _on_server_ended():
     lobby_container.hide()
     join_container.hide()
     join_container.find_node("ConnectButton").set_disabled(false)
+    print("Server ended")
     #menu_container.show()
 
     # If we are ingame, remove world from existence!
@@ -164,7 +165,8 @@ func _on_server_error():
 
 func _on_connection_success():
     join_container.hide()
-    lobby_container.show()
+    game_state.start_game()
+#    lobby_container.show()
 
 
 func _on_connection_fail():
@@ -206,7 +208,13 @@ func _ready():
     game_state.connect("connection_success", self, "_on_connection_success")
     game_state.connect("connection_fail", self, "_on_connection_fail")
 
-    ## TEMP FOR DEV:
+    var args = Array(OS.get_cmdline_args())
+    if args.has("--quick-host"):
+        no_main_menu = true
+        quick_host = true
+    elif args.has("--connect-local"):
+        no_main_menu = true
+        quick_host = false
     if no_main_menu:
         call_deferred("skip_main_menu")
     set_process(true)

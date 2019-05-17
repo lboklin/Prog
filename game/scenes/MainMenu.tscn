@@ -286,7 +286,6 @@ margin_bottom = 46.0
 text = "Continue"
 
 [node name="LobbyContainer" type="Control" parent="."]
-editor/display_folded = true
 visible = false
 light_mask = 0
 margin_right = 250.0

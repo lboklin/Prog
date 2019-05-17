@@ -8,7 +8,7 @@ const SERVER_PORT = 31041
 
 # GAMEDATA
 var p_players = {} setget set_players, get_players # Dictionary with player_id => player_name
-var my_name # Your own player name
+remotesync var my_name # Your own player name
 #var my_id # Your own player id
 
 # SIGNALS to Main Menu (GUI)
@@ -38,16 +38,13 @@ func get_player_node(id: int) -> Node:
     return node
 
 
-func name_to_node_name(name: String, id: int) -> String:
-    return name + String(id)
-
-
-sync func add_player(id: int, nd_name: String) -> Dictionary:
+sync func add_player(id: int, player_name: String) -> Dictionary:
     # If there's already a player with that name, append it with its ID
-    nd_name = name_to_node_name(nd_name, id)
-    while get_players().values().has(nd_name):
-        nd_name = name_to_node_name(nd_name, id)
-    p_players[id] = nd_name
+#    nd_name = name_to_node_name(nd_name, id)
+    while get_players().values().has(player_name):
+        player_name += String(id).left(2)
+    rset("my_name", player_name)
+    p_players[id] = player_name
     return p_players
 
 
@@ -67,9 +64,9 @@ func join_game(name, ip_address):
     get_tree().network_peer = host
 
 # Host the server
-func host_game(name):
+func host_game(host_player_name):
     # Store own player name
-    my_name = name
+    my_name = host_player_name
 
     # Initializing the network as client
     var host = NetworkedMultiplayerENet.new()
@@ -78,7 +75,7 @@ func host_game(name):
         emit_signal("server_error", err)
     get_tree().network_peer = host
 
-    add_player(1, name)
+    add_player(1, host_player_name)
 
 
 # Client connected with you (can be both server or client)
@@ -108,6 +105,7 @@ func _connected_fail():
 
 # Server disconnected (client)
 func _server_disconnected():
+    print("Server disconnected")
     emit_signal("server_ended")
     quit_game()
 
@@ -153,9 +151,9 @@ remote func unregister_player(id):
 func quit_game():
     if has_node("/root/GameRound"):
         var nd_player = nd_game_round.find_node("Players").get_node(my_name)
-        nd_player.emit_signal("player_killed", my_name, "Self", -1)
+        nd_player.emit_signal("player_killed", get_tree().get_network_unique_id(), 0)
         nd_game_round.queue_free()
-        yield(nd_game_round, "exit_tree")
+#        yield(nd_game_round, "exit_tree")
     get_tree().set_network_peer(null)
     get_tree().quit()
 
@@ -205,7 +203,7 @@ sync func spawn_enemy(loc):
     nd_game_round.add_to_keepers(id, name)
 
 
-sync func spawn_players():
+remotesync func spawn_players():
     if(has_node("/root/GameRound")):
         nd_game_round = get_node("/root/GameRound")
     else:
@@ -223,10 +221,10 @@ sync func spawn_players():
         # Create nd_player instance
         var nd_player = scn_player.instance()
 
-        var name: String = players[id]
-        var node_name = name #if name == "Server" else name + str(id)
+        var player_name: String = players[id]
+        var node_name = player_name #if name == "Server" else name + str(id)
 #        var node_name = name + str(id)
-        nd_player.set_name(node_name)
+        nd_player.name = node_name
 
         # Spawn at origin
         var spawn_pos = Vector2(0,0)

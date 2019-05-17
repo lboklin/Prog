@@ -33,7 +33,7 @@ func add_to_keepers(id: int) -> void:
     var nd_participant = get_participant_node(id)
     var nd_name = nd_participant.name
     print("Adding ", nd_name)
-    print("Player nodes: ")
+#    print("Player nodes: ")
 #    for p in game_state.get_players().keys():
 #        var node = game_state.get_player_node(p)
 #        print(node.name,"\n")
@@ -62,7 +62,8 @@ func _player_killed(player: int, killer: int) -> void:
     return
 
 
-# Assigns player (ID) additional points. If player is -1 all players are given the points.
+# Assigns player (ID) additional points. If player is 0, nobody gets points,
+# if player is -1 all players are given the points.
 sync func add_points(player: int, points: int):
     if player == -1: # Give everyone points
         for p in scorekeeper.keys():
