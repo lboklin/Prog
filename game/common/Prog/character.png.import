@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/character-shadow-lighter.png-1ff185e5114286b917aabe240c68eb1e.stex"
+path="res://.import/character.png-1cec6d53f4df26a7371e0efca22abbf1.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://common/Character/character-shadow-lighter.png"
-dest_files=[ "res://.import/character-shadow-lighter.png-1ff185e5114286b917aabe240c68eb1e.stex" ]
+source_file="res://common/Prog/character.png"
+dest_files=[ "res://.import/character.png-1cec6d53f4df26a7371e0efca22abbf1.stex" ]
 
 [params]
 

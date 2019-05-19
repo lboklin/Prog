@@ -13,7 +13,7 @@ same value. This makes it much easier to predict
 the results and also allows for easier syncing
 between clients over a network.
 """
-class_name Character
+class_name Prog
 extends Area2D
 
 signal player_killed()
@@ -22,6 +22,8 @@ signal player_respawned()
 # Your Prog's very own beautiful color scheme
 export(Color) sync var primary_color
 export(Color) sync var secondary_color
+#export(NodePath) var player: NodePath
+#onready var nd_player: Player = get_node(player) as Player
 
 const WEP_CD = 1.0    # Weapon cooldown
 const JUMP_CD = 0.1    # Jump cooldown after landing
@@ -60,15 +62,15 @@ puppet var puppet_atk_loc = Vector2()
 
 ## Dicts
 
-remotesync var state = {
-    "timers" : {},
-    "target" : null,
-    "motion" : Vector2(), # Horizontal
-    "height" : 0,          # Vertical
-    "path"   : {
-        "position" : Vector2(),
-        "from"     : null,
-        "to"       : [],    # Take note that this is a jump queue array
+remotesync var state := {
+    timers = {},
+    target = null,
+    motion = Vector2(),  # Horizontal
+    height = 0,          # Vertical
+    path   = {
+        position = Vector2(),
+        from     = null,
+        to       = [],    # Take note that this is a jump queue array
         }
 } setget set_state, get_state
 
@@ -80,7 +82,7 @@ remotesync var state = {
 #-------------
 # General state
 
-remotesync func set_state(new_state):
+remotesync func set_state(new_state: Dictionary):
     # if new_state["timers"].has("dead"):
     #     queue_free()
     if new_state["timers"].has("stunned"):

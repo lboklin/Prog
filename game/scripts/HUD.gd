@@ -1,4 +1,5 @@
 extends CanvasLayer
+class_name HUD
 
 onready var nd_game_round = get_node("/root/GameRound")
 #onready var nd_player = nd_game_state.player_name
@@ -63,7 +64,7 @@ func _process(delta):
 
 func _ready():
     nd_game_round.connect("score_updated", self, "update_score")
-    for player in nd_game_state.nd_game_round.find_node("Players").get_children():
+    for player in nd_game_round.find_node("Players").get_children():
         player.connect("player_killed", self, "_player_killed")
         player.connect("player_respawned", self, "_player_respawned")
 

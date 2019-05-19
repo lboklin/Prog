@@ -97,6 +97,7 @@ func _on_host_continue_button_pressed():
 
 # LOBBY CONTAINER - Starts the Game
 func _on_start_game_button_pressed():
+    print("start the bloody games already before I piss myself")
     game_state.start_game()
 
 
@@ -196,6 +197,8 @@ func skip_main_menu() -> void:    ## TEMP FOR DEV
 
 
 func _ready():
+#    game_state = preload("res://scripts/GameState.gd").new()
+#    get_tree().get_root().add_child(game_state)
     get_viewport().connect("size_changed", self, "_on_viewport_size_changed")
     # Set default nicknames on host/join
     join_container.find_node("LineEditNickname").set_text(PLAYER_NAME_DEFAULT)

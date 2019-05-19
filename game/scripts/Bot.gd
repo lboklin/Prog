@@ -1,4 +1,4 @@
-extends "res://scripts/Character.gd"
+extends "res://scripts/Prog.gd"
 
 
 export var accuracy = 0.8 # Better than a stormtrooper

@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/progmodel_v2-blender-fit.png-97e91da3a65a713b0b772998e751da85.stex"
+path="res://.import/progmodel_v2-blender-fit.png-03540a4d3caba210a0e8ad04f27f6501.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://common/Character/progmodel_v2-blender-fit.png"
-dest_files=[ "res://.import/progmodel_v2-blender-fit.png-97e91da3a65a713b0b772998e751da85.stex" ]
+source_file="res://common/Prog/progmodel_v2-blender-fit.png"
+dest_files=[ "res://.import/progmodel_v2-blender-fit.png-03540a4d3caba210a0e8ad04f27f6501.stex" ]
 
 [params]
 
